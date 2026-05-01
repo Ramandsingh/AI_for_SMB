@@ -1,0 +1,34 @@
+# systemd service for the webhook listener
+# Install:
+#   sudo cp scripts/webhook.service /etc/systemd/system/ai-smb-webhook.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable ai-smb-webhook
+#   sudo systemctl start ai-smb-webhook
+#   sudo systemctl status ai-smb-webhook
+
+[Unit]
+Description=AI for SMB — GitHub Webhook Deployment Listener
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+# --- Edit these paths to match your server ---
+User=ubuntu
+WorkingDirectory=/home/ubuntu/AI_for_SMB
+ExecStart=/usr/bin/node scripts/webhook-listener.js
+Restart=on-failure
+RestartSec=5
+
+# Environment — set your real secret here or use an EnvironmentFile
+Environment=WEBHOOK_PORT=9000
+Environment=DEPLOY_BRANCH=claude/docker-react-vite-mysql-PeMvf
+# Environment=WEBHOOK_SECRET=your_secret_here
+# EnvironmentFile=/etc/ai-smb/webhook.env
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ai-smb-webhook
+
+[Install]
+WantedBy=multi-user.target

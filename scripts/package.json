@@ -1,0 +1,10 @@
+{
+  "name": "ai-smb-scripts",
+  "version": "1.0.0",
+  "description": "Webhook listener for auto-deployment",
+  "main": "webhook-listener.js",
+  "scripts": {
+    "start": "node webhook-listener.js"
+  },
+  "dependencies": {}
+}

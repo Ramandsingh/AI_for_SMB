@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Strong typographic hierarchy */
+  h1 {
+    @apply text-3xl font-extrabold text-slate-900 tracking-tight leading-tight;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    @apply text-lg font-bold text-slate-800 tracking-tight;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    @apply text-sm font-semibold text-slate-700;
+  }
+}
+
+@layer components {
+  /* Elevated card with subtle depth */
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .card:hover {
+    box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.06), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+  }
+
+  .section-anchor { @apply scroll-mt-8; }
+
+  /* Badge system */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap;
+  }
+  .badge-blue   { @apply badge bg-blue-50 text-blue-700 ring-1 ring-blue-200/60; }
+  .badge-green  { @apply badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60; }
+  .badge-amber  { @apply badge bg-amber-50 text-amber-700 ring-1 ring-amber-200/60; }
+  .badge-red    { @apply badge bg-red-50 text-red-700 ring-1 ring-red-200/60; }
+  .badge-purple { @apply badge bg-purple-50 text-purple-700 ring-1 ring-purple-200/60; }
+
+  /* Page section divider line */
+  .section-divider {
+    @apply border-t border-slate-100 my-10;
+  }
+}
+
+/* Refined thin scrollbar */
+.thin-scroll::-webkit-scrollbar        { width: 3px; }
+.thin-scroll::-webkit-scrollbar-track  { background: transparent; }
+.thin-scroll::-webkit-scrollbar-thumb  {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+/* Subtle left-sidebar active glow */
+.nav-active-glow {
+  box-shadow: inset 3px 0 0 0 #3b82f6;
+}
