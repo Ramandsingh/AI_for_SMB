@@ -1,0 +1,39 @@
+name: Deploy to MBserver
+
+on:
+  push:
+    branches:
+      - claude/docker-react-vite-mysql-PeMvf
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Write .env
+        run: |
+          cat > .env <<EOF
+          DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          EOF
+
+      - name: Stop existing containers
+        run: docker compose down --remove-orphans
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Verify containers are running
+        run: |
+          echo "--- Container status ---"
+          docker compose ps
+          echo "--- Health check ---"
+          sleep 8
+          curl -sf http://localhost:3001 > /dev/null && echo "Frontend OK" || echo "Frontend not responding yet"
+          curl -sf http://localhost:3002/api/health && echo "Backend OK" || echo "Backend not ready yet"
