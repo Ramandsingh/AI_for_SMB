@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS ai_smb_db;
-USE ai_smb_db;
+CREATE DATABASE IF NOT EXISTS ai_dashboard_db;
+USE ai_dashboard_db;
 
 CREATE TABLE IF NOT EXISTS assessments (
   id INT AUTO_INCREMENT PRIMARY KEY,

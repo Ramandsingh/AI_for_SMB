@@ -8,9 +8,9 @@ app.use(express.json());
 
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'smb_user',
-  password: process.env.DB_PASSWORD || 'smb_password',
-  database: process.env.DB_NAME || 'ai_smb_db',
+  user: process.env.DB_USER || 'ai_dashboard_user',
+  password: process.env.DB_PASSWORD || 'change_me_password',
+  database: process.env.DB_NAME || 'ai_dashboard_db',
   waitForConnections: true,
   connectionLimit: 10,
 };
@@ -91,5 +91,5 @@ app.get('/api/roi/models', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
