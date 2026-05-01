@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useCompany } from '../context/CompanyContext';
 
 const NAV_GROUPS = [
   {
@@ -44,6 +45,8 @@ const NAV_GROUPS = [
 ];
 
 export default function LeftSidebar() {
+  const { activeCompany } = useCompany();
+
   return (
     <aside
       className="fixed left-0 top-0 h-full w-64 flex flex-col z-20 thin-scroll overflow-y-auto"
@@ -63,6 +66,31 @@ export default function LeftSidebar() {
             <p className="text-slate-500 text-xs mt-0.5">Dashboard</p>
           </div>
         </div>
+
+        {/* Active company pill */}
+        <NavLink
+          to="/admin"
+          className="mt-3 flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-colors hover:bg-white/5"
+        >
+          {activeCompany ? (
+            <>
+              <div
+                className="w-5 h-5 rounded-md flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+              >
+                {activeCompany.name[0].toUpperCase()}
+              </div>
+              <span className="text-emerald-400 text-xs font-semibold truncate">{activeCompany.name}</span>
+            </>
+          ) : (
+            <>
+              <div className="w-5 h-5 rounded-md flex items-center justify-center bg-slate-700 flex-shrink-0">
+                <span className="text-slate-400 text-xs">+</span>
+              </div>
+              <span className="text-slate-500 text-xs">Select client</span>
+            </>
+          )}
+        </NavLink>
       </div>
 
       {/* Navigation */}
@@ -86,9 +114,7 @@ export default function LeftSidebar() {
                       }`
                     }
                     style={({ isActive }) =>
-                      isActive
-                        ? { background: 'rgba(59,130,246,0.12)', color: '#fff' }
-                        : {}
+                      isActive ? { background: 'rgba(59,130,246,0.12)', color: '#fff' } : {}
                     }
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-current opacity-40 flex-shrink-0" />
@@ -101,9 +127,25 @@ export default function LeftSidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-5 py-4 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: 'rgba(148,163,184,0.4)' }}>
-        v1.0 · AI Adoption Dashboard
+      {/* Admin link + footer */}
+      <div className="px-3 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <NavLink
+          to="/admin"
+          className={({ isActive }) =>
+            `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm mt-3 transition-all duration-150 ${
+              isActive ? 'text-white font-semibold nav-active-glow' : 'text-slate-400 hover:text-slate-200'
+            }`
+          }
+          style={({ isActive }) =>
+            isActive ? { background: 'rgba(59,130,246,0.12)' } : {}
+          }
+        >
+          <span className="text-base leading-none">⚙</span>
+          <span>Admin · Companies</span>
+        </NavLink>
+        <p className="px-3 pt-3 text-xs" style={{ color: 'rgba(148,163,184,0.35)' }}>
+          v1.0 · AI Adoption Dashboard
+        </p>
       </div>
     </aside>
   );
