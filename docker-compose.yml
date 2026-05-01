@@ -21,9 +21,9 @@ services:
       - "3002"
     environment:
       - DB_HOST=mysql
-      - DB_USER=${DB_USER:-smb_user}
-      - DB_PASSWORD=${DB_PASSWORD:-smb_password}
-      - DB_NAME=${DB_NAME:-ai_smb_db}
+      - DB_USER=${DB_USER:-ai_dashboard_user}
+      - DB_PASSWORD=${DB_PASSWORD:-change_me_password}
+      - DB_NAME=${DB_NAME:-ai_dashboard_db}
       - PORT=3002
       - NODE_ENV=production
     depends_on:
@@ -39,9 +39,9 @@ services:
       - "3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
-      MYSQL_DATABASE: ${DB_NAME:-ai_smb_db}
-      MYSQL_USER: ${DB_USER:-smb_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-smb_password}
+      MYSQL_DATABASE: ${DB_NAME:-ai_dashboard_db}
+      MYSQL_USER: ${DB_USER:-ai_dashboard_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_password}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
