@@ -43,6 +43,17 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Technology of AI',
+    items: [
+      { to: '/p17', label: '17 · What Is AI',             icon: '○' },
+      { to: '/p18', label: '18 · Categories of AI',       icon: '○' },
+      { to: '/p19', label: '19 · How AI Works',           icon: '○' },
+      { to: '/p20', label: '20 · Where AI Deploys',       icon: '○' },
+      { to: '/p21', label: '21 · AI & Your Tech Stack',   icon: '○' },
+      { to: '/p22', label: '22 · Glossary',               icon: '○' },
+    ],
+  },
+  {
     label: 'Enterprise Context',
     items: [
       { to: '/p12', label: '12 · What Enterprises Do',      icon: '○' },

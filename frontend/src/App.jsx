@@ -20,6 +20,12 @@ import EnterpriseValue      from './pages/EnterpriseValue';
 import EnterpriseHowAdopt   from './pages/EnterpriseHowAdopt';
 import EnterpriseWhen       from './pages/EnterpriseWhen';
 import EnterpriseMeasure    from './pages/EnterpriseMeasure';
+import TechWhatIsAI         from './pages/TechWhatIsAI';
+import TechCategories       from './pages/TechCategories';
+import TechHowWork          from './pages/TechHowWork';
+import TechDeployment       from './pages/TechDeployment';
+import TechIntegrations     from './pages/TechIntegrations';
+import TechGlossary         from './pages/TechGlossary';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -49,6 +55,12 @@ export default function App() {
             <Route path="/p14"   element={<EnterpriseHowAdopt />} />
             <Route path="/p15"   element={<EnterpriseWhen />} />
             <Route path="/p16"   element={<EnterpriseMeasure />} />
+            <Route path="/p17"   element={<TechWhatIsAI />} />
+            <Route path="/p18"   element={<TechCategories />} />
+            <Route path="/p19"   element={<TechHowWork />} />
+            <Route path="/p20"   element={<TechDeployment />} />
+            <Route path="/p21"   element={<TechIntegrations />} />
+            <Route path="/p22"   element={<TechGlossary />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </Layout>
