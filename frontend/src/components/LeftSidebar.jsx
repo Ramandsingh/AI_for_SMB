@@ -9,58 +9,58 @@ const NAV_GROUPS = [
   {
     label: 'Foundation',
     items: [
-      { to: '/p1', label: '1 · Understanding AI',       icon: '○' },
-      { to: '/p2', label: '2 · Maturity Journey',       icon: '○' },
-      { to: '/p3', label: '3 · Role Impact Map',        icon: '○' },
+      { to: '/p1', label: 'Understanding AI',       icon: '○' },
+      { to: '/p2', label: 'Maturity Journey',       icon: '○' },
+      { to: '/p3', label: 'Role Impact Map',        icon: '○' },
     ],
   },
   {
     label: 'Planning',
     items: [
-      { to: '/p4', label: '4 · Assessment & Discovery', icon: '○' },
-      { to: '/p5', label: '5 · Roadmap Options',        icon: '○' },
-      { to: '/p6', label: '6 · ROI Calculator',         icon: '○' },
+      { to: '/p4', label: 'Assessment & Discovery', icon: '○' },
+      { to: '/p5', label: 'Roadmap Options',        icon: '○' },
+      { to: '/p6', label: 'ROI Calculator',         icon: '○' },
     ],
   },
   {
     label: 'Implementation',
     items: [
-      { to: '/p7', label: '7 · Technology & Tools',     icon: '○' },
-      { to: '/p9', label: '9 · Learning Approach',      icon: '○' },
+      { to: '/p7', label: 'Technology & Tools',     icon: '○' },
+      { to: '/p9', label: 'Learning Approach',      icon: '○' },
     ],
   },
   {
     label: 'People & Culture',
     items: [
-      { to: '/p10', label: '10 · Individual Adoption',  icon: '○' },
-      { to: '/p11', label: '11 · Org Contributions',    icon: '○' },
+      { to: '/p10', label: 'Individual Adoption',  icon: '○' },
+      { to: '/p11', label: 'Org Contributions',    icon: '○' },
     ],
   },
   {
     label: 'Sales Toolkit',
     items: [
-      { to: '/p8', label: '8 · Pitch & Narrative',      icon: '○' },
+      { to: '/p8', label: 'Pitch & Narrative',      icon: '○' },
     ],
   },
   {
     label: 'Technology of AI',
     items: [
-      { to: '/p17', label: '17 · What Is AI',             icon: '○' },
-      { to: '/p18', label: '18 · Categories of AI',       icon: '○' },
-      { to: '/p19', label: '19 · How AI Works',           icon: '○' },
-      { to: '/p20', label: '20 · Where AI Deploys',       icon: '○' },
-      { to: '/p21', label: '21 · AI & Your Tech Stack',   icon: '○' },
-      { to: '/p22', label: '22 · Glossary',               icon: '○' },
+      { to: '/p17', label: 'What Is AI',             icon: '○' },
+      { to: '/p18', label: 'Categories of AI',       icon: '○' },
+      { to: '/p19', label: 'How AI Works',           icon: '○' },
+      { to: '/p20', label: 'Where AI Deploys',       icon: '○' },
+      { to: '/p21', label: 'AI & Your Tech Stack',   icon: '○' },
+      { to: '/p22', label: 'Glossary',               icon: '○' },
     ],
   },
   {
     label: 'Enterprise Context',
     items: [
-      { to: '/p12', label: '12 · What Enterprises Do',      icon: '○' },
-      { to: '/p13', label: '13 · Where the Value Is',       icon: '○' },
-      { to: '/p14', label: '14 · How to Adopt AI',          icon: '○' },
-      { to: '/p15', label: '15 · When to Adopt AI',         icon: '○' },
-      { to: '/p16', label: '16 · How to Measure Value',     icon: '○' },
+      { to: '/p12', label: 'What Enterprises Do',      icon: '○' },
+      { to: '/p13', label: 'Where the Value Is',       icon: '○' },
+      { to: '/p14', label: 'How to Adopt AI',          icon: '○' },
+      { to: '/p15', label: 'When to Adopt AI',         icon: '○' },
+      { to: '/p16', label: 'How to Measure Value',     icon: '○' },
     ],
   },
 ];
