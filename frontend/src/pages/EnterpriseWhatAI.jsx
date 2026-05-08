@@ -1,0 +1,309 @@
+import PageWrapper from '../components/PageWrapper';
+
+const SECTIONS = [
+  { id: 's1', title: 'Scale of Deployment',          level: 2 },
+  { id: 's2', title: 'Deployment by Function',       level: 2 },
+  { id: 's3', title: 'How Enterprises Are Organising for AI', level: 2 },
+  { id: 's4', title: 'Build vs Buy vs Partner',      level: 2 },
+  { id: 's5', title: 'What Separates Leaders from Laggards', level: 2 },
+];
+
+const STATS = [
+  { figure: '72%', label: 'of organisations have adopted AI in at least one business function', source: 'McKinsey, 2024' },
+  { figure: '$297B', label: 'enterprise AI software market by 2027', source: 'Gartner, 2024' },
+  { figure: '1 in 3', label: 'large enterprises now have a dedicated Chief AI Officer or equivalent', source: 'Deloitte, 2024' },
+  { figure: '5×', label: 'more AI patents filed in 2023 than in 2018 — investment is accelerating', source: 'WIPO, 2024' },
+];
+
+const FUNCTIONS = [
+  {
+    name: 'Marketing & Sales',
+    icon: '📣',
+    color: 'border-l-blue-400',
+    maturity: 'High',
+    uses: [
+      'Personalised content generation at scale (emails, ads, product descriptions)',
+      'Lead scoring and propensity-to-buy models updated in real time',
+      'AI-assisted pricing and dynamic offer management',
+      'Conversation intelligence: analysing sales calls to coach reps',
+      'Campaign performance forecasting before launch',
+    ],
+    stat: 'Sales teams using AI-assisted outreach report 40–50% higher pipeline conversion — Salesforce, 2024',
+  },
+  {
+    name: 'Customer Service',
+    icon: '💬',
+    color: 'border-l-emerald-400',
+    maturity: 'High',
+    uses: [
+      'Tier-1 query resolution without human escalation (50–70% deflection rates)',
+      'Real-time agent assist — surfacing answers during live calls',
+      'Sentiment analysis across all channels to flag at-risk customers',
+      'Automated case summarisation and CRM updates post-interaction',
+      'Proactive outreach based on predicted customer needs',
+    ],
+    stat: '35% reduction in cost-per-contact in large-scale deployments — Gartner, 2024',
+  },
+  {
+    name: 'Finance & Accounting',
+    icon: '📊',
+    color: 'border-l-amber-400',
+    maturity: 'High',
+    uses: [
+      'Automated three-way matching and invoice processing',
+      'Continuous fraud monitoring across millions of transactions',
+      'AI-generated management commentary for monthly reports',
+      'Contract review for financial terms, obligations, and risk clauses',
+      'Real-time cash flow forecasting with scenario modelling',
+    ],
+    stat: '50% faster close cycles in finance teams deploying AI — McKinsey, 2024',
+  },
+  {
+    name: 'Supply Chain & Operations',
+    icon: '🔗',
+    color: 'border-l-purple-400',
+    maturity: 'Medium–High',
+    uses: [
+      'Demand forecasting incorporating weather, events, and economic signals',
+      'Supplier risk monitoring with early-warning alerts',
+      'Predictive maintenance to reduce unplanned equipment downtime',
+      'Route and inventory optimisation updated continuously',
+      'Quality control via computer vision on production lines',
+    ],
+    stat: '15–20% inventory cost reduction through AI-optimised planning — WEF, 2025',
+  },
+  {
+    name: 'HR & People',
+    icon: '🧑‍💼',
+    color: 'border-l-rose-400',
+    maturity: 'Medium',
+    uses: [
+      'CV screening and applicant ranking against structured criteria',
+      'Personalised learning pathways based on role and skill gaps',
+      'Attrition prediction to flag at-risk employees before they resign',
+      'Internal mobility matching — surfacing open roles to qualified employees',
+      'Policy Q&A and onboarding automation via conversational AI',
+    ],
+    stat: '35% reduction in time-to-hire in AI-augmented talent acquisition — Deloitte, 2024',
+  },
+  {
+    name: 'IT & Software Development',
+    icon: '💻',
+    color: 'border-l-slate-400',
+    maturity: 'Very High',
+    uses: [
+      'AI code completion (GitHub Copilot, Cursor) — adopted by 55%+ of enterprise dev teams',
+      'Automated test generation and vulnerability scanning',
+      'Incident response: root cause analysis and suggested remediation',
+      'AIOps: anomaly detection and capacity forecasting in infrastructure',
+      'Knowledge base maintenance and developer documentation generation',
+    ],
+    stat: 'Developers using AI coding tools complete tasks 55% faster — GitHub, 2024',
+  },
+];
+
+const ORG_MODELS = [
+  {
+    model: 'Centralised AI Team',
+    desc: 'A dedicated AI centre of excellence (CoE) owns all AI strategy, tooling, and delivery. Business units submit use cases for the CoE to execute.',
+    pros: ['Strong governance and consistency', 'Deep technical expertise', 'Clear accountability'],
+    cons: ['Bottleneck for business units', 'Risk of building AI "for" rather than "with" the business', 'Slow iteration speed'],
+    bestFor: 'Regulated industries (finance, healthcare) or early-stage AI programs',
+  },
+  {
+    model: 'Federated / Hub and Spoke',
+    desc: 'A central AI team sets standards, provides platforms, and offers support. Business units have embedded AI leads who drive adoption locally.',
+    pros: ['Speed of local execution', 'Business context preserved', 'Scales across the organisation'],
+    cons: ['Coordination overhead', 'Risk of inconsistent standards', 'Requires strong central governance'],
+    bestFor: 'Mid-to-large enterprises with multiple business units at different AI maturity levels',
+  },
+  {
+    model: 'Embedded / Decentralised',
+    desc: 'AI capability is fully embedded in each business function. No central AI team — AI tools are adopted and operated by functional owners.',
+    pros: ['Maximum agility', 'Fastest iteration', 'High business ownership'],
+    cons: ['Risk of duplication', 'Governance gaps', 'Inconsistent data practices'],
+    bestFor: 'Technology-native organisations or those with high digital maturity already',
+  },
+];
+
+const BUILD_BUY = [
+  {
+    approach: 'Buy (SaaS AI)',
+    icon: '🛒',
+    examples: 'Microsoft Copilot, Salesforce Einstein, ServiceNow AI, Workday AI',
+    bestFor: 'Horizontal productivity use cases, standard workflows, rapid deployment',
+    tradeoffs: 'Faster and cheaper to start. Less customisation. Vendor-dependent. Data stays in vendor\'s ecosystem.',
+    timeline: '2–8 weeks to deploy',
+  },
+  {
+    approach: 'Build on Foundation Models',
+    icon: '🔧',
+    examples: 'OpenAI API, Anthropic Claude API, Google Vertex AI, Azure OpenAI',
+    bestFor: 'Proprietary use cases, custom workflows, competitive differentiation',
+    tradeoffs: 'Higher investment. Full control over data and model behaviour. Requires technical capability. Scales well once built.',
+    timeline: '8–24 weeks for first production deployment',
+  },
+  {
+    approach: 'Partner / Managed AI',
+    icon: '🤝',
+    examples: 'Big 4 AI practices, specialist AI consultancies, system integrators',
+    bestFor: 'Complex transformations, regulated industries, organisations without internal AI capability',
+    tradeoffs: 'Expensive. Fast access to expertise. Risk of knowledge not transferring to internal team.',
+    timeline: 'Variable — typically 3–12 months for major programs',
+  },
+];
+
+const LEADER_FACTORS = [
+  { factor: 'Clear executive sponsorship with a named AI owner at C-suite level', leader: true },
+  { factor: 'Data strategy and governance in place before AI deployment', leader: true },
+  { factor: 'AI value measured in business outcomes — not just technical metrics', leader: true },
+  { factor: 'Workforce reskilling treated as core to the AI program, not an afterthought', leader: true },
+  { factor: 'Iterative deployment — pilot, measure, scale — rather than big-bang programs', leader: true },
+  { factor: 'AI capability viewed as an organisational asset, not an IT project', leader: true },
+  { factor: 'AI owned solely by the technology function with no business co-ownership', leader: false },
+  { factor: 'Pursuing only large, complex use cases — ignoring quick wins', leader: false },
+  { factor: 'No measurement framework — success defined by deployment, not outcomes', leader: false },
+  { factor: 'Change management treated as optional or a post-launch activity', leader: false },
+];
+
+export default function EnterpriseWhatAI() {
+  return (
+    <PageWrapper
+      badge="Page 12 — Enterprise Context"
+      title="What Enterprises Are Doing with AI"
+      subtitle="The scale, depth, and organisational approach enterprises are taking to AI — grounded in the latest global research and deployment data."
+      sections={SECTIONS}
+    >
+
+      {/* S1 */}
+      <section id="s1" className="section-anchor mb-10">
+        <h2 className="mb-4">Scale of Deployment</h2>
+        <p className="text-slate-500 text-sm mb-6">
+          Enterprise AI has moved decisively from pilot to production. The numbers below represent the current baseline — not a future forecast.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          {STATS.map((s) => (
+            <div key={s.figure} className="card text-center">
+              <p className="text-3xl font-extrabold text-blue-600 mb-1">{s.figure}</p>
+              <p className="text-xs text-slate-500 leading-tight mb-2">{s.label}</p>
+              <p className="text-xs font-semibold text-slate-400">{s.source}</p>
+            </div>
+          ))}
+        </div>
+        <div className="card bg-blue-50 border-blue-200">
+          <p className="text-sm text-blue-800">
+            <strong>The inflection point has passed.</strong> For most industries, the question is no longer whether to deploy AI — it is how fast to scale existing pilots and where to focus next investment. Organisations still in "exploration mode" are already behind the operational baseline of their sector leaders.
+          </p>
+        </div>
+      </section>
+
+      <div className="section-divider" />
+
+      {/* S2 */}
+      <section id="s2" className="section-anchor mb-10">
+        <h2 className="mb-4">Deployment by Function</h2>
+        <p className="text-slate-500 text-sm mb-6">
+          AI value is not uniformly distributed. These six functions account for the majority of enterprise AI value creation and show the highest adoption rates.
+        </p>
+        <div className="space-y-4">
+          {FUNCTIONS.map((f) => (
+            <div key={f.name} className={`card border-l-4 ${f.color}`}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">{f.icon}</span>
+                <div>
+                  <h3 className="font-bold text-slate-800">{f.name}</h3>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    f.maturity === 'Very High' ? 'bg-emerald-100 text-emerald-700' :
+                    f.maturity === 'High' ? 'bg-blue-100 text-blue-700' :
+                    'bg-amber-100 text-amber-700'
+                  }`}>Adoption maturity: {f.maturity}</span>
+                </div>
+              </div>
+              <ul className="space-y-1 mb-3">
+                {f.uses.map((u, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-slate-600">
+                    <span className="text-slate-300 flex-shrink-0 mt-0.5">→</span>{u}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs font-semibold text-slate-500 bg-slate-50 rounded px-2 py-1 inline-block">📌 {f.stat}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="section-divider" />
+
+      {/* S3 */}
+      <section id="s3" className="section-anchor mb-10">
+        <h2 className="mb-4">How Enterprises Are Organising for AI</h2>
+        <p className="text-slate-500 text-sm mb-6">
+          How you structure AI capability is as important as the technology choices. Three dominant models have emerged.
+        </p>
+        <div className="space-y-4">
+          {ORG_MODELS.map((m) => (
+            <div key={m.model} className="card">
+              <h3 className="font-bold text-slate-800 text-base mb-2">{m.model}</h3>
+              <p className="text-sm text-slate-600 mb-3">{m.desc}</p>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <p className="text-xs font-semibold text-emerald-600 mb-1">Strengths</p>
+                  <ul className="space-y-1">{m.pros.map((p, i) => <li key={i} className="text-xs text-slate-600 flex gap-1.5"><span className="text-emerald-400">✓</span>{p}</li>)}</ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-red-500 mb-1">Risks</p>
+                  <ul className="space-y-1">{m.cons.map((c, i) => <li key={i} className="text-xs text-slate-600 flex gap-1.5"><span className="text-red-400">✗</span>{c}</li>)}</ul>
+                </div>
+              </div>
+              <p className="text-xs bg-blue-50 text-blue-700 rounded px-2 py-1"><strong>Best for:</strong> {m.bestFor}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="section-divider" />
+
+      {/* S4 */}
+      <section id="s4" className="section-anchor mb-10">
+        <h2 className="mb-4">Build vs Buy vs Partner</h2>
+        <p className="text-slate-500 text-sm mb-6">
+          Most enterprises use all three — the key is matching the approach to the use case type and organisational capability.
+        </p>
+        <div className="space-y-4">
+          {BUILD_BUY.map((b) => (
+            <div key={b.approach} className="card">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl">{b.icon}</span>
+                <h3 className="font-bold text-slate-800">{b.approach}</h3>
+                <span className="ml-auto text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{b.timeline}</span>
+              </div>
+              <p className="text-xs text-slate-500 mb-1"><strong>Examples:</strong> {b.examples}</p>
+              <p className="text-xs text-slate-500 mb-2"><strong>Best for:</strong> {b.bestFor}</p>
+              <p className="text-xs text-slate-600 bg-slate-50 rounded px-2 py-1.5">{b.tradeoffs}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="section-divider" />
+
+      {/* S5 */}
+      <section id="s5" className="section-anchor mb-10">
+        <h2 className="mb-4">What Separates Leaders from Laggards</h2>
+        <p className="text-slate-500 text-sm mb-6">
+          McKinsey's 2024 research across 1,000+ organisations identified these consistent differentiators between organisations generating significant AI value and those that are not.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {LEADER_FACTORS.map((f, i) => (
+            <div key={i} className={`flex items-start gap-2.5 rounded-xl px-3 py-2.5 text-sm border ${
+              f.leader ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
+            }`}>
+              <span className="flex-shrink-0 font-bold">{f.leader ? '✓' : '✗'}</span>
+              <span>{f.factor}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </PageWrapper>
+  );
+}

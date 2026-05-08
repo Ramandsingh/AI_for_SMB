@@ -45,7 +45,11 @@ const NAV_GROUPS = [
   {
     label: 'Enterprise Context',
     items: [
-      { to: '/p12', label: '12 · Enterprise AI',        icon: '○' },
+      { to: '/p12', label: '12 · What Enterprises Do',      icon: '○' },
+      { to: '/p13', label: '13 · Where the Value Is',       icon: '○' },
+      { to: '/p14', label: '14 · How to Adopt AI',          icon: '○' },
+      { to: '/p15', label: '15 · When to Adopt AI',         icon: '○' },
+      { to: '/p16', label: '16 · How to Measure Value',     icon: '○' },
     ],
   },
 ];

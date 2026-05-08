@@ -15,7 +15,11 @@ import LearningApproach from './pages/LearningApproach';
 import IndividualAdoption from './pages/IndividualAdoption';
 import OrgContributions from './pages/OrgContributions';
 import Admin from './pages/Admin';
-import EnterpriseAI from './pages/EnterpriseAI';
+import EnterpriseWhatAI    from './pages/EnterpriseWhatAI';
+import EnterpriseValue      from './pages/EnterpriseValue';
+import EnterpriseHowAdopt   from './pages/EnterpriseHowAdopt';
+import EnterpriseWhen       from './pages/EnterpriseWhen';
+import EnterpriseMeasure    from './pages/EnterpriseMeasure';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -40,7 +44,11 @@ export default function App() {
             <Route path="/p9"    element={<LearningApproach />} />
             <Route path="/p10"   element={<IndividualAdoption />} />
             <Route path="/p11"   element={<OrgContributions />} />
-            <Route path="/p12"   element={<EnterpriseAI />} />
+            <Route path="/p12"   element={<EnterpriseWhatAI />} />
+            <Route path="/p13"   element={<EnterpriseValue />} />
+            <Route path="/p14"   element={<EnterpriseHowAdopt />} />
+            <Route path="/p15"   element={<EnterpriseWhen />} />
+            <Route path="/p16"   element={<EnterpriseMeasure />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </Layout>
