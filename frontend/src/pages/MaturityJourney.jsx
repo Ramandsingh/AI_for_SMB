@@ -1,5 +1,41 @@
 import PageWrapper from '../components/PageWrapper';
 
+const STAGE_COLORS = [
+  { ring: '#cbd5e1', bg: '#f8fafc', text: '#64748b' },
+  { ring: '#93c5fd', bg: '#eff6ff', text: '#2563eb' },
+  { ring: '#60a5fa', bg: '#bfdbfe', text: '#1d4ed8' },
+  { ring: '#3b82f6', bg: '#2563eb', text: '#fff'   },
+  { ring: '#1e40af', bg: '#1e3a8a', text: '#fff'   },
+];
+
+function MaturityArc() {
+  return (
+    <div className="card mb-6 overflow-x-auto">
+      <div className="relative flex items-start min-w-[480px] px-2 pt-2 pb-1">
+        <div className="absolute top-7 left-10 right-10 h-0.5 bg-gradient-to-r from-slate-200 via-blue-400 to-blue-900 rounded-full" />
+        {STAGES.map((s, i) => {
+          const c = STAGE_COLORS[i];
+          return (
+            <div key={s.num} className="flex flex-col items-center flex-1 relative z-10">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ring-2 shadow-sm"
+                style={{ background: c.bg, ringColor: c.ring, color: c.text, outline: `2px solid ${c.ring}` }}
+              >
+                {s.num}
+              </div>
+              <p className="text-xs font-bold text-slate-700 mt-2 text-center leading-tight px-1">{s.label}</p>
+              <p className="text-[10px] text-slate-400 text-center mt-0.5 px-1 hidden sm:block">{s.investment.split('.')[0]}</p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 min-w-[480px] bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-xs text-emerald-700 text-center">
+        <span className="font-semibold">Key value inflection: </span>Stage 2 → 3 transition (Accelerator → Automator) delivers the single biggest ROI jump for most organisations
+      </div>
+    </div>
+  );
+}
+
 const SECTIONS = [
   { id: 's1', title: '2.1 The Five Stages',           level: 2 },
   { id: 's2', title: '2.2 Why You Can\'t Skip Stages', level: 2 },
@@ -78,6 +114,7 @@ export default function MaturityJourney() {
       {/* 2.1 */}
       <section id="s1" className="section-anchor mb-10">
         <h2 className="mb-4">2.1 The Five Stages Explained</h2>
+        <MaturityArc />
         <div className="space-y-4">
           {STAGES.map((s) => (
             <div key={s.num} className={`card border ${s.color}`}>

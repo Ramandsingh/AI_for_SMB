@@ -167,6 +167,13 @@ const LEADER_FACTORS = [
   { factor: 'Change management treated as optional or a post-launch activity', leader: false },
 ];
 
+const MATURITY_VISUAL = {
+  'Very High':   { pct: '92%', bar: 'bg-emerald-500', text: 'text-emerald-700' },
+  'High':        { pct: '75%', bar: 'bg-blue-500',    text: 'text-blue-700'    },
+  'Medium–High': { pct: '58%', bar: 'bg-amber-500',   text: 'text-amber-700'   },
+  'Medium':      { pct: '42%', bar: 'bg-orange-400',  text: 'text-orange-600'  },
+};
+
 export default function EnterpriseWhatAI() {
   return (
     <PageWrapper
@@ -183,13 +190,23 @@ export default function EnterpriseWhatAI() {
           Enterprise AI has moved decisively from pilot to production. The numbers below represent the current baseline — not a future forecast.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          {STATS.map((s) => (
-            <div key={s.figure} className="card text-center">
-              <p className="text-3xl font-extrabold text-blue-600 mb-1">{s.figure}</p>
-              <p className="text-xs text-slate-500 leading-tight mb-2">{s.label}</p>
-              <p className="text-xs font-semibold text-slate-400">{s.source}</p>
-            </div>
-          ))}
+          {STATS.map((s) => {
+            const pct = s.figure.endsWith('%') ? parseFloat(s.figure) : null;
+            const frac = s.figure === '1 in 3' ? 33 : null;
+            const fill = pct ?? frac;
+            return (
+              <div key={s.figure} className="card text-center">
+                <p className="text-3xl font-extrabold text-blue-600 mb-1">{s.figure}</p>
+                {fill != null && (
+                  <div className="h-1 bg-slate-100 rounded-full overflow-hidden mx-3 mb-2">
+                    <div className="h-full bg-blue-400 rounded-full" style={{ width: `${fill}%` }} />
+                  </div>
+                )}
+                <p className="text-xs text-slate-500 leading-tight mb-2">{s.label}</p>
+                <p className="text-xs font-semibold text-slate-400">{s.source}</p>
+              </div>
+            );
+          })}
         </div>
         <div className="card bg-blue-50 border-blue-200">
           <p className="text-sm text-blue-800">
@@ -211,13 +228,19 @@ export default function EnterpriseWhatAI() {
             <div key={f.name} className={`card border-l-4 ${f.color}`}>
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">{f.icon}</span>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-slate-800">{f.name}</h3>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    f.maturity === 'Very High' ? 'bg-emerald-100 text-emerald-700' :
-                    f.maturity === 'High' ? 'bg-blue-100 text-blue-700' :
-                    'bg-amber-100 text-amber-700'
-                  }`}>Adoption maturity: {f.maturity}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="h-1.5 w-24 bg-slate-100 rounded-full overflow-hidden flex-shrink-0">
+                      <div
+                        className={`h-full rounded-full ${MATURITY_VISUAL[f.maturity]?.bar || 'bg-slate-300'}`}
+                        style={{ width: MATURITY_VISUAL[f.maturity]?.pct || '50%' }}
+                      />
+                    </div>
+                    <span className={`text-xs font-semibold ${MATURITY_VISUAL[f.maturity]?.text || 'text-slate-500'}`}>
+                      {f.maturity} adoption
+                    </span>
+                  </div>
                 </div>
               </div>
               <ul className="space-y-1 mb-3">

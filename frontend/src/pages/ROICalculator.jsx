@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageWrapper from '../components/PageWrapper';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const SECTIONS = [
   { id: 's1', title: '6.1 The ROI Framework',        level: 2 },
@@ -214,6 +215,37 @@ export default function ROICalculator() {
       <section id="s3" className="section-anchor mb-10">
         <h2 className="mb-4">6.3 Pre-Built Use Case Models</h2>
         <p className="text-sm text-slate-500 mb-4">Pre-populated at 50% adoption. Actual results vary — use as indicative benchmarks, not guarantees.</p>
+
+        {models.length > 0 && (() => {
+          const chartData = [...models]
+            .sort((a, b) => b.annualNet - a.annualNet)
+            .map((m, i) => ({
+              name: m.use.length > 28 ? m.use.slice(0, 26) + '…' : m.use,
+              saving: Math.round(m.annualNet),
+              color: i === 0 ? '#059669' : i < 3 ? '#1d4ed8' : '#3b82f6',
+            }));
+          return (
+            <div className="card mb-4">
+              <p className="text-sm font-semibold text-slate-700 mb-1">Annual Net Saving by Use Case</p>
+              <p className="text-xs text-slate-400 mb-4">Sorted highest to lowest · 50% adoption assumed</p>
+              <ResponsiveContainer width="100%" height={264}>
+                <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 56, bottom: 0, left: 8 }}>
+                  <XAxis type="number" tickFormatter={v => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" width={170} tick={{ fontSize: 11, fill: '#475569' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    formatter={v => [`$${Number(v).toLocaleString()}`, 'Annual Net']}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                    cursor={{ fill: 'rgba(59,130,246,0.04)' }}
+                  />
+                  <Bar dataKey="saving" radius={[0, 4, 4, 0]} label={{ position: 'right', formatter: v => `$${(v/1000).toFixed(0)}k`, fontSize: 10, fill: '#64748b' }}>
+                    {chartData.map((d, i) => <Cell key={i} fill={d.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          );
+        })()}
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-100 text-slate-600">
