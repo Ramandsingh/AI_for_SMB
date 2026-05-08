@@ -22,6 +22,24 @@
   h3 {
     @apply text-sm font-semibold text-slate-700;
   }
+
+  /* cursor-pointer on all interactive elements (WCAG + UX spec) */
+  button, [role="button"], summary { cursor: pointer; }
+
+  /* WCAG AA visible focus rings — 4.5:1 contrast requirement */
+  :focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Reduced-motion safety */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
@@ -29,10 +47,19 @@
   .card {
     @apply bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
   .card:hover {
-    box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.06), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+    box-shadow: 0 6px 16px 0 rgb(0 0 0 / 0.07), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+  }
+
+  /* Interactive card (links/nav tiles) — adds lift on hover */
+  .card-interactive {
+    @apply card cursor-pointer;
+  }
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgb(147 197 253 / 0.8);
   }
 
   .section-anchor { @apply scroll-mt-8; }
@@ -52,9 +79,24 @@
     @apply border-t border-slate-100 my-10;
   }
 
-  /* Form input */
+  /* Form input — WCAG AA focus */
   .input {
-    @apply w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white;
+    @apply w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+
+  /* Button system */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold;
+    @apply bg-blue-600 text-white shadow-sm;
+    @apply hover:bg-blue-700 hover:shadow transition-all duration-150 cursor-pointer;
+    @apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium;
+    @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+    @apply transition-all duration-150 cursor-pointer;
   }
 }
 

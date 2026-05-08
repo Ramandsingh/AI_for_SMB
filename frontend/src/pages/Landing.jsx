@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Lightbulb, TrendingUp, Network, ClipboardList, GitBranch, Calculator, Cpu, Mic2, BookOpen, UserCheck, Building2 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 
 const STAGES = [
@@ -32,17 +33,17 @@ const STAGE_RESULTS = [
 ];
 
 const NAV_TILES = [
-  { to: '/p1',  num: '1', title: 'Understanding AI',        desc: 'What AI is, what it does, and the five ways it creates business value.' },
-  { to: '/p2',  num: '2', title: 'Maturity Journey',        desc: 'The five-stage arc from Assistant to Operating Model, with evidence.' },
-  { to: '/p3',  num: '3', title: 'Role Impact Map',         desc: 'How AI lands differently across roles and competency levels.' },
-  { to: '/p4',  num: '4', title: 'Assessment & Discovery',  desc: 'Structured methodology to evaluate AI readiness and opportunity.' },
-  { to: '/p5',  num: '5', title: 'Roadmap Options',         desc: 'Three adoption tiers and a phased commercial model.' },
-  { to: '/p6',  num: '6', title: 'ROI Calculator',          desc: 'Model your own numbers — payback period, annual saving, ROI.' },
-  { to: '/p7',  num: '7', title: 'Technology & Tools',      desc: 'The four enablers, tools by stage, and governance frameworks.' },
-  { to: '/p8',  num: '8', title: 'Pitch & Narrative',       desc: 'The six-beat pitch structure and objection handling library.' },
-  { to: '/p9',  num: '9', title: 'Learning Approach',       desc: 'How organisations build AI capability deliberately over time.' },
-  { to: '/p10', num:'10', title: 'Individual Adoption',     desc: 'Practical AI adoption pathways for individual contributors.' },
-  { to: '/p11', num:'11', title: 'Org Contributions',       desc: 'How AI reshapes roles, teams, and organisational value creation.' },
+  { to: '/p1',  icon: Lightbulb,    title: 'Understanding AI',        desc: 'What AI is, what it does, and the five ways it creates business value.' },
+  { to: '/p2',  icon: TrendingUp,   title: 'Maturity Journey',        desc: 'The five-stage arc from Assistant to Operating Model, with evidence.' },
+  { to: '/p3',  icon: Network,      title: 'Role Impact Map',         desc: 'How AI lands differently across roles and competency levels.' },
+  { to: '/p4',  icon: ClipboardList,title: 'Assessment & Discovery',  desc: 'Structured methodology to evaluate AI readiness and opportunity.' },
+  { to: '/p5',  icon: GitBranch,    title: 'Roadmap Options',         desc: 'Three adoption tiers and a phased commercial model.' },
+  { to: '/p6',  icon: Calculator,   title: 'ROI Calculator',          desc: 'Model your own numbers — payback period, annual saving, ROI.' },
+  { to: '/p7',  icon: Cpu,          title: 'Technology & Tools',      desc: 'The four enablers, tools by stage, and governance frameworks.' },
+  { to: '/p8',  icon: Mic2,         title: 'Pitch & Narrative',       desc: 'The six-beat pitch structure and objection handling library.' },
+  { to: '/p9',  icon: BookOpen,     title: 'Learning Approach',       desc: 'How organisations build AI capability deliberately over time.' },
+  { to: '/p10', icon: UserCheck,    title: 'Individual Adoption',     desc: 'Practical AI adoption pathways for individual contributors.' },
+  { to: '/p11', icon: Building2,    title: 'Org Contributions',       desc: 'How AI reshapes roles, teams, and organisational value creation.' },
 ];
 
 function getStageResult(score) {
@@ -137,10 +138,10 @@ export default function Landing() {
         <button
           onClick={handleSubmit}
           disabled={!allAnswered}
-          className={`mt-6 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
+          className={`mt-6 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
             allAnswered
-              ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
-              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              ? 'btn-primary'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
           }`}
         >
           {allAnswered ? 'See My Maturity Stage →' : `Answer all ${QUESTIONS.length} questions to continue`}
@@ -179,21 +180,26 @@ export default function Landing() {
         <h2 className="mb-1">All Sections</h2>
         <p className="text-slate-500 text-sm mb-6">Jump directly to any section of the dashboard.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {NAV_TILES.map((tile) => (
-            <Link
-              key={tile.to}
-              to={tile.to}
-              className="card hover:border-blue-300 hover:shadow-md transition-all group"
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-2xl font-bold text-slate-200 group-hover:text-blue-200 transition-colors">{tile.num}</span>
-                <div>
-                  <p className="font-semibold text-slate-800 group-hover:text-blue-700 transition-colors text-sm mb-1">{tile.title}</p>
-                  <p className="text-slate-500 text-xs leading-relaxed">{tile.desc}</p>
+          {NAV_TILES.map((tile) => {
+            const TileIcon = tile.icon;
+            return (
+              <Link
+                key={tile.to}
+                to={tile.to}
+                className="card-interactive group"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="p-2 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors flex-shrink-0">
+                    <TileIcon size={18} className="text-blue-600" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-slate-800 group-hover:text-blue-700 transition-colors text-sm mb-1">{tile.title}</p>
+                    <p className="text-slate-500 text-xs leading-relaxed">{tile.desc}</p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 

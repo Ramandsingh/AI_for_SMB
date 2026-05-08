@@ -1,3 +1,4 @@
+import { Megaphone, MessageSquare, BarChart2, Link2, Users, Code2, ShoppingCart, Wrench, Handshake, CheckCircle2, XCircle } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 
 const SECTIONS = [
@@ -19,7 +20,7 @@ const STATS = [
 const FUNCTIONS = [
   {
     name: 'Marketing & Sales',
-    icon: '📣',
+    icon: Megaphone,
     color: 'border-l-blue-400',
     maturity: 'High',
     uses: [
@@ -33,7 +34,7 @@ const FUNCTIONS = [
   },
   {
     name: 'Customer Service',
-    icon: '💬',
+    icon: MessageSquare,
     color: 'border-l-emerald-400',
     maturity: 'High',
     uses: [
@@ -47,7 +48,7 @@ const FUNCTIONS = [
   },
   {
     name: 'Finance & Accounting',
-    icon: '📊',
+    icon: BarChart2,
     color: 'border-l-amber-400',
     maturity: 'High',
     uses: [
@@ -61,7 +62,7 @@ const FUNCTIONS = [
   },
   {
     name: 'Supply Chain & Operations',
-    icon: '🔗',
+    icon: Link2,
     color: 'border-l-purple-400',
     maturity: 'Medium–High',
     uses: [
@@ -75,7 +76,7 @@ const FUNCTIONS = [
   },
   {
     name: 'HR & People',
-    icon: '🧑‍💼',
+    icon: Users,
     color: 'border-l-rose-400',
     maturity: 'Medium',
     uses: [
@@ -89,7 +90,7 @@ const FUNCTIONS = [
   },
   {
     name: 'IT & Software Development',
-    icon: '💻',
+    icon: Code2,
     color: 'border-l-slate-400',
     maturity: 'Very High',
     uses: [
@@ -130,7 +131,7 @@ const ORG_MODELS = [
 const BUILD_BUY = [
   {
     approach: 'Buy (SaaS AI)',
-    icon: '🛒',
+    icon: ShoppingCart,
     examples: 'Microsoft Copilot, Salesforce Einstein, ServiceNow AI, Workday AI',
     bestFor: 'Horizontal productivity use cases, standard workflows, rapid deployment',
     tradeoffs: 'Faster and cheaper to start. Less customisation. Vendor-dependent. Data stays in vendor\'s ecosystem.',
@@ -138,7 +139,7 @@ const BUILD_BUY = [
   },
   {
     approach: 'Build on Foundation Models',
-    icon: '🔧',
+    icon: Wrench,
     examples: 'OpenAI API, Anthropic Claude API, Google Vertex AI, Azure OpenAI',
     bestFor: 'Proprietary use cases, custom workflows, competitive differentiation',
     tradeoffs: 'Higher investment. Full control over data and model behaviour. Requires technical capability. Scales well once built.',
@@ -146,7 +147,7 @@ const BUILD_BUY = [
   },
   {
     approach: 'Partner / Managed AI',
-    icon: '🤝',
+    icon: Handshake,
     examples: 'Big 4 AI practices, specialist AI consultancies, system integrators',
     bestFor: 'Complex transformations, regulated industries, organisations without internal AI capability',
     tradeoffs: 'Expensive. Fast access to expertise. Risk of knowledge not transferring to internal team.',
@@ -224,10 +225,14 @@ export default function EnterpriseWhatAI() {
           AI value is not uniformly distributed. These six functions account for the majority of enterprise AI value creation and show the highest adoption rates.
         </p>
         <div className="space-y-4">
-          {FUNCTIONS.map((f) => (
+          {FUNCTIONS.map((f) => {
+            const FuncIcon = f.icon;
+            return (
             <div key={f.name} className={`card border-l-4 ${f.color}`}>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl">{f.icon}</span>
+                <span className="p-2.5 rounded-xl bg-slate-100 flex-shrink-0">
+                  <FuncIcon size={18} className="text-slate-600" />
+                </span>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-slate-800">{f.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
@@ -250,9 +255,10 @@ export default function EnterpriseWhatAI() {
                   </li>
                 ))}
               </ul>
-              <p className="text-xs font-semibold text-slate-500 bg-slate-50 rounded px-2 py-1 inline-block">📌 {f.stat}</p>
+              <p className="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 mt-1">{f.stat}</p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -272,11 +278,11 @@ export default function EnterpriseWhatAI() {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <p className="text-xs font-semibold text-emerald-600 mb-1">Strengths</p>
-                  <ul className="space-y-1">{m.pros.map((p, i) => <li key={i} className="text-xs text-slate-600 flex gap-1.5"><span className="text-emerald-400">✓</span>{p}</li>)}</ul>
+                  <ul className="space-y-1">{m.pros.map((p, i) => <li key={i} className="text-xs text-slate-600 flex gap-1.5 items-start"><CheckCircle2 size={12} className="text-emerald-500 flex-shrink-0 mt-0.5" />{p}</li>)}</ul>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-red-500 mb-1">Risks</p>
-                  <ul className="space-y-1">{m.cons.map((c, i) => <li key={i} className="text-xs text-slate-600 flex gap-1.5"><span className="text-red-400">✗</span>{c}</li>)}</ul>
+                  <ul className="space-y-1">{m.cons.map((c, i) => <li key={i} className="text-xs text-slate-600 flex gap-1.5 items-start"><XCircle size={12} className="text-red-400 flex-shrink-0 mt-0.5" />{c}</li>)}</ul>
                 </div>
               </div>
               <p className="text-xs bg-blue-50 text-blue-700 rounded px-2 py-1"><strong>Best for:</strong> {m.bestFor}</p>
@@ -294,10 +300,14 @@ export default function EnterpriseWhatAI() {
           Most enterprises use all three — the key is matching the approach to the use case type and organisational capability.
         </p>
         <div className="space-y-4">
-          {BUILD_BUY.map((b) => (
+          {BUILD_BUY.map((b) => {
+            const BuildIcon = b.icon;
+            return (
             <div key={b.approach} className="card">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{b.icon}</span>
+                <span className="p-2 rounded-lg bg-slate-100 flex-shrink-0">
+                  <BuildIcon size={16} className="text-slate-600" />
+                </span>
                 <h3 className="font-bold text-slate-800">{b.approach}</h3>
                 <span className="ml-auto text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{b.timeline}</span>
               </div>
@@ -305,7 +315,8 @@ export default function EnterpriseWhatAI() {
               <p className="text-xs text-slate-500 mb-2"><strong>Best for:</strong> {b.bestFor}</p>
               <p className="text-xs text-slate-600 bg-slate-50 rounded px-2 py-1.5">{b.tradeoffs}</p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -322,7 +333,10 @@ export default function EnterpriseWhatAI() {
             <div key={i} className={`flex items-start gap-2.5 rounded-xl px-3 py-2.5 text-sm border ${
               f.leader ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
             }`}>
-              <span className="flex-shrink-0 font-bold">{f.leader ? '✓' : '✗'}</span>
+              {f.leader
+                ? <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                : <XCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
+              }
               <span>{f.factor}</span>
             </div>
           ))}
