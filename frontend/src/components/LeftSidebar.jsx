@@ -42,6 +42,12 @@ const NAV_GROUPS = [
       { to: '/p8', label: '8 · Pitch & Narrative',      icon: '○' },
     ],
   },
+  {
+    label: 'Enterprise Context',
+    items: [
+      { to: '/p12', label: '12 · Enterprise AI',        icon: '○' },
+    ],
+  },
 ];
 
 export default function LeftSidebar() {

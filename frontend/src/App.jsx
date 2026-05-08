@@ -15,6 +15,7 @@ import LearningApproach from './pages/LearningApproach';
 import IndividualAdoption from './pages/IndividualAdoption';
 import OrgContributions from './pages/OrgContributions';
 import Admin from './pages/Admin';
+import EnterpriseAI from './pages/EnterpriseAI';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/p9"    element={<LearningApproach />} />
             <Route path="/p10"   element={<IndividualAdoption />} />
             <Route path="/p11"   element={<OrgContributions />} />
+            <Route path="/p12"   element={<EnterpriseAI />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </Layout>
