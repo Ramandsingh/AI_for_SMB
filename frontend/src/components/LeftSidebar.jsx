@@ -63,6 +63,17 @@ const NAV_GROUPS = [
       { to: '/p16', label: 'How to Measure Value',     icon: '○' },
     ],
   },
+  {
+    label: 'Enterprise AI Development',
+    items: [
+      { to: '/p23', label: 'Data Infrastructure',      icon: '○' },
+      { to: '/p24', label: 'The AI Factory',           icon: '○' },
+      { to: '/p25', label: 'Foundation Models & RAG',  icon: '○' },
+      { to: '/p26', label: 'Enterprise AI Platforms',  icon: '○' },
+      { to: '/p27', label: 'Governance & Risk',        icon: '○' },
+      { to: '/p28', label: 'Building the AI Team',     icon: '○' },
+    ],
+  },
 ];
 
 export default function LeftSidebar() {

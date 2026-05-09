@@ -26,6 +26,12 @@ import TechHowWork          from './pages/TechHowWork';
 import TechDeployment       from './pages/TechDeployment';
 import TechIntegrations     from './pages/TechIntegrations';
 import TechGlossary         from './pages/TechGlossary';
+import EntDevDataInfra      from './pages/EntDevDataInfra';
+import EntDevAIFactory      from './pages/EntDevAIFactory';
+import EntDevFoundationRAG  from './pages/EntDevFoundationRAG';
+import EntDevAIPlatforms    from './pages/EntDevAIPlatforms';
+import EntDevGovernance     from './pages/EntDevGovernance';
+import EntDevTeam           from './pages/EntDevTeam';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -61,6 +67,12 @@ export default function App() {
             <Route path="/p20"   element={<TechDeployment />} />
             <Route path="/p21"   element={<TechIntegrations />} />
             <Route path="/p22"   element={<TechGlossary />} />
+            <Route path="/p23"   element={<EntDevDataInfra />} />
+            <Route path="/p24"   element={<EntDevAIFactory />} />
+            <Route path="/p25"   element={<EntDevFoundationRAG />} />
+            <Route path="/p26"   element={<EntDevAIPlatforms />} />
+            <Route path="/p27"   element={<EntDevGovernance />} />
+            <Route path="/p28"   element={<EntDevTeam />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </Layout>
