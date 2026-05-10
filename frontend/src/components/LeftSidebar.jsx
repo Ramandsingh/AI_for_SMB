@@ -64,6 +64,15 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Executive Insights',
+    items: [
+      { to: '/p29', label: 'BCG',       icon: '○' },
+      { to: '/p30', label: 'McKinsey',  icon: '○' },
+      { to: '/p31', label: 'Bain',      icon: '○' },
+      { to: '/p32', label: 'Deloitte',  icon: '○' },
+    ],
+  },
+  {
     label: 'Enterprise AI Development',
     items: [
       { to: '/p23', label: 'Data Infrastructure',      icon: '○' },

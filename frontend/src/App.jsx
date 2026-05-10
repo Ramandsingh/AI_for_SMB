@@ -32,6 +32,10 @@ import EntDevFoundationRAG  from './pages/EntDevFoundationRAG';
 import EntDevAIPlatforms    from './pages/EntDevAIPlatforms';
 import EntDevGovernance     from './pages/EntDevGovernance';
 import EntDevTeam           from './pages/EntDevTeam';
+import ConsultBCG           from './pages/ConsultBCG';
+import ConsultMcKinsey      from './pages/ConsultMcKinsey';
+import ConsultBain          from './pages/ConsultBain';
+import ConsultDeloitte      from './pages/ConsultDeloitte';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -73,6 +77,10 @@ export default function App() {
             <Route path="/p26"   element={<EntDevAIPlatforms />} />
             <Route path="/p27"   element={<EntDevGovernance />} />
             <Route path="/p28"   element={<EntDevTeam />} />
+            <Route path="/p29"   element={<ConsultBCG />} />
+            <Route path="/p30"   element={<ConsultMcKinsey />} />
+            <Route path="/p31"   element={<ConsultBain />} />
+            <Route path="/p32"   element={<ConsultDeloitte />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </Layout>
