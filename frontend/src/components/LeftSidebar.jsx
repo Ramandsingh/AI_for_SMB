@@ -84,6 +84,12 @@ const NAV_GROUPS = [
       { to: '/p28', label: 'Building the AI Team',     icon: '○' },
     ],
   },
+  {
+    label: 'Your AI Fit',
+    items: [
+      { to: '/p33', label: 'How AI Fits You',          icon: '◈' },
+    ],
+  },
 ];
 
 export default function LeftSidebar({ isOpen, onToggle }) {
