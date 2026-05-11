@@ -1,5 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Zap, Shield, Target, Palette, MessageCircle, Database, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Send, Bot, User, Zap, Shield, Target, Palette, MessageCircle, Database, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import {
+  AssistantRuntimeProvider,
+  AssistantModalPrimitive,
+  ThreadPrimitive,
+  ComposerPrimitive,
+  MessagePrimitive,
+  useLocalRuntime,
+} from '@assistant-ui/react';
 
 // ── System prompt sections ────────────────────────────────────────────────────
 const PROMPT_SECTIONS = [
@@ -135,6 +143,191 @@ function PromptSection({ section }) {
   );
 }
 
+// ── assistant-ui Modal demo ───────────────────────────────────────────────────
+const MOCK_ADAPTER = {
+  async run({ messages }) {
+    await new Promise(r => setTimeout(r, 900));
+    const last = messages[messages.length - 1];
+    const userText = last?.content?.[0]?.text ?? '';
+    const reply = userText
+      ? `You asked: "${userText.slice(0, 80)}${userText.length > 80 ? '…' : ''}". This is a placeholder response — wire up the Anthropic SDK on your backend to enable live Claude replies.`
+      : "Hello! I'm a placeholder assistant. Connect the Anthropic SDK to enable real responses.";
+    return { content: [{ type: 'text', text: reply }] };
+  },
+};
+
+function AssistantModalDemo() {
+  const runtime = useLocalRuntime(MOCK_ADAPTER);
+
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      <div className="space-y-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
+          <p className="text-sm font-bold text-slate-700 mb-1">Floating Modal Widget</p>
+          <p className="text-xs text-slate-500 mb-4">
+            The button below opens a floating chat modal powered by <code className="font-mono bg-slate-100 px-1 rounded">AssistantModalPrimitive</code> from{' '}
+            <a href="https://www.assistant-ui.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">assistant-ui</a>.
+            Responses are placeholder until a real backend is wired up.
+          </p>
+
+          <AssistantModalPrimitive.Root>
+            <AssistantModalPrimitive.Trigger asChild>
+              <button className="flex items-center gap-2 bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-slate-400">
+                <Bot size={15} />
+                Open Chat Modal
+              </button>
+            </AssistantModalPrimitive.Trigger>
+
+            <AssistantModalPrimitive.Content
+              style={{
+                position: 'fixed',
+                bottom: '5rem',
+                right: '2rem',
+                width: 380,
+                maxHeight: 540,
+                background: '#fff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 16,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                zIndex: 9999,
+              }}
+            >
+              {/* Modal header */}
+              <div style={{ background: '#1e293b', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Bot size={15} style={{ color: '#6ee7b7' }} />
+                <span style={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>AI Assistant</span>
+                <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8', background: '#334155', padding: '2px 8px', borderRadius: 12 }}>Placeholder</span>
+              </div>
+
+              {/* Messages */}
+              <ThreadPrimitive.Root style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <ThreadPrimitive.Viewport style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <ThreadPrimitive.Empty>
+                    <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8', fontSize: 13 }}>
+                      Ask me anything…
+                    </div>
+                  </ThreadPrimitive.Empty>
+
+                  <ThreadPrimitive.Messages
+                    components={{
+                      UserMessage: ({ message }) => (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <div style={{ maxWidth: '80%', background: '#2563eb', color: '#fff', borderRadius: 14, padding: '8px 14px', fontSize: 13, lineHeight: 1.5 }}>
+                            <MessagePrimitive.Content />
+                          </div>
+                        </div>
+                      ),
+                      AssistantMessage: ({ message }) => (
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                          <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Bot size={13} style={{ color: '#059669' }} />
+                          </div>
+                          <div style={{ maxWidth: '80%', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 14, padding: '8px 14px', fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                            <MessagePrimitive.Content />
+                          </div>
+                        </div>
+                      ),
+                    }}
+                  />
+                </ThreadPrimitive.Viewport>
+
+                {/* Composer */}
+                <ComposerPrimitive.Root style={{ padding: '10px 12px', borderTop: '1px solid #f1f5f9', display: 'flex', gap: 8, background: '#fff' }}>
+                  <ComposerPrimitive.Input
+                    style={{
+                      flex: 1,
+                      fontSize: 13,
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12,
+                      padding: '8px 12px',
+                      outline: 'none',
+                      resize: 'none',
+                      fontFamily: 'inherit',
+                      lineHeight: 1.4,
+                    }}
+                    placeholder="Type a message…"
+                    rows={1}
+                  />
+                  <ComposerPrimitive.Send
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      background: '#1e293b',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      alignSelf: 'flex-end',
+                    }}
+                  >
+                    <Send size={14} style={{ color: '#fff' }} />
+                  </ComposerPrimitive.Send>
+                </ComposerPrimitive.Root>
+              </ThreadPrimitive.Root>
+            </AssistantModalPrimitive.Content>
+          </AssistantModalPrimitive.Root>
+        </div>
+
+        {/* Code reference */}
+        <div className="rounded-xl border border-slate-200 overflow-hidden">
+          <div className="bg-slate-800 px-4 py-2 flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 font-mono">assistant-ui setup</span>
+            <a href="https://www.assistant-ui.com/docs" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors">
+              docs <ExternalLink size={11} />
+            </a>
+          </div>
+          <pre className="bg-slate-900 text-emerald-300 text-xs font-mono p-4 overflow-x-auto leading-relaxed whitespace-pre">{`import {
+  AssistantRuntimeProvider, useLocalRuntime,
+  AssistantModalPrimitive, ThreadPrimitive,
+  ComposerPrimitive, MessagePrimitive,
+} from '@assistant-ui/react';
+
+const adapter = {
+  async run({ messages }) {
+    // Call your backend here
+    const res = await fetch('/api/chat', { method:'POST',
+      body: JSON.stringify({ messages }) });
+    const { text } = await res.json();
+    return { content: [{ type:'text', text }] };
+  }
+};
+
+function App() {
+  const runtime = useLocalRuntime(adapter);
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      <AssistantModalPrimitive.Root>
+        <AssistantModalPrimitive.Trigger>
+          <button>Chat</button>
+        </AssistantModalPrimitive.Trigger>
+        <AssistantModalPrimitive.Content>
+          <ThreadPrimitive.Root>
+            <ThreadPrimitive.Viewport>
+              <ThreadPrimitive.Messages ... />
+            </ThreadPrimitive.Viewport>
+            <ComposerPrimitive.Root>
+              <ComposerPrimitive.Input />
+              <ComposerPrimitive.Send />
+            </ComposerPrimitive.Root>
+          </ThreadPrimitive.Root>
+        </AssistantModalPrimitive.Content>
+      </AssistantModalPrimitive.Root>
+    </AssistantRuntimeProvider>
+  );
+}`}</pre>
+        </div>
+      </div>
+    </AssistantRuntimeProvider>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function LabChat() {
   const [messages, setMessages] = useState(PLACEHOLDER_MESSAGES);
@@ -179,6 +372,7 @@ export default function LabChat() {
           { id: 'prompt', label: 'System Prompt' },
           { id: 'demo',   label: 'Chat Demo' },
           { id: 'code',   label: 'Integration' },
+          { id: 'modal',  label: 'Modal Widget' },
         ].map(t => (
           <button
             key={t.id}
@@ -327,6 +521,9 @@ Always prioritize information from the uploaded documents over general training 
           </div>
         </div>
       )}
+
+      {/* ── Modal Widget tab ── */}
+      {tab === 'modal' && <AssistantModalDemo />}
     </div>
   );
 }

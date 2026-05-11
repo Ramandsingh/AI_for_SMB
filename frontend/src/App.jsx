@@ -46,6 +46,7 @@ import LabArch              from './pages/lab/LabArch';
 import LabTimeline          from './pages/lab/LabTimeline';
 import LabCharts            from './pages/lab/LabCharts';
 import LabCalendar          from './pages/lab/LabCalendar';
+import LabDatabase          from './pages/lab/LabDatabase';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -101,7 +102,8 @@ export default function App() {
             <Route path="/lab/arch"    element={<LabArch />} />
             <Route path="/lab/timeline" element={<LabTimeline />} />
             <Route path="/lab/charts"  element={<LabCharts />} />
-            <Route path="/lab/calendar" element={<LabCalendar />} />
+            <Route path="/lab/calendar"  element={<LabCalendar />} />
+            <Route path="/lab/database"  element={<LabDatabase />} />
           </Routes>
         </Layout>
       </SectionsContext.Provider>

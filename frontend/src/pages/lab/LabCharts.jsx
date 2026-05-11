@@ -384,9 +384,9 @@ export default function LabCharts() {
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
-          recharts · custom SVG · 19 chart types
-        </span>
+        <a href="https://recharts.org" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full hover:bg-rose-100 transition-colors" style={{ textDecoration: 'none' }}>
+          recharts · custom SVG · 19 chart types ↗
+        </a>
       </div>
       <h1 className="text-2xl font-extrabold text-slate-900 mb-1">Data Visualisation</h1>
       <p className="text-slate-500 text-sm mb-8">

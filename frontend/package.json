@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@assistant-ui/react": "^0.14.0",
     "@uppy/core": "^5.2.0",
     "@uppy/dashboard": "^5.1.1",
     "@uppy/drag-drop": "^5.1.0",
@@ -16,6 +17,7 @@
     "antd": "^6.3.7",
     "axios": "^1.6.7",
     "lucide-react": "^1.14.0",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",

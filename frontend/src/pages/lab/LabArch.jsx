@@ -296,7 +296,10 @@ export default function LabArch() {
           gap: 4,
         }}
       >
-        <span
+        <a
+          href="https://reactflow.dev"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             display: 'inline-block',
             fontSize: 11,
@@ -309,10 +312,11 @@ export default function LabArch() {
             letterSpacing: '0.03em',
             alignSelf: 'flex-start',
             fontFamily: 'monospace',
+            textDecoration: 'none',
           }}
         >
-          reactflow · custom-nodes
-        </span>
+          reactflow · custom-nodes ↗
+        </a>
         <h1
           style={{
             margin: 0,

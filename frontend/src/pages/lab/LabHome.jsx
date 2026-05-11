@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X } from 'lucide-react';
+import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database } from 'lucide-react';
 
 const NOTES_KEY = 'lab-home-notes';
 const DEFAULT_NOTES = `## Key Libraries
@@ -13,7 +13,9 @@ const DEFAULT_NOTES = `## Key Libraries
 
 **antd** — Ant Design. Calendar, DatePicker, Modal. Requires ConfigProvider for theme tokens.
 
-**@anthropic-ai/sdk** — Claude API. Default to claude-opus-4-7 with adaptive thinking for complex tasks.`;
+**@anthropic-ai/sdk** — Claude API. Default to claude-opus-4-7 with adaptive thinking for complex tasks.
+
+**@assistant-ui/react** — Chat UI primitives. AssistantModalPrimitive for floating modal widget. AssistantRuntimeProvider + useLocalRuntime(adapter) for mock/local runtime. Real backend: replace adapter.run() with a fetch to /api/chat. useChatRuntime() from @assistant-ui/react-ai-sdk for Vercel AI SDK integration.`;
 
 function EditableNotes() {
   const [saved, setSaved] = useState(() => localStorage.getItem(NOTES_KEY) ?? DEFAULT_NOTES);
@@ -183,6 +185,18 @@ const EXPERIMENTS = [
     iconColor: 'text-cyan-600',
     desc: 'Full-featured calendar using Ant Design — CRUD events, busy-day indicators, modal editor, and .ics download for any event.',
     tags: ['antd', 'Calendar', 'ics-export'],
+  },
+  {
+    to: '/lab/database',
+    icon: Database,
+    title: 'Database Platforms',
+    library: 'MySQL · REST API',
+    libraryUrl: null,
+    color: 'border-l-indigo-400',
+    iconBg: 'bg-indigo-50',
+    iconColor: 'text-indigo-600',
+    desc: 'Reference guide for top free & open-source no-code/low-code self-hosted database platforms — features, screenshots, and free-tier limitations.',
+    tags: ['baserow', 'nocodb', 'grist', 'teable', 'mathesar'],
   },
 ];
 

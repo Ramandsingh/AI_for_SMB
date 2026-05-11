@@ -10,7 +10,7 @@ const TRUE_FULL_BLEED = ['/p34'];
 // Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
 const LAB_ROUTES = [
   '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
-  '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar',
+  '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar', '/lab/database',
 ];
 
 export default function Layout({ children }) {

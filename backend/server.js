@@ -165,6 +165,183 @@ async function runMigrations(db) {
     }
     console.log('enterprise_functions seeded');
   }
+
+  // ── database_platforms ────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS database_platforms (
+      id              INT AUTO_INCREMENT PRIMARY KEY,
+      name            VARCHAR(100) NOT NULL,
+      tagline         TEXT,
+      url             VARCHAR(255),
+      logo_url        VARCHAR(500),
+      screenshot_urls JSON,
+      features        JSON,
+      limitations     JSON,
+      tags            JSON,
+      color           VARCHAR(30) DEFAULT 'blue',
+      sort_order      INT DEFAULT 0
+    )
+  `);
+
+  const [[{ dbp_count }]] = await db.query('SELECT COUNT(*) AS dbp_count FROM database_platforms');
+  if (dbp_count === 0) {
+    const platforms = [
+      {
+        name: 'Baserow',
+        tagline: 'Open source no-code database & Airtable alternative. Self-host via Docker or use Baserow cloud.',
+        url: 'https://baserow.io',
+        logo_url: 'https://raw.githubusercontent.com/bram2w/baserow/master/web-frontend/modules/core/static/img/logo.svg',
+        screenshot_urls: JSON.stringify([
+          'https://baserow.io/img/baserow-screenshot-grid.png',
+          'https://baserow.io/img/baserow-screenshot-gallery.png',
+        ]),
+        features: JSON.stringify([
+          'Grid, gallery, kanban, calendar, and form views',
+          'REST API auto-generated for every table and field',
+          'Role-based access: admin, member, viewer per workspace',
+          'Webhooks triggered on row create/update/delete',
+          'Formula fields, lookup fields, link-to-table relations',
+          'Docker self-host or Baserow cloud — unlimited rows self-hosted',
+        ]),
+        limitations: JSON.stringify([
+          'Free cloud plan capped at 5,000 rows and 5 GB storage',
+          'Row-level access rules (filter-based permissions) are premium',
+          'Public shared views are view-only — no per-viewer identity filter',
+          'Automations (save-triggered workflows) are premium only',
+          'No SSO / SAML on free tier — email auth only',
+          'Password-protected shared views require a premium plan',
+        ]),
+        tags: JSON.stringify(['self-hosted', 'open-source', 'docker', 'rest-api', 'no-code']),
+        color: 'blue',
+        sort_order: 1,
+      },
+      {
+        name: 'NocoDB',
+        tagline: 'Turns any MySQL, PostgreSQL, or SQLite database into a smart spreadsheet UI with APIs and views.',
+        url: 'https://nocodb.com',
+        logo_url: 'https://raw.githubusercontent.com/nocodb/nocodb/develop/packages/nc-gui/assets/img/icons/512x512-trans.png',
+        screenshot_urls: JSON.stringify([
+          'https://raw.githubusercontent.com/nocodb/nocodb/develop/.github/assets/screenshots/22.png',
+          'https://raw.githubusercontent.com/nocodb/nocodb/develop/.github/assets/screenshots/23.png',
+        ]),
+        features: JSON.stringify([
+          'Connects to MySQL, PostgreSQL, SQLite, MariaDB — your existing DB',
+          'Grid, gallery, form, kanban, and map views',
+          'REST & GraphQL API auto-generated per table',
+          'Shared views with optional password protection',
+          'Webhook triggers on record create/update/delete',
+          'Self-host via Docker, AGPL free and open source',
+        ]),
+        limitations: JSON.stringify([
+          'Row-level access only via view filters — no per-user identity routing',
+          'No column-level hiding per user on free tier',
+          'Password-protected views use one shared password for all viewers',
+          'Save-triggered conditional actions require enterprise plan',
+          'Cloud attachment storage limited on free plan',
+          'No built-in audit log on open source version',
+        ]),
+        tags: JSON.stringify(['self-hosted', 'open-source', 'postgresql', 'mysql', 'graphql', 'no-code']),
+        color: 'violet',
+        sort_order: 2,
+      },
+      {
+        name: 'Grist',
+        tagline: 'Spreadsheet meets database — Python formula columns, granular access rules, and sharable views.',
+        url: 'https://getgrist.com',
+        logo_url: 'https://raw.githubusercontent.com/gristlabs/grist-core/main/static/icons/GristLogo.png',
+        screenshot_urls: JSON.stringify([
+          'https://raw.githubusercontent.com/gristlabs/grist-core/main/static/img/docs/newsletters/2021-09/kanban.png',
+          'https://www.getgrist.com/wp-content/uploads/2023/10/grist-access-rules.png',
+        ]),
+        features: JSON.stringify([
+          'Python-powered formula columns — full NumPy/Pandas access',
+          'Granular access rules at row, column, and table level',
+          'Link & filter views — each user sees only their data slice',
+          'Custom widgets (maps, charts) embeddable per page',
+          'Version history and document snapshots',
+          'Self-host via Docker (AGPL), free and open source',
+        ]),
+        limitations: JSON.stringify([
+          'Free cloud plan: 5 documents, 5,000 rows per document',
+          'No SSO on free or free-plus plans',
+          'Column-level access rules are available but complex to configure',
+          'External webhooks on save require the Business plan',
+          'No native mobile app',
+          'Per-user row filtering requires careful formula-based access rule setup',
+        ]),
+        tags: JSON.stringify(['self-hosted', 'open-source', 'python', 'access-rules', 'no-code']),
+        color: 'emerald',
+        sort_order: 3,
+      },
+      {
+        name: 'Teable',
+        tagline: 'Postgres-native, high-performance Airtable alternative — handles millions of rows with real-time collaboration.',
+        url: 'https://teable.io',
+        logo_url: 'https://raw.githubusercontent.com/teableio/teable/develop/apps/nextjs-app/public/favicon/android-chrome-192x192.png',
+        screenshot_urls: JSON.stringify([
+          'https://raw.githubusercontent.com/teableio/teable/develop/.github/screenshots/table-view.png',
+          'https://raw.githubusercontent.com/teableio/teable/develop/.github/screenshots/kanban-view.png',
+        ]),
+        features: JSON.stringify([
+          'Built directly on PostgreSQL — millions of rows without performance degradation',
+          'Real-time collaboration with low latency multiplayer editing',
+          'Grid, gallery, kanban, calendar, and form views',
+          'REST API and plugin system for extensibility',
+          'Self-hostable under AGPL, actively developed',
+          'AI field assistant (beta) for formula suggestions',
+        ]),
+        limitations: JSON.stringify([
+          'Relatively new product — some enterprise features still in development',
+          'No column-level access control on free tier yet',
+          'Automations are limited on the free self-hosted version',
+          'No SSO / SAML on free plan',
+          'Public shared views are read-only with no per-viewer row filtering',
+          'Password-protected shared views not available on free tier',
+        ]),
+        tags: JSON.stringify(['self-hosted', 'open-source', 'postgresql', 'real-time', 'no-code']),
+        color: 'amber',
+        sort_order: 4,
+      },
+      {
+        name: 'Mathesar',
+        tagline: 'Web interface for PostgreSQL — schema design, data editing, and filtered views without writing SQL.',
+        url: 'https://mathesar.org',
+        logo_url: 'https://raw.githubusercontent.com/mathesar-foundation/mathesar/develop/mathesar_ui/src/assets/images/mathesar_logo.svg',
+        screenshot_urls: JSON.stringify([
+          'https://mathesar.org/assets/img/home/hero-screenshot.png',
+          'https://mathesar.org/assets/img/features/table-screenshot.png',
+        ]),
+        features: JSON.stringify([
+          'Direct PostgreSQL interface — no proprietary data layer or migration required',
+          'Table editor, data explorer, and schema designer in the browser',
+          'Role-based access control matching native PostgreSQL roles',
+          'Shareable filtered views per user group',
+          'Works with existing databases — connect and start immediately',
+          'Fully self-hosted, free and open source (GPL)',
+        ]),
+        limitations: JSON.stringify([
+          'No cloud hosted option — must self-host on your own infrastructure',
+          'No built-in automations or webhook triggers',
+          'Only grid/table view — no kanban, gallery, or calendar views',
+          'No native form builder for public data collection',
+          'Column-level access requires PostgreSQL role configuration by a DBA',
+          'No password-protected public sharing links',
+        ]),
+        tags: JSON.stringify(['self-hosted', 'open-source', 'postgresql', 'sql', 'low-code']),
+        color: 'rose',
+        sort_order: 5,
+      },
+    ];
+
+    for (const p of platforms) {
+      await db.query(
+        `INSERT INTO database_platforms (name, tagline, url, logo_url, screenshot_urls, features, limitations, tags, color, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [p.name, p.tagline, p.url, p.logo_url, p.screenshot_urls, p.features, p.limitations, p.tags, p.color, p.sort_order]
+      );
+    }
+    console.log('database_platforms seeded');
+  }
 }
 
 // ── Health ────────────────────────────────────────────────────────────────────
@@ -299,6 +476,24 @@ app.put('/api/enterprise/functions/:id', async (req, res) => {
     const [[row]] = await db.query('SELECT * FROM enterprise_functions WHERE id=?', [id]);
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json({ ...row, uses: typeof row.uses === 'string' ? JSON.parse(row.uses) : row.uses });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Lab: Database Platforms ───────────────────────────────────────────────────
+app.get('/api/lab/database-platforms', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.query('SELECT * FROM database_platforms ORDER BY sort_order');
+    const parsed = rows.map(r => ({
+      ...r,
+      screenshot_urls: typeof r.screenshot_urls === 'string' ? JSON.parse(r.screenshot_urls) : r.screenshot_urls,
+      features:        typeof r.features === 'string'        ? JSON.parse(r.features)        : r.features,
+      limitations:     typeof r.limitations === 'string'     ? JSON.parse(r.limitations)     : r.limitations,
+      tags:            typeof r.tags === 'string'             ? JSON.parse(r.tags)            : r.tags,
+    }));
+    res.json(parsed);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
