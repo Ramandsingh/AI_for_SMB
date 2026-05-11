@@ -12,6 +12,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/p1', label: 'Understanding AI',       icon: '○' },
       { to: '/p2', label: 'Maturity Journey',       icon: '○' },
+      { to: '/p34', label: 'Maturity Canvas',       icon: '◈' },
       { to: '/p3', label: 'Role Impact Map',        icon: '○' },
     ],
   },

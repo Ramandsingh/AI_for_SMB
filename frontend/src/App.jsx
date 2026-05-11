@@ -37,6 +37,7 @@ import ConsultMcKinsey      from './pages/ConsultMcKinsey';
 import ConsultBain          from './pages/ConsultBain';
 import ConsultDeloitte      from './pages/ConsultDeloitte';
 import AIFitPlanner         from './pages/AIFitPlanner';
+import MaturityCanvas       from './pages/MaturityCanvas';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="/p31"   element={<ConsultBain />} />
             <Route path="/p32"   element={<ConsultDeloitte />} />
             <Route path="/p33"   element={<AIFitPlanner />} />
+            <Route path="/p34"   element={<MaturityCanvas />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </Layout>
