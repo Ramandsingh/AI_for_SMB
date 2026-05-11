@@ -4,7 +4,11 @@ import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import { useSections } from '../App';
 
-const FULL_BLEED_ROUTES = ['/p34'];
+const FULL_BLEED_ROUTES = [
+  '/p34',
+  '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
+  '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar',
+];
 
 export default function Layout({ children }) {
   const { sections } = useSections();

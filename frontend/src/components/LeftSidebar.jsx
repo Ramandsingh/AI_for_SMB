@@ -91,6 +91,19 @@ const NAV_GROUPS = [
       { to: '/p33', label: 'How AI Fits You',          icon: '◈' },
     ],
   },
+  {
+    label: 'Experimental UI',
+    items: [
+      { to: '/lab',           label: 'Lab Home',              icon: '◈' },
+      { to: '/lab/upload',    label: 'Image Upload · Uppy',   icon: '○' },
+      { to: '/lab/graph',     label: 'Site Graph · React Flow', icon: '○' },
+      { to: '/lab/chat',      label: 'Chat Agent',            icon: '○' },
+      { to: '/lab/arch',      label: 'Architecture · React Flow', icon: '○' },
+      { to: '/lab/timeline',  label: 'Timeline',              icon: '○' },
+      { to: '/lab/charts',    label: 'Data Viz · Recharts',   icon: '○' },
+      { to: '/lab/calendar',  label: 'Calendar · Ant Design', icon: '○' },
+    ],
+  },
 ];
 
 export default function LeftSidebar({ isOpen, onToggle }) {

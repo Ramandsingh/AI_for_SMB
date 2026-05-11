@@ -38,6 +38,14 @@ import ConsultBain          from './pages/ConsultBain';
 import ConsultDeloitte      from './pages/ConsultDeloitte';
 import AIFitPlanner         from './pages/AIFitPlanner';
 import MaturityCanvas       from './pages/MaturityCanvas';
+import LabHome              from './pages/lab/LabHome';
+import LabUppy              from './pages/lab/LabUppy';
+import LabGraph             from './pages/lab/LabGraph';
+import LabChat              from './pages/lab/LabChat';
+import LabArch              from './pages/lab/LabArch';
+import LabTimeline          from './pages/lab/LabTimeline';
+import LabCharts            from './pages/lab/LabCharts';
+import LabCalendar          from './pages/lab/LabCalendar';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -84,8 +92,16 @@ export default function App() {
             <Route path="/p31"   element={<ConsultBain />} />
             <Route path="/p32"   element={<ConsultDeloitte />} />
             <Route path="/p33"   element={<AIFitPlanner />} />
-            <Route path="/p34"   element={<MaturityCanvas />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/p34"         element={<MaturityCanvas />} />
+            <Route path="/admin"       element={<Admin />} />
+            <Route path="/lab"         element={<LabHome />} />
+            <Route path="/lab/upload"  element={<LabUppy />} />
+            <Route path="/lab/graph"   element={<LabGraph />} />
+            <Route path="/lab/chat"    element={<LabChat />} />
+            <Route path="/lab/arch"    element={<LabArch />} />
+            <Route path="/lab/timeline" element={<LabTimeline />} />
+            <Route path="/lab/charts"  element={<LabCharts />} />
+            <Route path="/lab/calendar" element={<LabCalendar />} />
           </Routes>
         </Layout>
       </SectionsContext.Provider>
