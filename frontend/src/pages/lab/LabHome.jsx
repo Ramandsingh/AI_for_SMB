@@ -1,5 +1,103 @@
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical } from 'lucide-react';
+import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X } from 'lucide-react';
+
+const NOTES_KEY = 'lab-home-notes';
+const DEFAULT_NOTES = `## Key Libraries
+
+**@uppy/core + @uppy/react** — File upload. v5 breaking changes: CSS paths changed to /css/, Dashboard import path changed to '@uppy/react/dashboard', useWebcam returns prop-getter functions.
+
+**recharts** — Charts. SunburstChart, Sankey, Treemap, FunnelChart all available. Use ResponsiveContainer for fluid widths.
+
+**reactflow** — Graph/diagram UI. Custom node types registered via nodeTypes prop. Force layout via d3-force plugin.
+
+**antd** — Ant Design. Calendar, DatePicker, Modal. Requires ConfigProvider for theme tokens.
+
+**@anthropic-ai/sdk** — Claude API. Default to claude-opus-4-7 with adaptive thinking for complex tasks.`;
+
+function EditableNotes() {
+  const [saved, setSaved] = useState(() => localStorage.getItem(NOTES_KEY) ?? DEFAULT_NOTES);
+  const [draft, setDraft] = useState(saved);
+  const [editing, setEditing] = useState(false);
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (editing) textareaRef.current?.focus();
+  }, [editing]);
+
+  function startEdit() {
+    setDraft(saved);
+    setEditing(true);
+  }
+
+  function save() {
+    setSaved(draft);
+    localStorage.setItem(NOTES_KEY, draft);
+    setEditing(false);
+  }
+
+  function discard() {
+    setDraft(saved);
+    setEditing(false);
+  }
+
+  return (
+    <div className="mt-10 rounded-2xl border border-slate-200 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-200">
+        <div className="flex items-center gap-2">
+          <StickyNote size={15} className="text-amber-500" />
+          <span className="text-sm font-bold text-slate-700">Library Notes</span>
+          <span className="text-xs text-slate-400 font-normal">· saved to localStorage</span>
+        </div>
+        {!editing ? (
+          <button
+            onClick={startEdit}
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          >
+            <Pencil size={12} /> Edit
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={save}
+              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            >
+              <Check size={12} /> Save
+            </button>
+            <button
+              onClick={discard}
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            >
+              <X size={12} /> Discard
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      {editing ? (
+        <textarea
+          ref={textareaRef}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          className="w-full px-5 py-4 text-sm font-mono text-slate-700 bg-white resize-none focus:outline-none leading-relaxed"
+          style={{ minHeight: 220 }}
+          spellCheck={false}
+        />
+      ) : (
+        <div
+          className="px-5 py-4 text-sm text-slate-600 leading-relaxed whitespace-pre-wrap font-mono bg-white cursor-text select-text"
+          style={{ minHeight: 100 }}
+          onClick={startEdit}
+          title="Click to edit"
+        >
+          {saved || <span className="text-slate-300 italic">No notes yet — click to add some.</span>}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const EXPERIMENTS = [
   {
@@ -142,6 +240,8 @@ export default function LabHome() {
           );
         })}
       </div>
+
+      <EditableNotes />
     </div>
   );
 }
