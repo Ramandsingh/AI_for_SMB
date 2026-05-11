@@ -4,8 +4,11 @@ import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import { useSections } from '../App';
 
-const FULL_BLEED_ROUTES = [
-  '/p34',
+// Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space
+const TRUE_FULL_BLEED = ['/p34'];
+
+// Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
+const LAB_ROUTES = [
   '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
   '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar',
 ];
@@ -15,7 +18,8 @@ export default function Layout({ children }) {
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const { pathname } = useLocation();
-  const fullBleed = FULL_BLEED_ROUTES.includes(pathname);
+  const trueFullBleed = TRUE_FULL_BLEED.includes(pathname);
+  const isLab = LAB_ROUTES.includes(pathname);
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -29,8 +33,12 @@ export default function Layout({ children }) {
           transition: 'margin 200ms ease',
         }}
       >
-        {fullBleed ? (
+        {trueFullBleed ? (
           children
+        ) : isLab ? (
+          <div className="px-8 py-8 max-w-5xl mx-auto">
+            {children}
+          </div>
         ) : (
           <div className="max-w-4xl mx-auto px-8 py-10">
             {children}
