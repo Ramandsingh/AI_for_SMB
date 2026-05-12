@@ -1,11 +1,33 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
-import { Plus, Trash2, Pencil, Check, X, Save, FileImage, Loader2, PenLine } from 'lucide-react';
+import { Component, useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import { Plus, Trash2, Pencil, Check, X, Save, FileImage, Loader2, PenLine, AlertCircle } from 'lucide-react';
 
 const Excalidraw = lazy(() =>
   import('@excalidraw/excalidraw').then(m => ({ default: m.Excalidraw }))
 );
 
-// ── Drawing thumbnail ─────────────────────────────────────────────────────────
+// ── Error boundary — catches Excalidraw render crashes ────────────────────────
+class ExcalidrawBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(e) { return { error: e }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-50">
+          <AlertCircle size={32} className="text-red-400" />
+          <p className="text-sm font-semibold text-slate-500">Canvas failed to load</p>
+          <p className="text-xs text-slate-400 max-w-xs text-center">{this.state.error?.message}</p>
+          <button
+            onClick={() => this.setState({ error: null })}
+            className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-bold hover:bg-violet-500"
+          >Retry</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ── Drawing thumbnail card ────────────────────────────────────────────────────
 function DrawingCard({ drawing, active, onSelect, onRename, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(drawing.name);
@@ -16,15 +38,12 @@ function DrawingCard({ drawing, active, onSelect, onRename, onDelete }) {
       className={`group relative rounded-xl border cursor-pointer transition-all duration-150 overflow-hidden
         ${active ? 'border-violet-400 ring-2 ring-violet-200' : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'}`}
     >
-      {/* Thumbnail */}
       <div className="bg-slate-50 flex items-center justify-center" style={{ aspectRatio: '4/3' }}>
         {drawing.thumbnail
           ? <img src={drawing.thumbnail} alt={drawing.name} className="w-full h-full object-contain" />
           : <PenLine size={24} className="text-slate-300" />
         }
       </div>
-
-      {/* Name + actions */}
       <div className="px-2.5 py-2 bg-white">
         {editing ? (
           <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
@@ -72,8 +91,8 @@ export default function LabExcalidraw() {
   const [saveMsg, setSaveMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const dirtyRef = useRef(false);
+  const initialData = useRef({ elements: [], appState: { viewBackgroundColor: '#ffffff' } });
 
-  // Load drawings list on mount
   useEffect(() => {
     fetch('/api/lab/excalidraw')
       .then(r => r.json())
@@ -86,7 +105,6 @@ export default function LabExcalidraw() {
     setTimeout(() => setSaveMsg(''), 2500);
   };
 
-  // Generate thumbnail from current Excalidraw state
   const generateThumbnail = useCallback(async (api) => {
     try {
       const elements = api.getSceneElements();
@@ -134,7 +152,6 @@ export default function LabExcalidraw() {
     setSaving(false);
   }, [excalidrawAPI, activeId, activeName, generateThumbnail]);
 
-  // Ctrl/Cmd+S shortcut
   useEffect(() => {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); save(); }
@@ -151,6 +168,7 @@ export default function LabExcalidraw() {
     setLoading(true);
     try {
       const res = await fetch(`/api/lab/excalidraw/${id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setActiveId(data.id);
       setActiveName(data.name);
@@ -164,7 +182,9 @@ export default function LabExcalidraw() {
         }
       }
       dirtyRef.current = false;
-    } catch {}
+    } catch (err) {
+      showSaveMsg('Failed to load drawing');
+    }
     setLoading(false);
   }, [excalidrawAPI, activeId, save]);
 
@@ -173,43 +193,54 @@ export default function LabExcalidraw() {
       const ok = window.confirm('Save current drawing before creating new one?');
       if (ok) await save();
     }
-    const res = await fetch('/api/lab/excalidraw', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: `Drawing ${drawings.length + 1}` }),
-    });
-    const created = await res.json();
-    setDrawings(d => [created, ...d]);
-    setActiveId(created.id);
-    setActiveName(created.name);
-    if (excalidrawAPI) excalidrawAPI.resetScene();
-    dirtyRef.current = false;
+    try {
+      const res = await fetch('/api/lab/excalidraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `Drawing ${drawings.length + 1}` }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const created = await res.json();
+      setDrawings(d => [created, ...d]);
+      setActiveId(created.id);
+      setActiveName(created.name);
+      if (excalidrawAPI) excalidrawAPI.resetScene();
+      dirtyRef.current = false;
+    } catch {
+      showSaveMsg('Failed to create drawing');
+    }
   };
 
   const renameDrawing = async (id, name) => {
-    await fetch(`/api/lab/excalidraw/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    });
-    setDrawings(d => d.map(x => x.id === id ? { ...x, name } : x));
-    if (id === activeId) setActiveName(name);
+    try {
+      await fetch(`/api/lab/excalidraw/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      setDrawings(d => d.map(x => x.id === id ? { ...x, name } : x));
+      if (id === activeId) setActiveName(name);
+    } catch {}
   };
 
   const deleteDrawing = async (id) => {
     if (!window.confirm('Delete this drawing?')) return;
-    await fetch(`/api/lab/excalidraw/${id}`, { method: 'DELETE' });
-    setDrawings(d => d.filter(x => x.id !== id));
-    if (id === activeId) {
-      setActiveId(null);
-      setActiveName('');
-      excalidrawAPI?.resetScene();
-    }
+    try {
+      await fetch(`/api/lab/excalidraw/${id}`, { method: 'DELETE' });
+      setDrawings(d => d.filter(x => x.id !== id));
+      if (id === activeId) {
+        setActiveId(null);
+        setActiveName('');
+        if (excalidrawAPI) excalidrawAPI.resetScene();
+      }
+    } catch {}
   };
 
   const handleExcalidrawChange = useCallback(() => {
     if (activeId) dirtyRef.current = true;
   }, [activeId]);
+
+  const handleExcalidrawAPI = useCallback((api) => setExcalidrawAPI(api), []);
 
   return (
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column', overflow: 'hidden' }}>
@@ -225,7 +256,11 @@ export default function LabExcalidraw() {
           </>
         )}
         <div className="flex-1" />
-        {saveMsg && <span className="text-xs text-emerald-400 font-medium">{saveMsg}</span>}
+        {saveMsg && (
+          <span className={`text-xs font-medium ${saveMsg.includes('fail') || saveMsg.includes('Failed') ? 'text-red-400' : 'text-emerald-400'}`}>
+            {saveMsg}
+          </span>
+        )}
         <button
           onClick={() => save()}
           disabled={!activeId || saving}
@@ -284,24 +319,26 @@ export default function LabExcalidraw() {
               </button>
             </div>
           ) : (
-            <Suspense fallback={
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
-                <Loader2 size={32} className="text-slate-300 animate-spin" />
-              </div>
-            }>
-              <Excalidraw
-                excalidrawAPI={setExcalidrawAPI}
-                onChange={handleExcalidrawChange}
-                initialData={{ elements: [], appState: { viewBackgroundColor: '#ffffff' } }}
-                UIOptions={{
-                  canvasActions: {
-                    saveToActiveFile: false,
-                    loadScene: false,
-                    export: { saveFileToDisk: true },
-                  },
-                }}
-              />
-            </Suspense>
+            <ExcalidrawBoundary>
+              <Suspense fallback={
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
+                  <Loader2 size={32} className="text-slate-300 animate-spin" />
+                </div>
+              }>
+                <Excalidraw
+                  excalidrawAPI={handleExcalidrawAPI}
+                  onChange={handleExcalidrawChange}
+                  initialData={initialData.current}
+                  UIOptions={{
+                    canvasActions: {
+                      saveToActiveFile: false,
+                      loadScene: false,
+                      export: { saveFileToDisk: true },
+                    },
+                  }}
+                />
+              </Suspense>
+            </ExcalidrawBoundary>
           )}
           {loading && (
             <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
