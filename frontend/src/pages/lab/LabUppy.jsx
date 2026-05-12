@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
-import Webcam from '@uppy/webcam';
 import '@uppy/core/css/style.min.css';
 import '@uppy/dashboard/css/style.min.css';
-import '@uppy/webcam/css/style.min.css';
 import QRCode from 'qrcode';
-import { QrCode, Images, Trash2, Pencil, Check, X, MessageSquare, Copy, CheckCheck, ExternalLink } from 'lucide-react';
+import { QrCode, Images, Trash2, Pencil, Check, X, MessageSquare, Copy, CheckCheck, ExternalLink, Camera, Info } from 'lucide-react';
 
 // ── Gallery card ──────────────────────────────────────────────────────────────
 function GalleryCard({ item, onDelete, onRename, onComment }) {
@@ -78,9 +76,10 @@ function GalleryCard({ item, onDelete, onRename, onComment }) {
 }
 
 // ── QR tab ────────────────────────────────────────────────────────────────────
-function QRTab() {
+function QRTab({ uppy }) {
   const [qrSrc, setQrSrc] = useState('');
   const [copied, setCopied] = useState(false);
+  const fileInputRef = useRef(null);
   const url = window.location.href;
 
   useEffect(() => {
@@ -95,39 +94,72 @@ function QRTab() {
     });
   }
 
+  function handleNativeFiles(e) {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      try {
+        uppy?.addFile({ name: file.name, type: file.type, data: file, source: 'native-camera' });
+      } catch (_) {}
+    });
+    e.target.value = '';
+  }
+
   return (
-    <div className="max-w-sm">
+    <div className="space-y-4 max-w-sm">
+      {/* HTTPS warning */}
+      <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+        <Info size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-700 leading-relaxed">
+          <strong>Webcam requires HTTPS.</strong> On a phone over HTTP, use the buttons below instead — they open your device's native camera/gallery without any browser restriction.
+        </p>
+      </div>
+
+      {/* Native camera buttons (work on HTTP) */}
       <div className="rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-800 px-5 py-4 flex items-center gap-3">
-          <QrCode size={18} className="text-slate-300" />
-          <div>
-            <p className="text-sm font-bold text-white">Scan to upload from phone</p>
-            <p className="text-xs text-slate-400 mt-0.5">Opens this page on your device</p>
-          </div>
+        <div className="bg-slate-800 px-5 py-3 flex items-center gap-3">
+          <Camera size={15} className="text-slate-300" />
+          <p className="text-sm font-bold text-white">Take Photo / Choose from Library</p>
         </div>
-        <div className="p-6 bg-white flex flex-col items-center gap-4">
-          {qrSrc
-            ? <img src={qrSrc} alt="QR code" className="w-52 h-52 rounded-xl border border-slate-100" />
-            : <div className="w-52 h-52 rounded-xl bg-slate-50 border border-slate-200 animate-pulse" />
-          }
-          <p className="text-xs text-slate-400 text-center break-all px-2">{url}</p>
-          <div className="flex gap-2 w-full">
-            <button onClick={copy}
-              className="flex-1 flex items-center justify-center gap-2 text-xs font-semibold py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-150">
-              {copied ? <CheckCheck size={13} className="text-emerald-500" /> : <Copy size={13} />}
-              {copied ? 'Copied!' : 'Copy URL'}
-            </button>
-            <a href={url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs font-semibold py-2 px-4 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition-colors duration-150"
-              style={{ textDecoration: 'none' }}>
-              <ExternalLink size={13} /> Open
-            </a>
-          </div>
+        <div className="p-4 bg-white flex flex-col gap-3">
+          {/* Take photo — opens camera directly */}
+          <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-800 text-white text-sm font-semibold cursor-pointer hover:bg-slate-700 transition-colors duration-150">
+            <Camera size={15} />
+            Take Photo (Camera)
+            <input ref={fileInputRef} type="file" accept="image/*,video/*" capture="environment"
+              className="hidden" onChange={handleNativeFiles} />
+          </label>
+
+          {/* Choose from gallery — no capture restriction */}
+          <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold cursor-pointer hover:bg-slate-50 transition-colors duration-150">
+            <Images size={15} />
+            Choose from Library
+            <input type="file" accept="image/*,video/*,.pdf" multiple
+              className="hidden" onChange={handleNativeFiles} />
+          </label>
+
+          <p className="text-xs text-slate-400 text-center">Photos go directly to the Gallery tab</p>
         </div>
       </div>
-      <p className="text-xs text-slate-400 mt-3 text-center">
-        Files added from your phone appear in <strong>Dashboard</strong> and <strong>Gallery</strong>.
-      </p>
+
+      {/* QR code */}
+      <div className="rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="bg-slate-50 px-5 py-3 flex items-center gap-3 border-b border-slate-100">
+          <QrCode size={15} className="text-slate-500" />
+          <p className="text-sm font-semibold text-slate-700">Or scan QR to open on phone</p>
+        </div>
+        <div className="p-5 bg-white flex flex-col items-center gap-3">
+          {qrSrc
+            ? <img src={qrSrc} alt="QR code" className="w-44 h-44 rounded-xl border border-slate-100" />
+            : <div className="w-44 h-44 rounded-xl bg-slate-50 border border-slate-200 animate-pulse" />
+          }
+          <p className="text-xs text-slate-400 text-center break-all">{url}</p>
+          <button onClick={copy}
+            className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-150">
+            {copied ? <CheckCheck size={13} className="text-emerald-500" /> : <Copy size={13} />}
+            {copied ? 'Copied!' : 'Copy URL'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -159,21 +191,20 @@ export default function LabUppy() {
   }, []);
 
   // Mount Dashboard imperatively once the container div is in the DOM
+  // Webcam plugin is excluded — it requires HTTPS (getUserMedia blocks on HTTP).
+  // Use the QR tab for mobile camera upload via the native file picker instead.
   useEffect(() => {
     if (mountedRef.current || !containerRef.current || !uppyRef.current) return;
     mountedRef.current = true;
-    uppyRef.current
-      .use(Dashboard, {
-        inline: true,
-        target: containerRef.current,
-        height: 420,
-        width: '100%',
-        plugins: ['Webcam'],
-        theme: 'light',
-        proudlyDisplayPoweredByUppy: false,
-        note: 'Images, video, PDF · max 10 MB',
-      })
-      .use(Webcam, { modes: ['picture', 'video-audio'], mirror: true });
+    uppyRef.current.use(Dashboard, {
+      inline: true,
+      target: containerRef.current,
+      height: 420,
+      width: '100%',
+      theme: 'light',
+      proudlyDisplayPoweredByUppy: false,
+      note: 'Images, video, PDF · max 10 MB',
+    });
   });
 
   const removeFromGallery = id => uppyRef.current?.removeFile(id);
@@ -216,11 +247,11 @@ export default function LabUppy() {
         <div ref={containerRef} className="rounded-xl overflow-hidden border border-slate-200" />
         <div className="mt-3 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3">
           <p className="text-xs font-semibold text-slate-600 mb-1">Imperative mount — the v5 fix</p>
-          <code className="text-xs font-mono text-slate-500 block whitespace-pre">{`uppy.use(Dashboard, { inline: true, target: containerRef.current })\n    .use(Webcam, { modes: ['picture', 'video-audio'] });`}</code>
+          <code className="text-xs font-mono text-slate-500 block whitespace-pre">{`uppy.use(Dashboard, { inline: true, target: containerRef.current });\n// Webcam plugin omitted — requires HTTPS (getUserMedia). Use QR tab for mobile.`}</code>
         </div>
       </div>
 
-      {tab === 'qr' && <QRTab />}
+      {tab === 'qr' && <QRTab uppy={uppyRef.current} />}
 
       {tab === 'gallery' && (
         <div>
