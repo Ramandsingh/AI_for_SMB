@@ -16,13 +16,17 @@
     "@uppy/webcam": "^5.1.0",
     "antd": "^6.3.7",
     "axios": "^1.6.7",
+    "konva": "^10.3.0",
     "lucide-react": "^1.14.0",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-filerobot-image-editor": "^5.0.1",
+    "react-konva": "^19.2.4",
     "react-router-dom": "^6.22.0",
     "reactflow": "^11.11.4",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "styled-components": "^6.4.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

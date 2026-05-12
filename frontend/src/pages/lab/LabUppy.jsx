@@ -4,10 +4,11 @@ import Dashboard from '@uppy/dashboard';
 import '@uppy/core/css/style.min.css';
 import '@uppy/dashboard/css/style.min.css';
 import QRCode from 'qrcode';
-import { QrCode, Images, Trash2, Pencil, Check, X, MessageSquare, Copy, CheckCheck, Camera, Loader2, AlertCircle } from 'lucide-react';
+import { QrCode, Images, Trash2, Pencil, Check, X, MessageSquare, Copy, CheckCheck, Camera, Loader2, AlertCircle, Wand2 } from 'lucide-react';
+import ImageEditorModal from './ImageEditorModal';
 
 // ── Gallery card ──────────────────────────────────────────────────────────────
-function GalleryCard({ item, onDelete, onRename, onComment }) {
+function GalleryCard({ item, onDelete, onRename, onComment, onEdit }) {
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(item.name);
   const [editingComment, setEditingComment] = useState(false);
@@ -29,12 +30,24 @@ function GalleryCard({ item, onDelete, onRename, onComment }) {
           <img src={item.src} alt={item.name} className="w-full h-full object-cover" />
         )}
         {!item.uploading && (
-          <button
-            onClick={() => onDelete(item.dbId, item.uppyId)}
-            className="absolute top-2 right-2 p-1.5 rounded-lg bg-white/90 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all duration-150"
-          >
-            <Trash2 size={13} />
-          </button>
+          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-150">
+            {item.dbId && (
+              <button
+                onClick={() => onEdit(item.dbId, item.name)}
+                className="p-1.5 rounded-lg bg-white/90 text-slate-400 hover:text-violet-600 transition-colors"
+                title="Edit image"
+              >
+                <Wand2 size={13} />
+              </button>
+            )}
+            <button
+              onClick={() => onDelete(item.dbId, item.uppyId)}
+              className="p-1.5 rounded-lg bg-white/90 text-slate-400 hover:text-red-500 transition-colors"
+              title="Delete image"
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
         )}
       </div>
 
@@ -215,6 +228,7 @@ function QRTab({ uppy }) {
 export default function LabUppy() {
   const [tab, setTab] = useState('dashboard');
   const [gallery, setGallery] = useState([]);
+  const [editing, setEditing] = useState(null); // { dbId, name }
   const containerRef = useRef(null);
   const uppyRef = useRef(null);
   const mountedRef = useRef(false);
@@ -332,6 +346,16 @@ export default function LabUppy() {
     }
   };
 
+  const handleEditorSave = (dbId) => {
+    // Cache-bust the image src so the browser reloads the updated binary
+    setGallery(g => g.map(i =>
+      i.dbId === dbId
+        ? { ...i, src: `/api/lab/gallery/${dbId}/image?t=${Date.now()}` }
+        : i
+    ));
+    setEditing(null);
+  };
+
   const clearAll = () => {
     gallery.forEach(i => {
       if (i.dbId) fetch(`/api/lab/gallery/${i.dbId}`, { method: 'DELETE' }).catch(() => {});
@@ -382,6 +406,15 @@ export default function LabUppy() {
 
       {tab === 'qr' && <QRTab uppy={uppyRef.current} />}
 
+      {editing && (
+        <ImageEditorModal
+          dbId={editing.dbId}
+          imageName={editing.name}
+          onSave={handleEditorSave}
+          onClose={() => setEditing(null)}
+        />
+      )}
+
       {tab === 'gallery' && (
         <div>
           {gallery.length === 0 ? (
@@ -402,7 +435,8 @@ export default function LabUppy() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {gallery.map(item => (
                   <GalleryCard key={item.dbId ?? item.uppyId} item={item}
-                    onDelete={removeFromGallery} onRename={renameInGallery} onComment={commentInGallery} />
+                    onDelete={removeFromGallery} onRename={renameInGallery} onComment={commentInGallery}
+                    onEdit={(dbId, name) => setEditing({ dbId, name })} />
                 ))}
               </div>
             </div>

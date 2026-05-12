@@ -612,6 +612,22 @@ app.delete('/api/lab/gallery/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+
+// Replace image binary (used by editor save)
+});
+app.patch('/api/lab/gallery/:id/image', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file provided' });
+    const { mimetype, buffer, size } = req.file;
+    const db = await getPool();
+    await db.query(
+      'UPDATE lab_gallery SET file_data = ?, file_size = ?, mime_type = ? WHERE id = ?',
+      [buffer, size, mimetype, req.params.id]
+    );
+    res.json({ ok: true, id: Number(req.params.id), file_size: size, mime_type: mimetype });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
