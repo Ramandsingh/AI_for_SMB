@@ -102,6 +102,7 @@ const NAV_GROUPS = [
       { to: '/lab/timeline',  label: 'Timeline',              icon: '○' },
       { to: '/lab/charts',    label: 'Data Viz · Recharts',   icon: '○' },
       { to: '/lab/calendar',  label: 'Calendar · Ant Design', icon: '○' },
+      { to: '/lab/database',  label: 'Database Platforms',    icon: '○' },
     ],
   },
 ];
