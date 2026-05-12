@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const os = require('os');
 
 const app = express();
 app.use(cors());
@@ -479,6 +480,19 @@ app.put('/api/enterprise/functions/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ── Server network info (for QR code LAN URL) ────────────────────────────────
+app.get('/api/server-ip', (req, res) => {
+  const ifaces = os.networkInterfaces();
+  const ips = Object.values(ifaces).flat()
+    .filter(i => i.family === 'IPv4' && !i.internal)
+    .map(i => i.address);
+  const port = process.env.PORT || 3002;
+  // Return the frontend port (Vite dev) inferred from the request origin, or default 5173
+  const origin = req.headers.origin || '';
+  const frontendPort = origin.match(/:(\d+)/)?.[1] || '5173';
+  res.json({ ips, frontendPort: Number(frontendPort) });
 });
 
 // ── Lab: Database Platforms ───────────────────────────────────────────────────

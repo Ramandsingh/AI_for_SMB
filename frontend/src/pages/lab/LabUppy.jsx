@@ -78,81 +78,123 @@ function GalleryCard({ item, onDelete, onRename, onComment }) {
 // ── QR tab ────────────────────────────────────────────────────────────────────
 function QRTab({ uppy }) {
   const [qrSrc, setQrSrc] = useState('');
+  const [lanUrl, setLanUrl] = useState('');
   const [copied, setCopied] = useState(false);
-  const fileInputRef = useRef(null);
-  const url = window.location.href;
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
+  // Get LAN IP from backend so QR code works from a phone on the same network
   useEffect(() => {
-    QRCode.toDataURL(url, { width: 220, margin: 2, color: { dark: '#0f172a', light: '#ffffff' } })
-      .then(setQrSrc);
-  }, [url]);
+    fetch('/api/server-ip')
+      .then(r => r.json())
+      .then(({ ips, frontendPort }) => {
+        const ip = ips[0];
+        if (ip) {
+          const path = window.location.pathname;
+          const url = `http://${ip}:${frontendPort}${path}`;
+          setLanUrl(url);
+          QRCode.toDataURL(url, { width: 240, margin: 2, color: { dark: '#0f172a', light: '#ffffff' } })
+            .then(setQrSrc);
+        } else {
+          // Fallback to current URL
+          const url = window.location.href;
+          setLanUrl(url);
+          QRCode.toDataURL(url, { width: 240, margin: 2, color: { dark: '#0f172a', light: '#ffffff' } })
+            .then(setQrSrc);
+        }
+      })
+      .catch(() => {
+        const url = window.location.href;
+        setLanUrl(url);
+        QRCode.toDataURL(url, { width: 240, margin: 2 }).then(setQrSrc);
+      });
+  }, []);
 
   function copy() {
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(lanUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
 
-  function handleNativeFiles(e) {
-    const files = Array.from(e.target.files || []);
-    files.forEach(file => {
-      try {
-        uppy?.addFile({ name: file.name, type: file.type, data: file, source: 'native-camera' });
-      } catch (_) {}
+  function handleFiles(e) {
+    Array.from(e.target.files || []).forEach(file => {
+      try { uppy?.addFile({ name: file.name, type: file.type, data: file, source: 'mobile' }); }
+      catch (_) {}
     });
     e.target.value = '';
   }
 
   return (
     <div className="space-y-4 max-w-sm">
-      {/* HTTPS warning */}
-      <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
-        <Info size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-700 leading-relaxed">
-          <strong>Webcam requires HTTPS.</strong> On a phone over HTTP, use the buttons below instead — they open your device's native camera/gallery without any browser restriction.
-        </p>
-      </div>
 
-      {/* Native camera buttons (work on HTTP) */}
+      {/* Camera buttons — native file inputs, work on HTTP, no HTTPS needed */}
       <div className="rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-800 px-5 py-3 flex items-center gap-3">
+        <div className="bg-slate-800 px-5 py-3 flex items-center gap-2">
           <Camera size={15} className="text-slate-300" />
-          <p className="text-sm font-bold text-white">Take Photo / Choose from Library</p>
+          <span className="text-sm font-bold text-white">Upload from Phone</span>
         </div>
-        <div className="p-4 bg-white flex flex-col gap-3">
-          {/* Take photo — opens camera directly */}
-          <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-800 text-white text-sm font-semibold cursor-pointer hover:bg-slate-700 transition-colors duration-150">
-            <Camera size={15} />
-            Take Photo (Camera)
-            <input ref={fileInputRef} type="file" accept="image/*,video/*" capture="environment"
-              className="hidden" onChange={handleNativeFiles} />
-          </label>
+        <div className="p-4 bg-white space-y-3">
 
-          {/* Choose from gallery — no capture restriction */}
-          <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold cursor-pointer hover:bg-slate-50 transition-colors duration-150">
-            <Images size={15} />
-            Choose from Library
-            <input type="file" accept="image/*,video/*,.pdf" multiple
-              className="hidden" onChange={handleNativeFiles} />
-          </label>
+          {/* Take Photo — capture="environment" opens rear camera directly */}
+          <div className="relative">
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 active:bg-slate-900 transition-colors duration-150 select-none"
+            >
+              <Camera size={16} />
+              Take a Photo
+            </button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFiles}
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', pointerEvents: 'none' }}
+            />
+          </div>
 
-          <p className="text-xs text-slate-400 text-center">Photos go directly to the Gallery tab</p>
+          {/* Choose from gallery */}
+          <div className="relative">
+            <button
+              onClick={() => galleryInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 active:bg-slate-100 transition-colors duration-150 select-none"
+            >
+              <Images size={15} />
+              Choose from Photo Library
+            </button>
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*,video/*,.pdf"
+              multiple
+              onChange={handleFiles}
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', pointerEvents: 'none' }}
+            />
+          </div>
+
+          <p className="text-xs text-slate-400 text-center pt-1">
+            Photos flow into the <strong>Gallery</strong> tab automatically
+          </p>
         </div>
       </div>
 
-      {/* QR code */}
+      {/* QR code — points to LAN IP so phone can actually reach the server */}
       <div className="rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-50 px-5 py-3 flex items-center gap-3 border-b border-slate-100">
+        <div className="bg-slate-50 px-5 py-3 flex items-center gap-2 border-b border-slate-100">
           <QrCode size={15} className="text-slate-500" />
-          <p className="text-sm font-semibold text-slate-700">Or scan QR to open on phone</p>
+          <span className="text-sm font-semibold text-slate-700">Scan to open on your phone</span>
         </div>
         <div className="p-5 bg-white flex flex-col items-center gap-3">
           {qrSrc
-            ? <img src={qrSrc} alt="QR code" className="w-44 h-44 rounded-xl border border-slate-100" />
-            : <div className="w-44 h-44 rounded-xl bg-slate-50 border border-slate-200 animate-pulse" />
+            ? <img src={qrSrc} alt="QR code" className="w-48 h-48 rounded-xl border border-slate-100" />
+            : <div className="w-48 h-48 rounded-xl bg-slate-50 border border-slate-200 animate-pulse" />
           }
-          <p className="text-xs text-slate-400 text-center break-all">{url}</p>
+          <p className="text-xs text-slate-500 text-center break-all font-mono">{lanUrl || '…'}</p>
+          <p className="text-xs text-slate-400 text-center -mt-1">
+            Uses your server's LAN IP — phone must be on the same Wi-Fi
+          </p>
           <button onClick={copy}
             className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-150">
             {copied ? <CheckCheck size={13} className="text-emerald-500" /> : <Copy size={13} />}
