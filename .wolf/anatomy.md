@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T04:27:45.021Z
-> Files: 80 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T07:02:40.609Z
+> Files: 81 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -31,7 +31,7 @@
 - `Dockerfile` — Docker container definition (~32 tok)
 - `package-lock.json` — npm lock file (~13869 tok)
 - `package.json` — Node.js package manifest (~96 tok)
-- `server.js` — express: getPool, runMigrations (~7818 tok)
+- `server.js` — express: getPool, runMigrations (~7999 tok)
 
 ## frontend/
 
@@ -102,6 +102,7 @@
 
 ## frontend/src/pages/lab/
 
+- `ImageEditorModal.jsx` — Convert base64 data URL → Blob (~672 tok)
 - `LabArch.jsx` — ArchNode (~2636 tok)
 - `LabCalendar.jsx` — makeId — renders form, modal — uses useState, useForm (~3041 tok)
 - `LabCharts.jsx` — Shared (~10848 tok)
@@ -110,7 +111,7 @@
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
 - `LabHome.jsx` — NOTES_KEY — renders chart — uses useState, useRef, useEffect (~2986 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
-- `LabUppy.jsx` — ── Gallery card ────────────────────────────────────────────────────────────── (~4924 tok)
+- `LabUppy.jsx` — ── Gallery card ────────────────────────────────────────────────────────────── (~5260 tok)
 
 ## mysql/
 
