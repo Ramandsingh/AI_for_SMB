@@ -1,11 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const multer = require('multer');
 const os = require('os');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
@@ -343,6 +349,20 @@ async function runMigrations(db) {
     }
     console.log('database_platforms seeded');
   }
+
+  // ── lab_gallery ───────────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS lab_gallery (
+      id          INT AUTO_INCREMENT PRIMARY KEY,
+      name        VARCHAR(255) NOT NULL,
+      mime_type   VARCHAR(100) NOT NULL DEFAULT 'image/jpeg',
+      file_data   LONGBLOB NOT NULL,
+      file_size   INT,
+      comment     TEXT,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
 }
 
 // ── Health ────────────────────────────────────────────────────────────────────
@@ -508,6 +528,80 @@ app.get('/api/lab/database-platforms', async (req, res) => {
       tags:            typeof r.tags === 'string'             ? JSON.parse(r.tags)            : r.tags,
     }));
     res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Lab: Gallery ─────────────────────────────────────────────────────────────
+
+// Upload image
+app.post('/api/lab/gallery', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file provided' });
+    const { originalname, mimetype, buffer, size } = req.file;
+    const name = req.body.name || originalname;
+    const db = await getPool();
+    const [result] = await db.query(
+      'INSERT INTO lab_gallery (name, mime_type, file_data, file_size) VALUES (?, ?, ?, ?)',
+      [name, mimetype, buffer, size]
+    );
+    res.json({ id: result.insertId, name, mime_type: mimetype, file_size: size, comment: '', created_at: new Date().toISOString() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List gallery (no binary data)
+app.get('/api/lab/gallery', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.query(
+      'SELECT id, name, mime_type, file_size, comment, created_at, updated_at FROM lab_gallery ORDER BY created_at DESC'
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Serve image binary
+app.get('/api/lab/gallery/:id/image', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [[row]] = await db.query('SELECT mime_type, file_data FROM lab_gallery WHERE id = ?', [req.params.id]);
+    if (!row) return res.status(404).json({ error: 'Not found' });
+    res.set('Content-Type', row.mime_type);
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(row.file_data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update name / comment
+app.put('/api/lab/gallery/:id', async (req, res) => {
+  try {
+    const { name, comment } = req.body;
+    const db = await getPool();
+    if (name !== undefined) await db.query('UPDATE lab_gallery SET name = ? WHERE id = ?', [name, req.params.id]);
+    if (comment !== undefined) await db.query('UPDATE lab_gallery SET comment = ? WHERE id = ?', [comment, req.params.id]);
+    const [[row]] = await db.query(
+      'SELECT id, name, mime_type, file_size, comment, created_at, updated_at FROM lab_gallery WHERE id = ?',
+      [req.params.id]
+    );
+    res.json(row || { error: 'Not found' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete
+app.delete('/api/lab/gallery/:id', async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.query('DELETE FROM lab_gallery WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
