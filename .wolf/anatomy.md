@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T11:23:00.274Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T11:30:53.737Z
 > Files: 82 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -108,7 +108,7 @@
 - `LabCharts.jsx` — Shared (~10848 tok)
 - `LabChat.jsx` — PROMPT_SECTIONS — uses useState (~7017 tok)
 - `LabDatabase.jsx` — COLOR_MAP — uses useState, useEffect (~2597 tok)
-- `LabExcalidraw.jsx` — Excalidraw (~3606 tok)
+- `LabExcalidraw.jsx` — Excalidraw (~4045 tok)
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
 - `LabHome.jsx` — NOTES_KEY (~3122 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
