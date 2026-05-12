@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T10:38:37.839Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T10:42:56.203Z
 > Files: 81 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -24,7 +24,7 @@
 
 ## .github/workflows/
 
-- `deploy.yml` — CI: Deploy to MBserver (~319 tok)
+- `deploy.yml` — CI: Deploy to MBserver (~332 tok)
 
 ## backend/
 
