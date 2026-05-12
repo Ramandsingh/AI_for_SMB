@@ -1,11 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 import '@uppy/core/css/style.min.css';
 import '@uppy/dashboard/css/style.min.css';
 import QRCode from 'qrcode';
 import { QrCode, Images, Trash2, Pencil, Check, X, MessageSquare, Copy, CheckCheck, Camera, Loader2, AlertCircle, Wand2 } from 'lucide-react';
-import ImageEditorModal from './ImageEditorModal';
+
+// Lazy-load the editor so react-konva/konva don't run at app startup —
+// keeps them out of the main bundle and prevents any canvas-init crash.
+const ImageEditorModal = lazy(() => import('./ImageEditorModal'));
 
 // ── Gallery card ──────────────────────────────────────────────────────────────
 function GalleryCard({ item, onDelete, onRename, onComment, onEdit }) {
@@ -406,14 +409,16 @@ export default function LabUppy() {
 
       {tab === 'qr' && <QRTab uppy={uppyRef.current} />}
 
-      {editing && (
-        <ImageEditorModal
-          dbId={editing.dbId}
-          imageName={editing.name}
-          onSave={handleEditorSave}
-          onClose={() => setEditing(null)}
-        />
-      )}
+      <Suspense fallback={null}>
+        {editing && (
+          <ImageEditorModal
+            dbId={editing.dbId}
+            imageName={editing.name}
+            onSave={handleEditorSave}
+            onClose={() => setEditing(null)}
+          />
+        )}
+      </Suspense>
 
       {tab === 'gallery' && (
         <div>

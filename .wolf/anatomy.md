@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T10:42:56.203Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T10:53:51.462Z
 > Files: 81 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -111,7 +111,7 @@
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
 - `LabHome.jsx` — NOTES_KEY — renders chart — uses useState, useRef, useEffect (~2986 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
-- `LabUppy.jsx` — ── Gallery card ────────────────────────────────────────────────────────────── (~5260 tok)
+- `LabUppy.jsx` — Lazy-load the editor so react-konva/konva don't run at app startup — (~5330 tok)
 
 ## mysql/
 
