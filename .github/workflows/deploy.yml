@@ -21,6 +21,7 @@ jobs:
           DB_USER=${{ secrets.DB_USER }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_NAME=${{ secrets.DB_NAME }}
+          LAN_IP=${{ secrets.LAN_IP }}
           EOF
 
       - name: Stop existing containers
