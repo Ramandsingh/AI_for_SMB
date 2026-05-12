@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
-import { exportToBlob } from '@excalidraw/excalidraw';
 import { Plus, Trash2, Pencil, Check, X, Save, FileImage, Loader2, PenLine } from 'lucide-react';
 
 const Excalidraw = lazy(() =>
@@ -92,6 +91,7 @@ export default function LabExcalidraw() {
     try {
       const elements = api.getSceneElements();
       if (!elements.length) return null;
+      const { exportToBlob } = await import('@excalidraw/excalidraw');
       const blob = await exportToBlob({
         elements,
         appState: { ...api.getAppState(), exportWithDarkMode: false, exportBackground: true },

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { CompanyProvider } from './context/CompanyContext';
 import Layout from './components/Layout';
@@ -47,7 +47,7 @@ import LabTimeline          from './pages/lab/LabTimeline';
 import LabCharts            from './pages/lab/LabCharts';
 import LabCalendar          from './pages/lab/LabCalendar';
 import LabDatabase          from './pages/lab/LabDatabase';
-import LabExcalidraw        from './pages/lab/LabExcalidraw';
+const LabExcalidraw = lazy(() => import('./pages/lab/LabExcalidraw'));
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -105,7 +105,7 @@ export default function App() {
             <Route path="/lab/charts"  element={<LabCharts />} />
             <Route path="/lab/calendar"  element={<LabCalendar />} />
             <Route path="/lab/database"  element={<LabDatabase />} />
-            <Route path="/lab/excalidraw" element={<LabExcalidraw />} />
+            <Route path="/lab/excalidraw" element={<Suspense fallback={null}><LabExcalidraw /></Suspense>} />
           </Routes>
         </Layout>
       </SectionsContext.Provider>
