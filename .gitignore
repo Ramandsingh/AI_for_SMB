@@ -4,3 +4,15 @@ node_modules/
 frontend/dist/
 deploy.log
 webhook.log
+
+# OpenWolf — session memory files (machine-local, rebuilt each session)
+.wolf/memory.md
+.wolf/token-ledger.json
+.wolf/buglog.json
+.wolf/cron-manifest.json
+.wolf/cron-state.json
+.wolf/designqc-report.json
+.wolf/suggestions.json
+
+# graphify — generated code map (rebuilt with: npx graphify build .)
+graphify-out/

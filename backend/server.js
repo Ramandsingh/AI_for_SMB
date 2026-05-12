@@ -504,14 +504,21 @@ app.put('/api/enterprise/functions/:id', async (req, res) => {
 
 // ── Server network info (for QR code LAN URL) ────────────────────────────────
 app.get('/api/server-ip', (req, res) => {
-  const ifaces = os.networkInterfaces();
-  const ips = Object.values(ifaces).flat()
-    .filter(i => i.family === 'IPv4' && !i.internal)
-    .map(i => i.address);
-  const port = process.env.PORT || 3002;
-  // Return the frontend port (Vite dev) inferred from the request origin, or default 5173
+  // LAN_IP env var takes priority — set it in .env to a fixed LAN address
+  // so the QR code always points to the right host regardless of which
+  // network interface the server happens to enumerate first.
+  const envIp = process.env.LAN_IP;
+  let ips;
+  if (envIp) {
+    ips = [envIp];
+  } else {
+    const ifaces = os.networkInterfaces();
+    ips = Object.values(ifaces).flat()
+      .filter(i => i.family === 'IPv4' && !i.internal)
+      .map(i => i.address);
+  }
   const origin = req.headers.origin || '';
-  const frontendPort = origin.match(/:(\d+)/)?.[1] || '5173';
+  const frontendPort = origin.match(/:(\d+)/)?.[1] || '3001';
   res.json({ ips, frontendPort: Number(frontendPort) });
 });
 
