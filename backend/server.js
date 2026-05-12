@@ -363,6 +363,18 @@ async function runMigrations(db) {
       updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
+
+  // ── lab_excalidraw ────────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS lab_excalidraw (
+      id          INT AUTO_INCREMENT PRIMARY KEY,
+      name        VARCHAR(255) NOT NULL DEFAULT 'Untitled Drawing',
+      scene_data  LONGTEXT,
+      thumbnail   MEDIUMTEXT,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
 }
 
 // ── Health ────────────────────────────────────────────────────────────────────
@@ -625,6 +637,84 @@ app.patch('/api/lab/gallery/:id/image', upload.single('file'), async (req, res) 
       [buffer, size, mimetype, req.params.id]
     );
     res.json({ ok: true, id: Number(req.params.id), file_size: size, mime_type: mimetype });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Lab: Excalidraw Workspace ─────────────────────────────────────────────────
+
+// List drawings (no scene_data — metadata only for sidebar)
+app.get('/api/lab/excalidraw', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.query(
+      'SELECT id, name, thumbnail, created_at, updated_at FROM lab_excalidraw ORDER BY updated_at DESC'
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get single drawing with full scene data
+app.get('/api/lab/excalidraw/:id', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [[row]] = await db.query(
+      'SELECT id, name, scene_data, thumbnail, created_at, updated_at FROM lab_excalidraw WHERE id = ?',
+      [req.params.id]
+    );
+    if (!row) return res.status(404).json({ error: 'Not found' });
+    res.json({ ...row, scene_data: row.scene_data ? JSON.parse(row.scene_data) : null });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create new drawing
+app.post('/api/lab/excalidraw', async (req, res) => {
+  try {
+    const { name = 'Untitled Drawing', scene_data, thumbnail } = req.body;
+    const db = await getPool();
+    const [result] = await db.query(
+      'INSERT INTO lab_excalidraw (name, scene_data, thumbnail) VALUES (?, ?, ?)',
+      [name, scene_data ? JSON.stringify(scene_data) : null, thumbnail || null]
+    );
+    const [[row]] = await db.query(
+      'SELECT id, name, thumbnail, created_at, updated_at FROM lab_excalidraw WHERE id = ?',
+      [result.insertId]
+    );
+    res.json(row);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update drawing (name, scene_data, thumbnail)
+app.put('/api/lab/excalidraw/:id', async (req, res) => {
+  try {
+    const { name, scene_data, thumbnail } = req.body;
+    const db = await getPool();
+    if (name !== undefined)       await db.query('UPDATE lab_excalidraw SET name = ? WHERE id = ?', [name, req.params.id]);
+    if (scene_data !== undefined) await db.query('UPDATE lab_excalidraw SET scene_data = ? WHERE id = ?', [JSON.stringify(scene_data), req.params.id]);
+    if (thumbnail !== undefined)  await db.query('UPDATE lab_excalidraw SET thumbnail = ? WHERE id = ?', [thumbnail, req.params.id]);
+    const [[row]] = await db.query(
+      'SELECT id, name, thumbnail, created_at, updated_at FROM lab_excalidraw WHERE id = ?',
+      [req.params.id]
+    );
+    res.json(row || { error: 'Not found' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete drawing
+app.delete('/api/lab/excalidraw/:id', async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.query('DELETE FROM lab_excalidraw WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -47,6 +47,7 @@ import LabTimeline          from './pages/lab/LabTimeline';
 import LabCharts            from './pages/lab/LabCharts';
 import LabCalendar          from './pages/lab/LabCalendar';
 import LabDatabase          from './pages/lab/LabDatabase';
+import LabExcalidraw        from './pages/lab/LabExcalidraw';
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
 export const useSections = () => useContext(SectionsContext);
@@ -104,6 +105,7 @@ export default function App() {
             <Route path="/lab/charts"  element={<LabCharts />} />
             <Route path="/lab/calendar"  element={<LabCalendar />} />
             <Route path="/lab/database"  element={<LabDatabase />} />
+            <Route path="/lab/excalidraw" element={<LabExcalidraw />} />
           </Routes>
         </Layout>
       </SectionsContext.Provider>

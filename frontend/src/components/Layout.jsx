@@ -5,7 +5,7 @@ import RightSidebar from './RightSidebar';
 import { useSections } from '../App';
 
 // Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space
-const TRUE_FULL_BLEED = ['/p34'];
+const TRUE_FULL_BLEED = ['/p34', '/lab/excalidraw'];
 
 // Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
 const LAB_ROUTES = [

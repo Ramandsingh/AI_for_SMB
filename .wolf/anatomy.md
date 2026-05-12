@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T11:09:39.113Z
-> Files: 81 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T11:17:07.891Z
+> Files: 82 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -31,7 +31,7 @@
 - `Dockerfile` — Docker container definition (~32 tok)
 - `package-lock.json` — npm lock file (~13869 tok)
 - `package.json` — Node.js package manifest (~96 tok)
-- `server.js` — express: getPool, runMigrations (~7999 tok)
+- `server.js` — express: getPool, runMigrations (~8954 tok)
 
 ## frontend/
 
@@ -42,18 +42,18 @@
 - `package.json` — Node.js package manifest (~230 tok)
 - `postcss.config.js` — PostCSS configuration (~24 tok)
 - `tailwind.config.js` — Tailwind CSS configuration (~159 tok)
-- `vite.config.js` — Vite build configuration (~87 tok)
+- `vite.config.js` (~105 tok)
 
 ## frontend/src/
 
-- `App.jsx` — SectionsContext — renders chart — uses useContext, useState (~1754 tok)
+- `App.jsx` — SectionsContext (~1793 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
 ## frontend/src/components/
 
-- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~486 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS — renders chart (~2708 tok)
+- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~491 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~2730 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -108,14 +108,15 @@
 - `LabCharts.jsx` — Shared (~10848 tok)
 - `LabChat.jsx` — PROMPT_SECTIONS — uses useState (~7017 tok)
 - `LabDatabase.jsx` — COLOR_MAP — uses useState, useEffect (~2597 tok)
+- `LabExcalidraw.jsx` — Excalidraw (~3601 tok)
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
-- `LabHome.jsx` — NOTES_KEY — renders chart — uses useState, useRef, useEffect (~2986 tok)
+- `LabHome.jsx` — NOTES_KEY (~3122 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
 - `LabUppy.jsx` — Lazy-load the editor so react-konva/konva don't run at app startup — (~5330 tok)
 
 ## mysql/
 
-- `init.sql` — SQL: tables: assessments, roi_calculations, roi_models, lab_gallery (~2630 tok)
+- `init.sql` — SQL: tables: assessments, roi_calculations, roi_models, lab_excalidraw (~2545 tok)
 
 ## scripts/
 

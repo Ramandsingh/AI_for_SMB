@@ -48,6 +48,15 @@ INSERT INTO roi_models (use_case, description, typical_hours_saved_monthly, conf
 ('Sales Call Summarisation', 'AI produces structured call summaries and CRM update drafts', 16, 'High', 3, 110),
 ('Market & Competitor Monitoring', 'AI aggregates and summarises relevant market intelligence daily', 8, 'Medium', 4, 130);
 
+CREATE TABLE IF NOT EXISTS lab_excalidraw (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(255) NOT NULL DEFAULT 'Untitled Drawing',
+  scene_data  LONGTEXT,
+  thumbnail   MEDIUMTEXT,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS lab_gallery (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(255) NOT NULL,

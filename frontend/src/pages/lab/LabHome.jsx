@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database } from 'lucide-react';
+import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine } from 'lucide-react';
 
 const NOTES_KEY = 'lab-home-notes';
 const DEFAULT_NOTES = `## Key Libraries
@@ -197,6 +197,18 @@ const EXPERIMENTS = [
     iconColor: 'text-indigo-600',
     desc: 'Reference guide for top free & open-source no-code/low-code self-hosted database platforms — features, screenshots, and free-tier limitations.',
     tags: ['baserow', 'nocodb', 'grist', 'teable', 'mathesar'],
+  },
+  {
+    to: '/lab/excalidraw',
+    icon: PenLine,
+    title: 'Excalidraw',
+    library: '@excalidraw/excalidraw',
+    libraryUrl: 'https://excalidraw.com',
+    color: 'border-l-violet-400',
+    iconBg: 'bg-violet-50',
+    iconColor: 'text-violet-600',
+    desc: 'Whiteboard tool with full scene persistence — create, save, rename, and delete drawings stored in MySQL with auto-generated thumbnails.',
+    tags: ['whiteboard', 'canvas', 'excalidraw', 'crud'],
   },
 ];
 
