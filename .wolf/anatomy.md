@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T10:53:51.462Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T11:09:39.113Z
 > Files: 81 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -102,7 +102,7 @@
 
 ## frontend/src/pages/lab/
 
-- `ImageEditorModal.jsx` — Convert base64 data URL → Blob (~672 tok)
+- `ImageEditorModal.jsx` — ImageEditorModal (~1006 tok)
 - `LabArch.jsx` — ArchNode (~2636 tok)
 - `LabCalendar.jsx` — makeId — renders form, modal — uses useState, useForm (~3041 tok)
 - `LabCharts.jsx` — Shared (~10848 tok)
