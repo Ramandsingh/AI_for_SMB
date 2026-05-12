@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T07:02:40.609Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-12T10:38:37.839Z
 > Files: 81 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -24,7 +24,7 @@
 
 ## .github/workflows/
 
-- `deploy.yml` — CI: Deploy to MBserver (~308 tok)
+- `deploy.yml` — CI: Deploy to MBserver (~319 tok)
 
 ## backend/
 
@@ -35,7 +35,7 @@
 
 ## frontend/
 
-- `Dockerfile` — Docker container definition (~90 tok)
+- `Dockerfile` — Docker container definition (~95 tok)
 - `index.html` — AI Adoption Dashboard (~157 tok)
 - `nginx.conf` — Nginx configuration (~219 tok)
 - `package-lock.json` — npm lock file (~98481 tok)
