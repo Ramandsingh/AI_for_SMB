@@ -330,18 +330,21 @@ export default function LabExcalidraw() {
                   <Loader2 size={32} className="text-slate-300 animate-spin" />
                 </div>
               }>
-                <Excalidraw
-                  excalidrawAPI={handleExcalidrawAPI}
-                  onChange={handleExcalidrawChange}
-                  initialData={initialData.current}
-                  UIOptions={{
-                    canvasActions: {
-                      saveToActiveFile: false,
+                {/* absolute inset-0 gives Excalidraw a concrete width+height from the relative parent */}
+                <div style={{ position: 'absolute', inset: 0 }}>
+                  <Excalidraw
+                    excalidrawAPI={handleExcalidrawAPI}
+                    onChange={handleExcalidrawChange}
+                    initialData={initialData.current}
+                    UIOptions={{
+                      canvasActions: {
+                        saveToActiveFile: false,
                       loadScene: false,
                       export: { saveFileToDisk: true },
                     },
                   }}
-                />
+                  />
+                </div>
               </Suspense>
             </ExcalidrawBoundary>
           )}

@@ -7,6 +7,9 @@ import { useSections } from '../App';
 // Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space
 const TRUE_FULL_BLEED = ['/p34', '/lab/excalidraw'];
 
+// Pages where right sidebar is auto-closed to give max canvas space
+const NO_RIGHT_SIDEBAR = ['/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch'];
+
 // Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
 const LAB_ROUTES = [
   '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
@@ -20,6 +23,8 @@ export default function Layout({ children }) {
   const { pathname } = useLocation();
   const trueFullBleed = TRUE_FULL_BLEED.includes(pathname);
   const isLab = LAB_ROUTES.includes(pathname);
+  const noRightSidebar = NO_RIGHT_SIDEBAR.includes(pathname);
+  const effectiveRightOpen = rightOpen && !noRightSidebar;
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -29,7 +34,7 @@ export default function Layout({ children }) {
         className="flex-1 min-h-screen"
         style={{
           marginLeft: leftOpen ? '16rem' : '0',
-          marginRight: rightOpen ? '15rem' : '0',
+          marginRight: effectiveRightOpen ? '15rem' : '0',
           transition: 'margin 200ms ease',
         }}
       >
@@ -46,7 +51,7 @@ export default function Layout({ children }) {
         )}
       </main>
 
-      <RightSidebar sections={sections} isOpen={rightOpen} onToggle={() => setRightOpen(o => !o)} />
+      <RightSidebar sections={sections} isOpen={effectiveRightOpen} onToggle={() => setRightOpen(o => !o)} />
     </div>
   );
 }
