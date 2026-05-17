@@ -1,4 +1,5 @@
 import { Component, useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import '@excalidraw/excalidraw/index.css';
 import { Plus, Trash2, Pencil, Check, X, Save, FileImage, Loader2, PenLine, AlertCircle } from 'lucide-react';
 
 const Excalidraw = lazy(() =>
