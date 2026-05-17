@@ -108,3 +108,111 @@ All new pages should follow the existing visual convention:
 - **Karpathy reference on `/p39`**: link to `karpathy.ai` and his YouTube series; describe the concepts rather than copy content
 - **OpenClaw on `/p41`**: treat as a conceptual pattern (open, composable, claw-like multi-tool) rather than a named product — confirm with user if this refers to a specific project
 - **Page numbering**: next available route after existing pages is `/p35`; Chinese labs could be split into two pages if content warrants it (e.g., DeepSeek deep-dive as `/p38b`)
+
+---
+
+## 1-Year AI Training Curriculum
+
+> A structured plan to transition a learner from foundational mathematics and programming to deployable, production-grade AI systems. Requires ~10–15 hours per week.
+
+---
+
+### Quarter 1 — Foundations of Programming & Mathematics
+*Build the raw logical tools necessary to write, interpret, and debug machine learning source code.*
+
+#### Months 1–2: Python Programming & Core Data Structures
+
+| Topic | Detail |
+|-------|--------|
+| Core Syntax | Variables, control flow, functions, loops, OOP |
+| Data Handling | NumPy (multi-dimensional arrays), Pandas (dataframes) |
+| Algorithms | Search, sort, time-complexity estimation — O(n) notation |
+
+#### Month 3: Essential Mathematics for AI
+
+| Topic | Detail |
+|-------|--------|
+| Linear Algebra | Vectors, matrices, matrix multiplication, eigenvalues |
+| Calculus | Partial derivatives, gradients, chain rule for optimisation |
+| Probability & Statistics | Distributions, Bayes' theorem, variance, std dev, hypothesis testing |
+
+---
+
+### Quarter 2 — Classical Machine Learning & Data Engineering
+*Transition from static mathematical frameworks to systems that actively identify statistical patterns.*
+
+#### Months 4–5: Supervised & Unsupervised Learning
+
+| Topic | Detail |
+|-------|--------|
+| Regression | Simple and multivariate linear regression with gradient descent |
+| Classification | Logistic regression, SVMs, decision trees |
+| Ensemble Methods | Random Forests, gradient boosting (XGBoost) |
+| Unsupervised | K-Means clustering, PCA for dimensional reduction |
+
+#### Month 6: Practical Data Pipelines & Feature Engineering
+
+| Topic | Detail |
+|-------|--------|
+| Data Preparation | Missing values, outlier smoothing, scaling methodologies |
+| SQL Foundations | Querying relational databases for structured analytical datasets |
+| Framework | End-to-end processing streams with Scikit-Learn |
+
+---
+
+### Quarter 3 — Deep Learning & Neural Network Architectures
+*Shift priority toward structural deep networks designed to approximate complex non-linear functions.*
+
+#### Months 7–8: Deep Learning Architectures
+
+| Topic | Detail |
+|-------|--------|
+| Perceptrons | MLPs, activation functions (ReLU, Sigmoid), regularisation |
+| Computer Vision | CNNs optimised for spatial feature extraction and image processing |
+| Sequence Modeling | RNNs and LSTM blocks |
+| Environments | Build models natively in PyTorch or TensorFlow |
+
+#### Month 9: Natural Language Processing & Transformers
+
+| Topic | Detail |
+|-------|--------|
+| Text Preparation | Tokenisation, embeddings (Word2Vec), semantic text vectors |
+| Attention Mechanism | Multi-head self-attention, transformer architectures |
+| Model Sourcing | Open-source evaluation blocks via Hugging Face |
+
+---
+
+### Quarter 4 — Generative AI, MLOps & Capstone Deployment
+*Synthesise individual framework modules into a unified, secure web application.*
+
+#### Months 10–11: Large Language Models & Prompt Engineering
+
+| Topic | Detail |
+|-------|--------|
+| Generative Paradigms | Fine-tuning, RAG, vector databases (Chroma, Pinecone) |
+| Agentic Frameworks | Autonomous task-execution loops, multi-agent orchestration |
+| System Prompting | Zero-shot, few-shot, chain-of-thought engineering |
+
+#### Month 12: Production-Grade Engineering (MLOps)
+
+| Topic | Detail |
+|-------|--------|
+| API Development | Expose models via FastAPI (async Python) |
+| Containerisation | Docker for host environment isolation |
+| Deployment | Cloud endpoints on AWS or Azure |
+| Ethical Guardrails | Bias detection protocols, user data compliance |
+
+---
+
+### Implementation Note for Dashboard
+
+This curriculum maps naturally to new dashboard pages — suggested routes:
+
+| Route | Page | Content |
+|-------|------|---------|
+| `/learn` | Learning Hub home | Overview, progress tracker concept |
+| `/learn/q1` | Q1 — Foundations | Python, NumPy, Pandas, maths primer |
+| `/learn/q2` | Q2 — Classical ML | Regression, classification, Scikit-Learn pipelines |
+| `/learn/q3` | Q3 — Deep Learning | CNNs, RNNs, transformers, Hugging Face |
+| `/learn/q4` | Q4 — GenAI & MLOps | LLMs, RAG, agents, FastAPI, Docker, cloud |
+
