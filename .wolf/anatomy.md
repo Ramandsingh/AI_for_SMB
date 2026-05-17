@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T02:24:56.545Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T22:47:49.429Z
 > Files: 83 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -12,7 +12,7 @@
 - `deploy.sh` — deploy.sh — pull latest code and restart Docker services (~315 tok)
 - `Discussions` (~19708 tok)
 - `docker-compose.yml` — Docker Compose services (~395 tok)
-- `PLANNING.md` — Dashboard Planning Document (~1755 tok)
+- `PLANNING.md` — Dashboard Planning Document (~2790 tok)
 - `README.md` — Project documentation (~9 tok)
 
 ## .claude/
