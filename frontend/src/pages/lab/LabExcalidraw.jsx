@@ -200,15 +200,19 @@ export default function LabExcalidraw() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: `Drawing ${drawings.length + 1}` }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const e = await res.json(); msg = e.error || msg; } catch {}
+        throw new Error(msg);
+      }
       const created = await res.json();
       setDrawings(d => [created, ...d]);
       setActiveId(created.id);
       setActiveName(created.name);
       if (excalidrawAPI) excalidrawAPI.resetScene();
       dirtyRef.current = false;
-    } catch {
-      showSaveMsg('Failed to create drawing');
+    } catch (err) {
+      showSaveMsg(`Error: ${err.message}`);
     }
   };
 

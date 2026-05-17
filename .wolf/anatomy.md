@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T01:54:48.706Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T01:57:37.573Z
 > Files: 83 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -32,7 +32,7 @@
 - `Dockerfile` — Docker container definition (~32 tok)
 - `package-lock.json` — npm lock file (~13869 tok)
 - `package.json` — Node.js package manifest (~96 tok)
-- `server.js` — express: getPool, runMigrations (~8954 tok)
+- `server.js` — express: getPool, runMigrations (~8959 tok)
 
 ## frontend/
 
@@ -109,7 +109,7 @@
 - `LabCharts.jsx` — Shared (~10848 tok)
 - `LabChat.jsx` — PROMPT_SECTIONS — uses useState (~7017 tok)
 - `LabDatabase.jsx` — COLOR_MAP — uses useState, useEffect (~2597 tok)
-- `LabExcalidraw.jsx` — Excalidraw (~4058 tok)
+- `LabExcalidraw.jsx` — Excalidraw (~4092 tok)
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
 - `LabHome.jsx` — NOTES_KEY (~3122 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
