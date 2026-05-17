@@ -12,6 +12,7 @@ const NO_RIGHT_SIDEBAR = ['/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch'];
 
 // Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
 const LAB_ROUTES = [
+  '/planning',
   '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
   '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar', '/lab/database',
 ];

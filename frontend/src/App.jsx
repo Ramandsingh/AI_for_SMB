@@ -38,6 +38,7 @@ import ConsultBain          from './pages/ConsultBain';
 import ConsultDeloitte      from './pages/ConsultDeloitte';
 import AIFitPlanner         from './pages/AIFitPlanner';
 import MaturityCanvas       from './pages/MaturityCanvas';
+import Planning             from './pages/Planning';
 import LabHome              from './pages/lab/LabHome';
 import LabUppy              from './pages/lab/LabUppy';
 import LabGraph             from './pages/lab/LabGraph';
@@ -60,7 +61,8 @@ export default function App() {
       <SectionsContext.Provider value={{ sections, setSections }}>
         <Layout>
           <Routes>
-            <Route path="/"      element={<Landing />} />
+            <Route path="/"          element={<Landing />} />
+            <Route path="/planning"  element={<Planning />} />
             <Route path="/p1"    element={<UnderstandingAI />} />
             <Route path="/p2"    element={<MaturityJourney />} />
             <Route path="/p3"    element={<RoleImpactMap />} />

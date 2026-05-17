@@ -375,6 +375,113 @@ async function runMigrations(db) {
       updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
+
+  // ── planning_doc ──────────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS planning_doc (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      content    LONGTEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+  const [[{ pd_count }]] = await db.query('SELECT COUNT(*) AS pd_count FROM planning_doc');
+  if (pd_count === 0) {
+    const defaultContent = `# Dashboard Planning Document
+
+> Track planned sections, page assignments, and content scope before implementation.
+> Edit directly in the browser — changes save automatically.
+
+---
+
+## Planned Sections
+
+### 1 · Top AI Labs  *(new nav group — insert after "Executive Insights")*
+
+**Nav group label:** \`Top AI Labs\`
+**Page routes:** \`/p35\` – \`/p38\`
+
+Each page uses a **tabbed layout** (one tab per lab entity or sub-topic). Each tab shows: overview blurb, flagship products/APIs, pricing model notes, notable capabilities, and links to docs.
+
+| Route | Page title | Tabs |
+|-------|-----------|------|
+| \`/p35\` | OpenAI | GPT models · DALL·E · Whisper · Sora · Assistants API · Fine-tuning · Operator |
+| \`/p36\` | Anthropic | Claude model family · Claude design philosophy · Constitutional AI · Claude.ai · API & SDK · Claude Code |
+| \`/p37\` | Google | Gemini models · Gemma (open) · NotebookLM · Google AI Studio · Vertex AI · DeepMind research |
+| \`/p38\` | Chinese Labs | DeepSeek (R2, V3) · Qwen (Alibaba) · Kimi (Moonshot) · Baidu ERNIE · MiniMax · Open-source releases |
+
+---
+
+### 2 · AI Model Concepts  *(new nav group — insert after "Top AI Labs")*
+
+**Nav group label:** \`AI Model Concepts\`
+**Page routes:** \`/p39\` – \`/p41\`
+
+| Route | Page title | Content |
+|-------|-----------|---------|
+| \`/p39\` | How LLMs Work | Tokenisation · Chunking · Embeddings · Context window · Karpathy LLM intro reference |
+| \`/p40\` | Retrieval & Memory | RAG · Vector databases · Chunking strategies · Hybrid search · Memory types |
+| \`/p41\` | Agents & Orchestration | Harness · OpenClaw · Agents · Skills · Swarms · Frameworks |
+
+---
+
+## Implementation Checklist
+
+### Top AI Labs
+- [ ] Create \`AILabsOpenAI.jsx\` (\`/p35\`)
+- [ ] Create \`AILabsAnthropic.jsx\` (\`/p36\`)
+- [ ] Create \`AILabsGoogle.jsx\` (\`/p37\`)
+- [ ] Create \`AILabsChinese.jsx\` (\`/p38\`)
+- [ ] Add routes + nav group to App.jsx and LeftSidebar.jsx
+
+### AI Model Concepts
+- [ ] Create \`AIConceptsLLM.jsx\` (\`/p39\`)
+- [ ] Create \`AIConceptsRAG.jsx\` (\`/p40\`)
+- [ ] Create \`AIConceptsAgents.jsx\` (\`/p41\`)
+- [ ] Add routes + nav group
+
+---
+
+## 1-Year AI Training Curriculum
+
+> ~10–15 hours per week · Foundations → Production AI
+
+### Q1 — Foundations of Programming & Mathematics
+- **Months 1–2**: Python, NumPy, Pandas, algorithms & O(n) notation
+- **Month 3**: Linear algebra, calculus (gradients, chain rule), probability & Bayes
+
+### Q2 — Classical Machine Learning & Data Engineering
+- **Months 4–5**: Regression, classification (SVMs, decision trees), ensembles (XGBoost), K-Means, PCA
+- **Month 6**: Data pipelines, feature engineering, SQL, Scikit-Learn
+
+### Q3 — Deep Learning & Neural Networks
+- **Months 7–8**: MLPs, CNNs, RNNs, LSTMs — PyTorch or TensorFlow
+- **Month 9**: NLP, tokenisation, Word2Vec, transformers, Hugging Face
+
+### Q4 — Generative AI, MLOps & Deployment
+- **Months 10–11**: Fine-tuning, RAG, vector DBs, agentic frameworks, prompt engineering
+- **Month 12**: FastAPI, Docker, AWS/Azure deployment, bias detection, compliance
+
+### Suggested Learning Hub Routes
+| Route | Content |
+|-------|---------|
+| \`/learn\` | Learning Hub home |
+| \`/learn/q1\` | Q1 — Foundations |
+| \`/learn/q2\` | Q2 — Classical ML |
+| \`/learn/q3\` | Q3 — Deep Learning |
+| \`/learn/q4\` | Q4 — GenAI & MLOps |
+
+---
+
+## Notes & Open Questions
+
+- **OpenClaw on \`/p41\`**: treat as a conceptual orchestration pattern — confirm if this refers to a specific project
+- **Karpathy reference**: link to karpathy.ai and "Let's build GPT" YouTube series
+- **Chinese labs**: include neutral geopolitical context note (data residency, export controls)
+- **Next available route**: \`/p35\` (pages go up to \`/p34\` currently)
+`;
+    await db.query('INSERT INTO planning_doc (content) VALUES (?)', [defaultContent]);
+    console.log('planning_doc seeded');
+  }
 }
 
 // ── Health ────────────────────────────────────────────────────────────────────
@@ -715,6 +822,34 @@ app.delete('/api/lab/excalidraw/:id', async (req, res) => {
     const db = await getPool();
     await db.query('DELETE FROM lab_excalidraw WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Planning doc ─────────────────────────────────────────────────────────────
+app.get('/api/planning', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [[row]] = await db.query('SELECT content, updated_at FROM planning_doc ORDER BY id LIMIT 1');
+    res.json(row || { content: '', updated_at: null });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/planning', async (req, res) => {
+  try {
+    const { content } = req.body;
+    const db = await getPool();
+    const [[{ pd_count }]] = await db.query('SELECT COUNT(*) AS pd_count FROM planning_doc');
+    if (pd_count === 0) {
+      await db.query('INSERT INTO planning_doc (content) VALUES (?)', [content]);
+    } else {
+      await db.query('UPDATE planning_doc SET content = ? ORDER BY id LIMIT 1', [content]);
+    }
+    const [[row]] = await db.query('SELECT content, updated_at FROM planning_doc ORDER BY id LIMIT 1');
+    res.json(row);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

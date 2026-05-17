@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T22:47:49.429Z
-> Files: 83 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T22:52:57.755Z
+> Files: 84 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -32,7 +32,7 @@
 - `Dockerfile` — Docker container definition (~32 tok)
 - `package-lock.json` — npm lock file (~13869 tok)
 - `package.json` — Node.js package manifest (~96 tok)
-- `server.js` — express: getPool, runMigrations (~8959 tok)
+- `server.js` — express: getPool, runMigrations (~10490 tok)
 
 ## frontend/
 
@@ -42,19 +42,19 @@
 - `package-lock.json` — npm lock file (~98481 tok)
 - `package.json` — Node.js package manifest (~230 tok)
 - `postcss.config.js` — PostCSS configuration (~24 tok)
-- `tailwind.config.js` — Tailwind CSS configuration (~159 tok)
+- `tailwind.config.js` (~168 tok)
 - `vite.config.js` (~105 tok)
 
 ## frontend/src/
 
-- `App.jsx` — LabExcalidraw (~1810 tok)
+- `App.jsx` — LabExcalidraw (~1845 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
 ## frontend/src/components/
 
-- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~574 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~2730 tok)
+- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~578 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~2754 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -88,6 +88,7 @@
 - `MaturityCanvas.jsx` — STAGES — uses useState, useCallback (~4492 tok)
 - `MaturityJourney.jsx` — STAGE_COLORS (~3886 tok)
 - `OrgContributions.jsx` — SECTIONS (~3626 tok)
+- `Planning.jsx` — AUTOSAVE_MS (~1723 tok)
 - `Roadmap.jsx` — SECTIONS — renders table (~3205 tok)
 - `ROICalculator.jsx` — SECTIONS — renders table, chart — uses useState, useEffect (~4730 tok)
 - `RoleImpactMap.jsx` — SECTIONS — renders chart — uses useState (~3885 tok)

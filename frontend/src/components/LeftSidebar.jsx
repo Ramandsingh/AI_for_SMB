@@ -5,7 +5,10 @@ import { useCompany } from '../context/CompanyContext';
 const NAV_GROUPS = [
   {
     label: 'Overview',
-    items: [{ to: '/', label: 'Dashboard Home', icon: '◈' }],
+    items: [
+      { to: '/',         label: 'Dashboard Home', icon: '◈' },
+      { to: '/planning', label: 'Planning',        icon: '◈' },
+    ],
   },
   {
     label: 'Foundation',
