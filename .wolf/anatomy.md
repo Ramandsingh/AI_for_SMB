@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T07:45:51.872Z
-> Files: 91 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T08:32:51.217Z
+> Files: 103 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -12,7 +12,7 @@
 - `deploy.sh` — deploy.sh — pull latest code and restart Docker services (~315 tok)
 - `Discussions` (~19708 tok)
 - `docker-compose.yml` — Docker Compose services (~395 tok)
-- `PLANNING.md` — Dashboard Planning Document (~2790 tok)
+- `PLANNING.md` — Dashboard Planning Document (~2805 tok)
 - `README.md` — Project documentation (~9 tok)
 
 ## .claude/
@@ -47,14 +47,14 @@
 
 ## frontend/src/
 
-- `App.jsx` — LabExcalidraw (~2090 tok)
+- `App.jsx` — LabExcalidraw (~2253 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
 ## frontend/src/components/
 
 - `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~578 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~3113 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~3248 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -66,13 +66,20 @@
 
 - `Admin.jsx` — INDUSTRIES — renders form — uses useState, useEffect (~3030 tok)
 - `AIConceptsAgents.jsx` — SECTIONS (~4997 tok)
+- `AIConceptsAgents.jsx` — SECTIONS — Agents & Orchestration page (/p41) (~3800 tok)
 - `AIConceptsLLM.jsx` — SECTIONS — renders table (~4516 tok)
+- `AIConceptsLLM.jsx` — SECTIONS — How LLMs Work page (/p39) (~3500 tok)
 - `AIConceptsRAG.jsx` — SECTIONS — renders table (~5034 tok)
+- `AIConceptsRAG.jsx` — SECTIONS — Retrieval & Memory page (/p40) (~3600 tok)
 - `AIFitPlanner.jsx` — SECTIONS — renders chart (~9032 tok)
 - `AILabsAnthropic.jsx` — SECTIONS (~3903 tok)
+- `AILabsAnthropic.jsx` — SECTIONS — Anthropic lab page (/p36) (~3200 tok)
 - `AILabsChinese.jsx` — SECTIONS — renders table (~3907 tok)
+- `AILabsChinese.jsx` — SECTIONS — Chinese Labs page (/p38) (~3000 tok)
 - `AILabsGoogle.jsx` — SECTIONS (~3764 tok)
+- `AILabsGoogle.jsx` — SECTIONS — Google lab page (/p37) (~3100 tok)
 - `AILabsOpenAI.jsx` — SECTIONS (~4287 tok)
+- `AILabsOpenAI.jsx` — SECTIONS — renders table — uses useState — OpenAI lab page (/p35) (~3400 tok)
 - `Assessment.jsx` — SECTIONS (~3306 tok)
 - `ConsultBain.jsx` — SECTIONS — renders chart (~5372 tok)
 - `ConsultBCG.jsx` — SECTIONS — renders table (~4938 tok)
@@ -91,17 +98,15 @@
 - `EnterpriseWhen.jsx` — SECTIONS (~4092 tok)
 - `IndividualAdoption.jsx` — SECTIONS (~3873 tok)
 - `Landing.jsx` — STAGES — uses useState (~3892 tok)
+- `LearnHome.jsx` — SECTIONS (~2495 tok)
 - `LearningApproach.jsx` — SECTIONS — renders table (~4111 tok)
+- `LearnQ1.jsx` — SECTIONS (~3773 tok)
+- `LearnQ2.jsx` — SECTIONS (~4538 tok)
+- `LearnQ3.jsx` — SECTIONS (~4743 tok)
+- `LearnQ4.jsx` — SECTIONS (~4708 tok)
 - `MaturityCanvas.jsx` — STAGES — uses useState, useCallback (~4492 tok)
 - `MaturityJourney.jsx` — STAGE_COLORS (~3886 tok)
 - `OrgContributions.jsx` — SECTIONS (~3626 tok)
-- `AIConceptsAgents.jsx` — SECTIONS — Agents & Orchestration page (/p41) (~3800 tok)
-- `AIConceptsLLM.jsx` — SECTIONS — How LLMs Work page (/p39) (~3500 tok)
-- `AIConceptsRAG.jsx` — SECTIONS — Retrieval & Memory page (/p40) (~3600 tok)
-- `AILabsAnthropic.jsx` — SECTIONS — Anthropic lab page (/p36) (~3200 tok)
-- `AILabsChinese.jsx` — SECTIONS — Chinese Labs page (/p38) (~3000 tok)
-- `AILabsGoogle.jsx` — SECTIONS — Google lab page (/p37) (~3100 tok)
-- `AILabsOpenAI.jsx` — SECTIONS — renders table — uses useState — OpenAI lab page (/p35) (~3400 tok)
 - `Planning.jsx` — AUTOSAVE_MS (~1723 tok)
 - `Roadmap.jsx` — SECTIONS — renders table (~3205 tok)
 - `ROICalculator.jsx` — SECTIONS — renders table, chart — uses useState, useEffect (~4730 tok)
