@@ -74,6 +74,23 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Top AI Labs',
+    items: [
+      { to: '/p35', label: 'OpenAI',         icon: '○' },
+      { to: '/p36', label: 'Anthropic',      icon: '○' },
+      { to: '/p37', label: 'Google',         icon: '○' },
+      { to: '/p38', label: 'Chinese Labs',   icon: '○' },
+    ],
+  },
+  {
+    label: 'AI Model Concepts',
+    items: [
+      { to: '/p39', label: 'How LLMs Work',         icon: '○' },
+      { to: '/p40', label: 'Retrieval & Memory',    icon: '○' },
+      { to: '/p41', label: 'Agents & Orchestration',icon: '○' },
+    ],
+  },
+  {
     label: 'Enterprise AI Development',
     items: [
       { to: '/p23', label: 'Data Infrastructure',     icon: '○' },

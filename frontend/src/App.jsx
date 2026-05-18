@@ -37,6 +37,13 @@ import ConsultMcKinsey      from './pages/ConsultMcKinsey';
 import ConsultBain          from './pages/ConsultBain';
 import ConsultDeloitte      from './pages/ConsultDeloitte';
 import AIFitPlanner         from './pages/AIFitPlanner';
+import AILabsOpenAI         from './pages/AILabsOpenAI';
+import AILabsAnthropic      from './pages/AILabsAnthropic';
+import AILabsGoogle         from './pages/AILabsGoogle';
+import AILabsChinese        from './pages/AILabsChinese';
+import AIConceptsLLM        from './pages/AIConceptsLLM';
+import AIConceptsRAG        from './pages/AIConceptsRAG';
+import AIConceptsAgents     from './pages/AIConceptsAgents';
 import MaturityCanvas       from './pages/MaturityCanvas';
 import Planning             from './pages/Planning';
 import LabHome              from './pages/lab/LabHome';
@@ -96,6 +103,13 @@ export default function App() {
             <Route path="/p31"   element={<ConsultBain />} />
             <Route path="/p32"   element={<ConsultDeloitte />} />
             <Route path="/p33"   element={<AIFitPlanner />} />
+            <Route path="/p35"   element={<AILabsOpenAI />} />
+            <Route path="/p36"   element={<AILabsAnthropic />} />
+            <Route path="/p37"   element={<AILabsGoogle />} />
+            <Route path="/p38"   element={<AILabsChinese />} />
+            <Route path="/p39"   element={<AIConceptsLLM />} />
+            <Route path="/p40"   element={<AIConceptsRAG />} />
+            <Route path="/p41"   element={<AIConceptsAgents />} />
             <Route path="/p34"         element={<MaturityCanvas />} />
             <Route path="/admin"       element={<Admin />} />
             <Route path="/lab"         element={<LabHome />} />

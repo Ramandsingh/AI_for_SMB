@@ -78,19 +78,19 @@ Each page uses a **tabbed layout** (one tab per lab entity or sub-topic). Each t
 ## Implementation Checklist
 
 ### Top AI Labs
-- [ ] Create `frontend/src/pages/AILabsOpenAI.jsx` (`/p35`)
-- [ ] Create `frontend/src/pages/AILabsAnthropic.jsx` (`/p36`)
-- [ ] Create `frontend/src/pages/AILabsGoogle.jsx` (`/p37`)
-- [ ] Create `frontend/src/pages/AILabsChinese.jsx` (`/p38`)
-- [ ] Add routes to `frontend/src/App.jsx`
-- [ ] Add "Top AI Labs" nav group to `frontend/src/components/LeftSidebar.jsx` (after "Executive Insights")
+- [x] Create `frontend/src/pages/AILabsOpenAI.jsx` (`/p35`)
+- [x] Create `frontend/src/pages/AILabsAnthropic.jsx` (`/p36`)
+- [x] Create `frontend/src/pages/AILabsGoogle.jsx` (`/p37`)
+- [x] Create `frontend/src/pages/AILabsChinese.jsx` (`/p38`)
+- [x] Add routes to `frontend/src/App.jsx`
+- [x] Add "Top AI Labs" nav group to `frontend/src/components/LeftSidebar.jsx` (after "Executive Insights")
 
 ### AI Model Concepts
-- [ ] Create `frontend/src/pages/AIConceptsLLM.jsx` (`/p39`)
-- [ ] Create `frontend/src/pages/AIConceptsRAG.jsx` (`/p40`)
-- [ ] Create `frontend/src/pages/AIConceptsAgents.jsx` (`/p41`)
-- [ ] Add routes to `frontend/src/App.jsx`
-- [ ] Add "AI Model Concepts" nav group to `frontend/src/components/LeftSidebar.jsx` (after "Top AI Labs")
+- [x] Create `frontend/src/pages/AIConceptsLLM.jsx` (`/p39`)
+- [x] Create `frontend/src/pages/AIConceptsRAG.jsx` (`/p40`)
+- [x] Create `frontend/src/pages/AIConceptsAgents.jsx` (`/p41`)
+- [x] Add routes to `frontend/src/App.jsx`
+- [x] Add "AI Model Concepts" nav group to `frontend/src/components/LeftSidebar.jsx` (after "Top AI Labs")
 
 ### Design pattern
 All new pages should follow the existing visual convention:

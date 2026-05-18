@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T01:50:02.782Z
-> Files: 84 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T07:45:51.872Z
+> Files: 91 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -47,14 +47,14 @@
 
 ## frontend/src/
 
-- `App.jsx` — LabExcalidraw (~1845 tok)
+- `App.jsx` — LabExcalidraw (~2090 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
 ## frontend/src/components/
 
 - `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~578 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~2958 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~3113 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -65,7 +65,14 @@
 ## frontend/src/pages/
 
 - `Admin.jsx` — INDUSTRIES — renders form — uses useState, useEffect (~3030 tok)
+- `AIConceptsAgents.jsx` — SECTIONS (~4997 tok)
+- `AIConceptsLLM.jsx` — SECTIONS — renders table (~4516 tok)
+- `AIConceptsRAG.jsx` — SECTIONS — renders table (~5034 tok)
 - `AIFitPlanner.jsx` — SECTIONS — renders chart (~9032 tok)
+- `AILabsAnthropic.jsx` — SECTIONS (~3903 tok)
+- `AILabsChinese.jsx` — SECTIONS — renders table (~3907 tok)
+- `AILabsGoogle.jsx` — SECTIONS (~3764 tok)
+- `AILabsOpenAI.jsx` — SECTIONS (~4287 tok)
 - `Assessment.jsx` — SECTIONS (~3306 tok)
 - `ConsultBain.jsx` — SECTIONS — renders chart (~5372 tok)
 - `ConsultBCG.jsx` — SECTIONS — renders table (~4938 tok)
