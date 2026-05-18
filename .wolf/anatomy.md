@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T08:32:51.217Z
-> Files: 103 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T22:41:58.590Z
+> Files: 104 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -47,7 +47,7 @@
 
 ## frontend/src/
 
-- `App.jsx` — LabExcalidraw (~2253 tok)
+- `App.jsx` — LabExcalidraw (~2297 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
@@ -100,7 +100,7 @@
 - `Landing.jsx` — STAGES — uses useState (~3892 tok)
 - `LearnHome.jsx` — SECTIONS (~2495 tok)
 - `LearningApproach.jsx` — SECTIONS — renders table (~4111 tok)
-- `LearnQ1.jsx` — SECTIONS (~3773 tok)
+- `LearnQ1.jsx` — SECTIONS (~3922 tok)
 - `LearnQ2.jsx` — SECTIONS (~4538 tok)
 - `LearnQ3.jsx` — SECTIONS (~4743 tok)
 - `LearnQ4.jsx` — SECTIONS (~4708 tok)
@@ -134,6 +134,10 @@
 - `LabHome.jsx` — NOTES_KEY (~3122 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
 - `LabUppy.jsx` — Lazy-load the editor so react-konva/konva don't run at app startup — (~5330 tok)
+
+## frontend/src/pages/learn/
+
+- `LearnPythonSyntax.jsx` — SECTIONS (~9044 tok)
 
 ## mysql/
 
