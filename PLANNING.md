@@ -208,11 +208,11 @@ All new pages should follow the existing visual convention:
 
 This curriculum maps naturally to new dashboard pages — suggested routes:
 
-| Route | Page | Content |
-|-------|------|---------|
-| `/learn` | Learning Hub home | Overview, progress tracker concept |
-| `/learn/q1` | Q1 — Foundations | Python, NumPy, Pandas, maths primer |
-| `/learn/q2` | Q2 — Classical ML | Regression, classification, Scikit-Learn pipelines |
-| `/learn/q3` | Q3 — Deep Learning | CNNs, RNNs, transformers, Hugging Face |
-| `/learn/q4` | Q4 — GenAI & MLOps | LLMs, RAG, agents, FastAPI, Docker, cloud |
+| Route | Page | Content | Status |
+|-------|------|---------|--------|
+| `/learn` | Learning Hub home | Overview, progress tracker concept | ✅ Done |
+| `/learn/q1` | Q1 — Foundations | Python, NumPy, Pandas, maths primer | ✅ Done |
+| `/learn/q2` | Q2 — Classical ML | Regression, classification, Scikit-Learn pipelines | ✅ Done |
+| `/learn/q3` | Q3 — Deep Learning | CNNs, RNNs, transformers, Hugging Face | ✅ Done |
+| `/learn/q4` | Q4 — GenAI & MLOps | LLMs, RAG, agents, FastAPI, Docker, cloud | ✅ Done |
 

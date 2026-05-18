@@ -102,6 +102,16 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Learning Hub',
+    items: [
+      { to: '/learn',    label: 'Learning Hub',        icon: '◈', end: true },
+      { to: '/learn/q1', label: 'Q1 — Foundations',    icon: '○' },
+      { to: '/learn/q2', label: 'Q2 — Classical ML',   icon: '○' },
+      { to: '/learn/q3', label: 'Q3 — Deep Learning',  icon: '○' },
+      { to: '/learn/q4', label: 'Q4 — GenAI & MLOps',  icon: '○' },
+    ],
+  },
+  {
     label: 'Your AI Fit',
     items: [
       { to: '/p33', label: 'How AI Fits You', icon: '◈' },
@@ -144,7 +154,9 @@ function loadOpenState() {
 
 function NavGroup({ group, location }) {
   const hasActive = group.items.some(i =>
-    i.to === '/' ? location.pathname === '/' : location.pathname.startsWith(i.to)
+    i.to === '/' ? location.pathname === '/' :
+    i.end ? location.pathname === i.to :
+    location.pathname.startsWith(i.to)
   );
 
   const stored = loadOpenState();
@@ -191,7 +203,7 @@ function NavGroup({ group, location }) {
             <li key={item.to}>
               <NavLink
                 to={item.to}
-                end={item.to === '/'}
+                end={item.to === '/' || item.end === true}
                 className={({ isActive }) =>
                   `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm transition-all duration-150 whitespace-nowrap ${
                     isActive
