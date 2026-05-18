@@ -44,12 +44,6 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'Sales Toolkit',
-    items: [
-      { to: '/p8', label: 'Pitch & Narrative', icon: '○' },
-    ],
-  },
-  {
     label: 'Technology of AI',
     items: [
       { to: '/p17', label: 'What Is AI',           icon: '○' },
@@ -94,6 +88,13 @@ const NAV_GROUPS = [
     label: 'Your AI Fit',
     items: [
       { to: '/p33', label: 'How AI Fits You', icon: '◈' },
+    ],
+  },
+  {
+    label: 'Admin',
+    items: [
+      { to: '/p8',   label: 'Pitch & Narrative', icon: '○' },
+      { to: '/admin', label: 'Companies',         icon: '○' },
     ],
   },
   {
@@ -261,18 +262,6 @@ export default function LeftSidebar({ isOpen, onToggle }) {
 
         {/* Footer */}
         <div className="px-3 pb-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <NavLink
-            to="/admin"
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm mt-3 transition-all duration-150 whitespace-nowrap ${
-                isActive ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
-              }`
-            }
-            style={({ isActive }) => isActive ? { background: 'rgba(59,130,246,0.12)' } : {}}
-          >
-            <span className="text-base leading-none">⚙</span>
-            <span>Admin · Companies</span>
-          </NavLink>
           <p className="px-3 pt-3 text-xs whitespace-nowrap" style={{ color: 'rgba(148,163,184,0.35)' }}>
             v1.0 · AI Adoption Dashboard
           </p>
