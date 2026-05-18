@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 
 const SECTIONS = [
@@ -10,6 +11,7 @@ const SECTIONS = [
 const PYTHON_TOPICS = [
   {
     topic: 'Core Python Syntax',
+    to: '/learn/q1/python-syntax',
     months: 'Month 1',
     skills: ['Variables, data types, f-strings', 'Control flow: if/elif/else, for, while', 'Functions, *args, **kwargs, default params', 'List/dict/set comprehensions', 'Object-oriented programming: classes, inheritance, dunder methods', 'Error handling: try/except/finally'],
     project: 'Build a command-line to-do app with file persistence (JSON)',
@@ -95,9 +97,19 @@ export default function LearnQ1() {
         <div className="space-y-5">
           {PYTHON_TOPICS.map((t) => (
             <div key={t.topic} className="card">
-              <div className="flex items-center gap-2 mb-3">
-                <h3 className="font-bold text-slate-800">{t.topic}</h3>
-                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-200">{t.months}</span>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-slate-800">{t.topic}</h3>
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-200">{t.months}</span>
+                </div>
+                {t.to && (
+                  <NavLink
+                    to={t.to}
+                    className="flex-shrink-0 text-xs px-3 py-1.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                  >
+                    Study this topic →
+                  </NavLink>
+                )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

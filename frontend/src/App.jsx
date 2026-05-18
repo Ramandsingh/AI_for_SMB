@@ -49,6 +49,7 @@ import LearnQ1              from './pages/LearnQ1';
 import LearnQ2              from './pages/LearnQ2';
 import LearnQ3              from './pages/LearnQ3';
 import LearnQ4              from './pages/LearnQ4';
+import LearnPythonSyntax    from './pages/learn/LearnPythonSyntax';
 import MaturityCanvas       from './pages/MaturityCanvas';
 import Planning             from './pages/Planning';
 import LabHome              from './pages/lab/LabHome';
@@ -120,6 +121,7 @@ export default function App() {
             <Route path="/learn/q2" element={<LearnQ2 />} />
             <Route path="/learn/q3" element={<LearnQ3 />} />
             <Route path="/learn/q4" element={<LearnQ4 />} />
+            <Route path="/learn/q1/python-syntax" element={<LearnPythonSyntax />} />
             <Route path="/p34"         element={<MaturityCanvas />} />
             <Route path="/admin"       element={<Admin />} />
             <Route path="/lab"         element={<LabHome />} />
