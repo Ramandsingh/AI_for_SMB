@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-17T22:52:57.755Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T01:39:24.161Z
 > Files: 84 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -54,7 +54,7 @@
 ## frontend/src/components/
 
 - `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~578 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~2754 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~3104 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -107,7 +107,7 @@
 - `ImageEditorModal.jsx` — ImageEditorModal (~1006 tok)
 - `LabArch.jsx` — ArchNode (~2636 tok)
 - `LabCalendar.jsx` — makeId — renders form, modal — uses useState, useForm (~3041 tok)
-- `LabCharts.jsx` — Shared (~10848 tok)
+- `LabCharts.jsx` — Shared (~10826 tok)
 - `LabChat.jsx` — PROMPT_SECTIONS — uses useState (~7017 tok)
 - `LabDatabase.jsx` — COLOR_MAP — uses useState, useEffect (~2597 tok)
 - `LabExcalidraw.jsx` — Excalidraw (~4152 tok)

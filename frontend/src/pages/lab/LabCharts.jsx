@@ -674,11 +674,9 @@ export default function LabCharts() {
 
             {/* Sunburst */}
             <ChartCard title="Sunburst Chart" sub="AI team structure — inner ring = dept., outer = role">
-              <ResponsiveContainer width="100%" height={260}>
-                <SunburstChart data={SUNBURST_DATA} dataKey="value">
-                  <Tooltip />
-                </SunburstChart>
-              </ResponsiveContainer>
+              <SunburstChart data={SUNBURST_DATA} dataKey="value" width="100%" height={260}>
+                <Tooltip />
+              </SunburstChart>
             </ChartCard>
 
           </div>
