@@ -186,9 +186,16 @@ async function runMigrations(db) {
       limitations     JSON,
       tags            JSON,
       color           VARCHAR(30) DEFAULT 'blue',
+      badge           VARCHAR(100),
       sort_order      INT DEFAULT 0
     )
   `);
+
+  // Add badge column to existing installations
+  const [badgeCols] = await db.query(`SHOW COLUMNS FROM database_platforms LIKE 'badge'`);
+  if (!badgeCols.length) {
+    await db.query(`ALTER TABLE database_platforms ADD COLUMN badge VARCHAR(100) AFTER color`);
+  }
 
   const [[{ dbp_count }]] = await db.query('SELECT COUNT(*) AS dbp_count FROM database_platforms');
   if (dbp_count === 0) {
@@ -336,18 +343,172 @@ async function runMigrations(db) {
         ]),
         tags: JSON.stringify(['self-hosted', 'open-source', 'postgresql', 'sql', 'low-code']),
         color: 'rose',
+        badge: null,
         sort_order: 5,
       },
     ];
 
     for (const p of platforms) {
       await db.query(
-        `INSERT INTO database_platforms (name, tagline, url, logo_url, screenshot_urls, features, limitations, tags, color, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [p.name, p.tagline, p.url, p.logo_url, p.screenshot_urls, p.features, p.limitations, p.tags, p.color, p.sort_order]
+        `INSERT INTO database_platforms (name, tagline, url, logo_url, screenshot_urls, features, limitations, tags, color, badge, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [p.name, p.tagline, p.url, p.logo_url, p.screenshot_urls, p.features, p.limitations, p.tags, p.color, p.badge, p.sort_order]
       );
     }
     console.log('database_platforms seeded');
+  }
+
+  // Insert new platforms added after initial seed (idempotent by name)
+  const newPlatforms = [
+    {
+      name: 'Budibase',
+      tagline: 'Drag-and-drop internal tool builder — connect any data source and ship forms, dashboards, and workflows fast.',
+      url: 'https://budibase.com',
+      logo_url: 'https://raw.githubusercontent.com/Budibase/budibase/develop/.github/bb-emblem.svg',
+      screenshot_urls: JSON.stringify([]),
+      features: JSON.stringify([
+        'Drag-and-drop UI builder — tables, forms, charts, kanban, no CSS required',
+        'Connects to PostgreSQL, MySQL, MongoDB, REST APIs, Google Sheets, S3',
+        'Built-in role-based access control — free on self-hosted, unlimited users',
+        'Automation workflows triggered on data changes or custom schedules',
+        'Self-host via Docker or Kubernetes under AGPLv3 at no cost',
+        'Component library with 50+ pre-built blocks for rapid prototyping',
+      ]),
+      limitations: JSON.stringify([
+        'Cloud free plan limited to 5 users and 100 automation runs/month',
+        'No column-level field permissions — access scoped via data source queries',
+        'Outputs responsive web apps only — no native iOS/Android app builder',
+        'Visual query builder cannot handle complex multi-step SQL CTEs',
+        'Branding and white-label features locked to Enterprise plan',
+        'Audit logs and enforced SSO are cloud Enterprise only',
+      ]),
+      tags: JSON.stringify(['self-hosted', 'open-source', 'internal-tools', 'low-code', 'agpl']),
+      color: 'indigo',
+      badge: null,
+      sort_order: 6,
+    },
+    {
+      name: 'PocketBase',
+      tagline: 'Single-file Go backend with embedded SQLite, built-in Admin UI, realtime subscriptions, and auth — MIT licensed.',
+      url: 'https://pocketbase.io',
+      logo_url: 'https://pocketbase.io/images/logo.svg',
+      screenshot_urls: JSON.stringify([]),
+      features: JSON.stringify([
+        'Single binary under 30MB — DB, auth, REST API, realtime, and Admin UI in one file',
+        'MIT license — no restrictions on commercial use, distribution, or modification',
+        'Built-in Admin UI for managing collections, users, rules, and settings',
+        'Realtime subscriptions via SSE — instant data push without polling',
+        'Auth: email/password, OAuth2 (Google, GitHub, Discord, etc.), anonymous',
+        'JavaScript and Dart SDKs with community SDKs for Python, .NET, and more',
+      ]),
+      limitations: JSON.stringify([
+        'SQLite-only — not designed for multi-server horizontal scaling',
+        'No built-in multi-tenant row isolation without custom hooks',
+        'Admin UI is minimal — no formula fields, computed columns, or rich views',
+        'No built-in job scheduler or workflow automation engine',
+        'Manual backup/restore — no automated snapshot schedule out of the box',
+        'Complex queries require custom hooks or external tooling',
+      ]),
+      tags: JSON.stringify(['mit-license', 'self-hosted', 'sqlite', 'realtime', 'go', 'backend']),
+      color: 'cyan',
+      badge: '⭐ AWESOME — MIT',
+      sort_order: 7,
+    },
+    {
+      name: 'Frappe Framework',
+      tagline: 'Schema-driven full-stack Python framework — define a DocType once and get form, list, API, and permissions automatically.',
+      url: 'https://frappeframework.com',
+      logo_url: 'https://raw.githubusercontent.com/frappe/frappe/develop/frappe/public/images/frappe-framework-logo.svg',
+      screenshot_urls: JSON.stringify([]),
+      features: JSON.stringify([
+        'Schema-driven DocType system — define once, auto-generates form, list, REST API, and permissions',
+        'MIT license — unrestricted commercial and SaaS use',
+        'Role and user permission model at DocType and document level',
+        'REST API auto-generated per DocType with filtering, sorting, and pagination',
+        'Foundation for ERPNext — battle-tested at enterprise scale in production',
+        'Built-in scheduler, job queue, email sending, and websocket events',
+      ]),
+      limitations: JSON.stringify([
+        'Large open issue backlog on GitHub — slower bug triage and community-driven fixes',
+        'Steep learning curve — custom DocTypes require Python development skills',
+        'Framework opinionates heavily: routing, form rendering, and ORM are tightly coupled',
+        'Full-text search requires separate Elasticsearch add-on configuration',
+        'Modern Frappe UI patterns differ from standard React — framework-specific learning',
+        'Docker self-host setup is more complex than single-binary alternatives',
+      ]),
+      tags: JSON.stringify(['mit-license', 'python', 'self-hosted', 'erp', 'open-source']),
+      color: 'orange',
+      badge: '⚠ Many Open Issues — MIT',
+      sort_order: 8,
+    },
+    {
+      name: 'Appwrite',
+      tagline: 'Open-source backend-as-a-service — auth, databases, storage, functions, and messaging in a single self-hosted API.',
+      url: 'https://appwrite.io',
+      logo_url: 'https://raw.githubusercontent.com/appwrite/appwrite/main/public/images/appwrite.svg',
+      screenshot_urls: JSON.stringify([]),
+      features: JSON.stringify([
+        'Backend-as-a-service: auth, databases, storage, functions, messaging — single API',
+        'BSD 3-Clause license — permissive for commercial and open-source products',
+        'SDKs for 10+ platforms: web, Flutter, iOS, Android, React Native, Node.js',
+        'Auth: email/password, magic link, OAuth2, phone OTP, and anonymous sessions',
+        'Realtime database subscriptions and serverless Functions with multiple runtimes',
+        'Self-host via Docker Compose — single command launches the full backend stack',
+      ]),
+      limitations: JSON.stringify([
+        'Large open issue backlog on GitHub — some long-standing bugs awaiting resolution',
+        'Free cloud plan: 75K monthly active users, 2GB storage, 750K function executions',
+        'No relational joins in Appwrite Databases — document/collection model only',
+        'Function cold starts can be slow on low-resource self-hosted instances',
+        'Complex attribute index requirements can complicate filtering at scale',
+        'No built-in admin table data editor — manage data via Console UI or API only',
+      ]),
+      tags: JSON.stringify(['bsd-3-clause', 'self-hosted', 'backend-as-a-service', 'auth', 'storage']),
+      color: 'rose',
+      badge: '⚠ Many Open Issues — BSD 3-Clause',
+      sort_order: 9,
+    },
+    {
+      name: 'Windmill',
+      tagline: 'Script runtime and workflow orchestrator for Python, TypeScript, Go, and Bash — with a low-code app builder included.',
+      url: 'https://windmill.dev',
+      logo_url: 'https://raw.githubusercontent.com/windmill-labs/windmill/main/frontend/src/lib/assets/windmill.svg',
+      screenshot_urls: JSON.stringify([]),
+      features: JSON.stringify([
+        'Script runtime for Python, TypeScript, Go, Bash — sandboxed workers with dependency auto-install',
+        'Visual workflow builder (DAG flows) connecting scripts, integrations, and approvals',
+        'Low-code app builder for internal dashboards with reactive, composable components',
+        'Granular RBAC and workspace isolation — safe for multi-team self-hosted deployments',
+        '10,000 free executions/month on cloud — generous for most small team workloads',
+        'Active development with frequent releases and a responsive maintainer team',
+      ]),
+      limitations: JSON.stringify([
+        'AGPL3 license — SaaS products incorporating Windmill must open-source their modifications',
+        'Learning curve: scripts, flows, and apps are three distinct concepts to master together',
+        'No built-in relational database view — scripts must query and transform external DBs',
+        'Complex fan-out flows with many branches can be difficult to debug and trace',
+        'SSO, audit logs, and dedicated worker pools require the Enterprise license',
+        'Community-only support on free tier — no SLA or guaranteed response time',
+      ]),
+      tags: JSON.stringify(['agpl3', 'self-hosted', 'workflow-automation', 'scripts', 'low-code']),
+      color: 'violet',
+      badge: '✓ Recommended — AGPL3',
+      sort_order: 10,
+    },
+  ];
+
+  for (const p of newPlatforms) {
+    const [[{ nameExists }]] = await db.query(
+      'SELECT COUNT(*) AS nameExists FROM database_platforms WHERE name = ?', [p.name]
+    );
+    if (!nameExists) {
+      await db.query(
+        `INSERT INTO database_platforms (name, tagline, url, logo_url, screenshot_urls, features, limitations, tags, color, badge, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [p.name, p.tagline, p.url, p.logo_url, p.screenshot_urls, p.features, p.limitations, p.tags, p.color, p.badge, p.sort_order]
+      );
+      console.log(`database_platforms: inserted ${p.name}`);
+    }
   }
 
   // ── lab_gallery ───────────────────────────────────────────────────────────

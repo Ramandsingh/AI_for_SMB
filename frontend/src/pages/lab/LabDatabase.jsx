@@ -7,6 +7,9 @@ const COLOR_MAP = {
   emerald:{ border: 'border-l-emerald-400',header: 'bg-emerald-600',badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   amber:  { border: 'border-l-amber-400',  header: 'bg-amber-500',  badge: 'bg-amber-50 text-amber-700 border-amber-200' },
   rose:   { border: 'border-l-rose-400',   header: 'bg-rose-600',   badge: 'bg-rose-50 text-rose-700 border-rose-200' },
+  indigo: { border: 'border-l-indigo-400', header: 'bg-indigo-600', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  cyan:   { border: 'border-l-cyan-400',   header: 'bg-cyan-600',   badge: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+  orange: { border: 'border-l-orange-400', header: 'bg-orange-500', badge: 'bg-orange-50 text-orange-700 border-orange-200' },
 };
 
 // ── Logo with initial fallback ────────────────────────────────────────────────
@@ -95,6 +98,15 @@ function PlatformCard({ platform }) {
             >
               Visit ↗
             </a>
+            {platform.badge && (
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+                platform.badge.startsWith('⭐') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                platform.badge.startsWith('⚠') ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                'bg-blue-50 text-blue-700 border-blue-200'
+              }`}>
+                {platform.badge}
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{platform.tagline}</p>
         </div>
