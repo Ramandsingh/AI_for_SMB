@@ -14,7 +14,7 @@ const NO_RIGHT_SIDEBAR = ['/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch'];
 const LAB_ROUTES = [
   '/planning',
   '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
-  '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar', '/lab/database',
+  '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar', '/lab/database', '/lab/cytoscape',
 ];
 
 export default function Layout({ children }) {

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-18T22:41:58.590Z
-> Files: 104 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T13:14:10.183Z
+> Files: 105 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -47,14 +47,14 @@
 
 ## frontend/src/
 
-- `App.jsx` — LabExcalidraw (~2297 tok)
+- `App.jsx` — LabExcalidraw (~2335 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
 ## frontend/src/components/
 
-- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~578 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~3248 tok)
+- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~584 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~3271 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -128,10 +128,11 @@
 - `LabCalendar.jsx` — makeId — renders form, modal — uses useState, useForm (~3041 tok)
 - `LabCharts.jsx` — Shared (~10826 tok)
 - `LabChat.jsx` — PROMPT_SECTIONS — uses useState (~7017 tok)
+- `LabCytoscape.jsx` — ── Use-case graph definitions ──────────────────────────────────────────────── (~7284 tok)
 - `LabDatabase.jsx` — COLOR_MAP — uses useState, useEffect (~2597 tok)
 - `LabExcalidraw.jsx` — Excalidraw (~4152 tok)
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
-- `LabHome.jsx` — NOTES_KEY (~3122 tok)
+- `LabHome.jsx` — NOTES_KEY (~3262 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
 - `LabUppy.jsx` — Lazy-load the editor so react-konva/konva don't run at app startup — (~5330 tok)
 

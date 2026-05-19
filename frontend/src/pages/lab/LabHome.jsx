@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine } from 'lucide-react';
+import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine, Network } from 'lucide-react';
 
 const NOTES_KEY = 'lab-home-notes';
 const DEFAULT_NOTES = `## Key Libraries
@@ -197,6 +197,18 @@ const EXPERIMENTS = [
     iconColor: 'text-indigo-600',
     desc: 'Reference guide for top free & open-source no-code/low-code self-hosted database platforms — features, screenshots, and free-tier limitations.',
     tags: ['baserow', 'nocodb', 'grist', 'teable', 'mathesar'],
+  },
+  {
+    to: '/lab/cytoscape',
+    icon: Network,
+    title: 'Graph Viz',
+    library: 'Cytoscape.js',
+    libraryUrl: 'https://js.cytoscape.org',
+    color: 'border-l-violet-500',
+    iconBg: 'bg-violet-50',
+    iconColor: 'text-violet-600',
+    desc: '6 live interactive graph use cases built from this dashboard\'s own content — knowledge graphs, lab ecosystems, learning path dependencies, tech stacks, and more.',
+    tags: ['cytoscape', 'graph-viz', 'network-analysis'],
   },
   {
     to: '/lab/excalidraw',
