@@ -137,6 +137,7 @@ const NAV_GROUPS = [
       { to: '/lab/calendar',   label: 'Calendar · Ant Design',     icon: '○' },
       { to: '/lab/database',   label: 'Database Platforms',        icon: '○' },
       { to: '/lab/cytoscape',  label: 'Cytoscape · Graph Viz',    icon: '○' },
+      { to: '/lab/flowcharts', label: 'Flowcharts · Mermaid',      icon: '○' },
       { to: '/lab/excalidraw', label: 'Excalidraw',                icon: '○' },
     ],
   },

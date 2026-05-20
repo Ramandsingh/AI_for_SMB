@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine, Network } from 'lucide-react';
+import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine, Network, GitBranch } from 'lucide-react';
 
 const NOTES_KEY = 'lab-home-notes';
 const DEFAULT_NOTES = `## Key Libraries
@@ -197,6 +197,18 @@ const EXPERIMENTS = [
     iconColor: 'text-indigo-600',
     desc: 'Reference guide for top free & open-source no-code/low-code self-hosted database platforms — features, screenshots, and free-tier limitations.',
     tags: ['baserow', 'nocodb', 'grist', 'teable', 'mathesar'],
+  },
+  {
+    to: '/lab/flowcharts',
+    icon: GitBranch,
+    title: 'Flowcharts',
+    library: 'Mermaid.js',
+    libraryUrl: 'https://mermaid.js.org',
+    color: 'border-l-blue-500',
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-blue-600',
+    desc: 'Live text-to-diagram editor with 6 diagram types — flowchart, sequence, Gantt, state machine, mind map, and ER diagram. Editable code, instant SVG render.',
+    tags: ['mermaid', 'flowchart', 'sequence', 'gantt', 'svg'],
   },
   {
     to: '/lab/cytoscape',

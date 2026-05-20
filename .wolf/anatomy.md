@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-19T13:32:17.060Z
-> Files: 105 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T06:35:08.787Z
+> Files: 106 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -47,14 +47,14 @@
 
 ## frontend/src/
 
-- `App.jsx` — LabExcalidraw (~2335 tok)
+- `App.jsx` — LabExcalidraw (~2374 tok)
 - `index.css` — Styles: 10 rules, 1 media queries, 2 layers (~1060 tok)
 - `main.jsx` (~94 tok)
 
 ## frontend/src/components/
 
-- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~584 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~3271 tok)
+- `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~589 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~3294 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 
@@ -131,8 +131,9 @@
 - `LabCytoscape.jsx` — ── Use-case graph definitions ──────────────────────────────────────────────── (~7284 tok)
 - `LabDatabase.jsx` — COLOR_MAP (~2837 tok)
 - `LabExcalidraw.jsx` — Excalidraw (~4152 tok)
+- `LabFlowcharts.jsx` — EXAMPLES (~5023 tok)
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
-- `LabHome.jsx` — NOTES_KEY (~3262 tok)
+- `LabHome.jsx` — NOTES_KEY (~3400 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)
 - `LabUppy.jsx` — Lazy-load the editor so react-konva/konva don't run at app startup — (~5330 tok)
 

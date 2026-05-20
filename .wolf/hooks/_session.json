@@ -1,69 +1,67 @@
 {
-  "session_id": "session-2026-05-19-1328",
-  "started": "2026-05-19T13:28:37.108Z",
+  "session_id": "session-2026-05-20-0631",
+  "started": "2026-05-20T06:31:39.791Z",
   "files_read": {
-    "/home/user/AI_for_SMB/frontend/src/pages/lab/LabDatabase.jsx": {
+    "/home/user/AI_for_SMB/frontend/package.json": {
       "count": 1,
-      "tokens": 2597,
-      "first_read": "2026-05-19T13:28:41.923Z"
-    },
-    "/home/user/AI_for_SMB/mysql/init.sql": {
-      "count": 1,
-      "tokens": 2545,
-      "first_read": "2026-05-19T13:28:42.242Z"
-    },
-    "/home/user/AI_for_SMB/backend/server.js": {
-      "count": 3,
-      "tokens": 10490,
-      "first_read": "2026-05-19T13:28:51.384Z"
+      "tokens": 230,
+      "first_read": "2026-05-20T06:32:10.185Z"
     }
   },
   "files_written": [
     {
-      "file": "/home/user/AI_for_SMB/frontend/src/pages/lab/LabDatabase.jsx",
-      "action": "edit",
-      "tokens": 292,
-      "at": "2026-05-19T13:30:26.147Z"
+      "file": "/home/user/AI_for_SMB/frontend/src/pages/lab/LabFlowcharts.jsx",
+      "action": "create",
+      "tokens": 5023,
+      "at": "2026-05-20T06:34:43.494Z"
     },
     {
-      "file": "/home/user/AI_for_SMB/frontend/src/pages/lab/LabDatabase.jsx",
+      "file": "/home/user/AI_for_SMB/frontend/src/App.jsx",
       "action": "edit",
-      "tokens": 288,
-      "at": "2026-05-19T13:30:33.667Z"
+      "tokens": 56,
+      "at": "2026-05-20T06:34:50.670Z"
     },
     {
-      "file": "/home/user/AI_for_SMB/mysql/init.sql",
+      "file": "/home/user/AI_for_SMB/frontend/src/App.jsx",
       "action": "edit",
-      "tokens": 125,
-      "at": "2026-05-19T13:30:38.379Z"
+      "tokens": 73,
+      "at": "2026-05-20T06:34:50.914Z"
     },
     {
-      "file": "/home/user/AI_for_SMB/mysql/init.sql",
+      "file": "/home/user/AI_for_SMB/frontend/src/components/Layout.jsx",
       "action": "edit",
-      "tokens": 2154,
-      "at": "2026-05-19T13:31:21.880Z"
+      "tokens": 34,
+      "at": "2026-05-20T06:34:54.253Z"
     },
     {
-      "file": "/home/user/AI_for_SMB/backend/server.js",
+      "file": "/home/user/AI_for_SMB/frontend/src/components/LeftSidebar.jsx",
       "action": "edit",
-      "tokens": 247,
-      "at": "2026-05-19T13:31:34.219Z"
+      "tokens": 68,
+      "at": "2026-05-20T06:34:59.480Z"
     },
     {
-      "file": "/home/user/AI_for_SMB/backend/server.js",
+      "file": "/home/user/AI_for_SMB/frontend/src/pages/lab/LabHome.jsx",
       "action": "edit",
-      "tokens": 2746,
-      "at": "2026-05-19T13:32:17.070Z"
+      "tokens": 52,
+      "at": "2026-05-20T06:35:05.099Z"
+    },
+    {
+      "file": "/home/user/AI_for_SMB/frontend/src/pages/lab/LabHome.jsx",
+      "action": "edit",
+      "tokens": 149,
+      "at": "2026-05-20T06:35:08.799Z"
     }
   ],
   "edit_counts": {
-    "frontend/src/pages/lab/LabDatabase.jsx": 2,
-    "mysql/init.sql": 2,
-    "backend/server.js": 2
+    "frontend/src/pages/lab/LabFlowcharts.jsx": 1,
+    "frontend/src/App.jsx": 2,
+    "frontend/src/components/Layout.jsx": 1,
+    "frontend/src/components/LeftSidebar.jsx": 1,
+    "frontend/src/pages/lab/LabHome.jsx": 2
   },
-  "anatomy_hits": 3,
+  "anatomy_hits": 1,
   "anatomy_misses": 0,
-  "repeated_reads_warned": 2,
+  "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
   "stop_count": 0
 }
