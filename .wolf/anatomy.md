@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T11:50:46.062Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T12:05:45.241Z
 > Files: 106 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -11,7 +11,7 @@
 - `dashboard structure.md` — Declares The (~3474 tok)
 - `deploy.sh` — deploy.sh — pull latest code and restart Docker services (~315 tok)
 - `Discussions` (~19708 tok)
-- `docker-compose.yml` — Docker Compose services (~395 tok)
+- `docker-compose.yml` — Docker Compose services (~390 tok)
 - `PLANNING.md` — Dashboard Planning Document (~2805 tok)
 - `README.md` — Project documentation (~9 tok)
 
