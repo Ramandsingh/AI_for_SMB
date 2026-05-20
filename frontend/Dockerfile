@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --silent --legacy-peer-deps
 COPY . .
+ENV NODE_OPTIONS=--max-old-space-size=3072
 RUN npm run build
 
 # Stage 2 — serve with nginx
