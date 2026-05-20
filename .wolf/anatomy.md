@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T06:35:08.787Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T11:42:12.766Z
 > Files: 106 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -54,7 +54,7 @@
 ## frontend/src/components/
 
 - `Layout.jsx` — Truly full-bleed (no padding) — canvas/diagram pages that need edge-to-edge space (~589 tok)
-- `LeftSidebar.jsx` — NAV_GROUPS (~3294 tok)
+- `LeftSidebar.jsx` — NAV_GROUPS (~3300 tok)
 - `PageWrapper.jsx` — PageWrapper — uses useEffect (~284 tok)
 - `RightSidebar.jsx` — RightSidebar — uses useState, useEffect (~922 tok)
 

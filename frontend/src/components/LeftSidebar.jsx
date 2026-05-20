@@ -126,6 +126,7 @@ const NAV_GROUPS = [
   },
   {
     label: 'Experimental UI',
+    defaultOpen: true,
     items: [
       { to: '/lab',            label: 'Lab Home',                  icon: '◈' },
       { to: '/lab/upload',     label: 'Image Upload · Uppy',       icon: '○' },
