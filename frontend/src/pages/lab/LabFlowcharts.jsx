@@ -1,44 +1,35 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import mermaid from 'mermaid';
+import nomnoml from 'nomnoml';
 import { ExternalLink, GitBranch, RotateCcw, Copy, Check } from 'lucide-react';
 
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-  fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-  flowchart: { curve: 'basis', padding: 20 },
-  sequence: { actorMargin: 60 },
-});
+mermaid.initialize({ startOnLoad: false, theme: 'default', fontFamily: 'ui-sans-serif, system-ui, sans-serif' });
 
-// ── Example diagrams (AI/SMB-relevant content) ────────────────────────────────
-const EXAMPLES = [
+// ── Mermaid examples ──────────────────────────────────────────────────────────
+const MERMAID_EXAMPLES = [
   {
-    id: 'flowchart',
-    label: 'Flowchart',
-    icon: '⬡',
-    desc: 'Decision trees, process maps',
+    id: 'flowchart', label: 'Flowchart', icon: '⬡',
+    desc: 'Process flows, decision trees',
     code: `flowchart TD
-    A([Business Problem]) --> B{Is labelled data\navailable?}
+    A([Business Problem]) --> B{Labelled data\navailable?}
     B -->|Yes| C[Choose ML approach]
     B -->|No| D[Collect & label data]
     D --> C
     C --> E{Structured data?}
     E -->|Yes| F[Classical ML\nRandom Forest · XGBoost]
-    E -->|No| G[Deep Learning\nor LLM fine-tune]
+    E -->|No| G[LLM or Deep Learning]
     F --> H[Evaluate on hold-out set]
     G --> H
-    H --> I{Accuracy meets\nbusiness threshold?}
+    H --> I{Meets business\nthreshold?}
     I -->|Yes| J[Deploy & Monitor]
     I -->|No| K[Tune / more data]
     K --> C
     J --> L([Production])`,
   },
   {
-    id: 'sequence',
-    label: 'Sequence',
-    icon: '⟶',
-    desc: 'API flows, system interactions',
+    id: 'sequence', label: 'Sequence', icon: '⟶',
+    desc: 'API calls, system interactions',
     code: `sequenceDiagram
     autonumber
     participant U as User
@@ -53,14 +44,12 @@ const EXAMPLES = [
     A->>V: top-k similarity search
     V-->>A: k relevant chunks + scores
     Note over A: Build prompt with chunks as context
-    A->>L: System + user + context prompt
-    L-->>A: Generated answer (streamed)
+    A->>L: System + context + user prompt
+    L-->>A: Answer (streamed)
     A-->>U: Final response`,
   },
   {
-    id: 'gantt',
-    label: 'Gantt',
-    icon: '▬',
+    id: 'gantt', label: 'Gantt', icon: '▬',
     desc: 'Project timelines, milestones',
     code: `gantt
     title AI Implementation Roadmap
@@ -79,18 +68,14 @@ const EXAMPLES = [
     section Build
     MVP development          :c1, after b1, 28d
     Internal testing         :c2, after c1, 10d
-    Iteration & fixes        :c3, after c2, 7d
 
     section Launch
     Pilot rollout            :d1, after c3, 14d
-    Training & onboarding    :d2, after c3, 14d
     Full deployment          :d3, after d1, 7d
     Review & next cycle      :milestone, after d3, 0d`,
   },
   {
-    id: 'state',
-    label: 'State',
-    icon: '◎',
+    id: 'state', label: 'State', icon: '◎',
     desc: 'State machines, agent loops',
     code: `stateDiagram-v2
     [*] --> Idle : Agent initialised
@@ -100,21 +85,19 @@ const EXAMPLES = [
     Thinking --> Responding : Direct answer ready
 
     ToolCall --> Executing : Tool approved
-    ToolCall --> Responding : Tool denied / no-op
+    ToolCall --> Responding : Tool denied
 
     Executing --> Thinking : Tool result returned
-    Executing --> Error : Tool raised exception
+    Executing --> Error : Exception raised
 
-    Error --> Thinking : Retry (max 3x)
-    Error --> Responding : Max retries exceeded
+    Error --> Thinking : Retry (≤3)
+    Error --> Responding : Max retries hit
 
     Responding --> Idle : Response sent
-    Responding --> [*] : Session timeout`,
+    Responding --> [*] : Session ended`,
   },
   {
-    id: 'mindmap',
-    label: 'Mind Map',
-    icon: '❋',
+    id: 'mindmap', label: 'Mind Map', icon: '❋',
     desc: 'Concept maps, topic trees',
     code: `mindmap
   root((AI for SMB))
@@ -127,27 +110,22 @@ const EXAMPLES = [
       Assessment
       ROI Calculator
       Roadmap
-      Maturity Journey
     Build
       Data Infrastructure
       AI Factory
-      Foundation Models
-      Governance & Risk
+      Governance
     Learn
       Python & Maths
       Classical ML
       Deep Learning
       GenAI & MLOps
     Labs
-      Chat Agent
-      Graph Viz
+      Chat · Graphs
       Flowcharts
-      Diagrams`,
+      Excalidraw`,
   },
   {
-    id: 'er',
-    label: 'ER Diagram',
-    icon: '⊞',
+    id: 'er', label: 'ER Diagram', icon: '⊞',
     desc: 'Database schemas, data models',
     code: `erDiagram
     COMPANY {
@@ -155,7 +133,6 @@ const EXAMPLES = [
       string name
       string industry
       string size
-      timestamp created_at
     }
     ASSESSMENT {
       int id PK
@@ -163,7 +140,6 @@ const EXAMPLES = [
       json answers
       int score
       string stage
-      timestamp created_at
     }
     ROI_CALCULATION {
       int id PK
@@ -171,339 +147,628 @@ const EXAMPLES = [
       string role_name
       decimal annual_saving
       decimal roi_24m
-      decimal roi_36m
-    }
-    DATABASE_PLATFORM {
-      int id PK
-      string name
-      string url
-      json features
-      json limitations
-      string badge
-      int sort_order
     }
 
     COMPANY ||--o{ ASSESSMENT : "has"
     COMPANY ||--o{ ROI_CALCULATION : "tracks"`,
   },
-];
+  {
+    id: 'class', label: 'Class', icon: '⬜',
+    desc: 'OOP class hierarchies, system design',
+    code: `classDiagram
+    class Agent {
+      +String name
+      +List~Tool~ tools
+      +ModelAdapter adapter
+      +run(message) Response
+      +addTool(tool) void
+    }
+    class Tool {
+      <<interface>>
+      +String name
+      +String description
+      +execute(params) Any
+    }
+    class SearchTool {
+      +String apiKey
+      +execute(query) List
+    }
+    class CodeTool {
+      +String runtime
+      +execute(code) String
+    }
+    class ModelAdapter {
+      +String modelId
+      +complete(prompt) String
+    }
 
-// ── Other open-source flowchart/diagram libraries ─────────────────────────────
-const TEXT_TO_DIAGRAM = [
-  {
-    name: 'Mermaid.js',
-    url: 'https://mermaid.js.org',
-    license: 'MIT',
-    types: 'Flowchart, Sequence, Gantt, Class, State, ER, Git, Mind Map, Pie',
-    rendering: 'Browser SVG',
-    note: 'Featured on this page. Best ecosystem support (VS Code, GitHub, Notion).',
-    highlight: true,
+    Agent --> ModelAdapter
+    Agent "1" --> "*" Tool
+    Tool <|-- SearchTool
+    Tool <|-- CodeTool`,
   },
   {
-    name: 'PlantUML',
-    url: 'https://plantuml.com',
-    license: 'GPL / MIT (core)',
-    types: 'UML, sequence, component, deployment, timing, JSON, YAML',
-    rendering: 'Server-side PNG/SVG or local Java',
-    note: 'Gold standard for enterprise UML — requires Java or a remote render server.',
-    highlight: false,
-  },
-  {
-    name: 'Graphviz (viz.js)',
-    url: 'https://viz-js.com',
-    license: 'MIT (viz.js) / EPL-2.0 (Graphviz)',
-    types: 'DOT language directed & undirected graphs',
-    rendering: 'Browser via WASM',
-    note: 'For pure graph layout (not flowcharts). Runs Graphviz compiled to WASM.',
-    highlight: false,
-  },
-  {
-    name: 'Markmap',
-    url: 'https://markmap.js.org',
-    license: 'MIT',
-    types: 'Mind maps from Markdown headers',
-    rendering: 'Browser SVG (D3)',
-    note: 'One-trick: turn any Markdown outline into an interactive collapsible mind map.',
-    highlight: false,
-  },
-  {
-    name: 'nomnoml',
-    url: 'https://nomnoml.com',
-    license: 'MIT',
-    types: 'UML class, activity, sequence (simplified)',
-    rendering: 'Browser Canvas',
-    note: 'Minimal, clean syntax for UML sketching. No dependencies beyond itself.',
-    highlight: false,
-  },
-  {
-    name: 'Kroki',
-    url: 'https://kroki.io',
-    license: 'MIT',
-    types: 'Unified API for 30+ diagram formats (Mermaid, PlantUML, Graphviz, D2, …)',
-    rendering: 'Server-side (self-host or cloud)',
-    note: 'Diagram format aggregator — one HTTP API for every format. Great for docs pipelines.',
-    highlight: false,
-  },
-];
-
-const INTERACTIVE = [
-  {
-    name: 'ReactFlow',
-    url: 'https://reactflow.dev',
-    to: '/lab/graph',
-    license: 'MIT',
-    desc: 'Node-based graph editor. Custom node types, edge routing, minimap. Used in the Site Graph lab.',
-  },
-  {
-    name: 'Excalidraw',
-    url: 'https://excalidraw.com',
-    to: '/lab/excalidraw',
-    license: 'MIT',
-    desc: 'Hand-drawn whiteboard. Persistent scenes in MySQL. Free-form, great for sketching.',
-  },
-  {
-    name: 'Cytoscape.js',
-    url: 'https://js.cytoscape.org',
-    to: '/lab/cytoscape',
-    license: 'MIT',
-    desc: 'Network & graph analysis. 6 live use-case graphs in the Graph Viz lab.',
-  },
-  {
-    name: 'D3.js',
-    url: 'https://d3js.org',
-    to: null,
-    license: 'ISC',
-    desc: 'Low-level SVG/Canvas binding for any custom visualization. Forces, trees, hierarchies.',
+    id: 'gitgraph', label: 'Git Graph', icon: '⎇',
+    desc: 'Branch strategies, release flows',
+    code: `gitGraph
+    commit id: "Initial setup"
+    branch feature/rag-pipeline
+    checkout feature/rag-pipeline
+    commit id: "Add embeddings"
+    commit id: "Add vector store"
+    checkout main
+    branch feature/agent-loop
+    checkout feature/agent-loop
+    commit id: "Tool registry"
+    commit id: "ReAct loop"
+    checkout main
+    merge feature/rag-pipeline id: "RAG merged"
+    merge feature/agent-loop id: "Agents merged"
+    commit id: "v1.0.0 release" tag: "v1.0"
+    branch hotfix/token-limit
+    checkout hotfix/token-limit
+    commit id: "Fix max tokens"
+    checkout main
+    merge hotfix/token-limit id: "Hotfix applied"`,
   },
 ];
 
-// ── Mermaid renderer ──────────────────────────────────────────────────────────
-let renderSeq = 0;
+// ── nomnoml examples ──────────────────────────────────────────────────────────
+const NOMNOML_EXAMPLES = [
+  {
+    id: 'class', label: 'Class Diagram', icon: '⬜',
+    desc: 'Clean UML class diagrams',
+    code: `#background: #f8fafc
+#stroke: #475569
+#fill: #f1f5f9; #e2e8f0
+#font: 13
+#fontSize: 13
+#leading: 1.4
+#padding: 12
 
-function MermaidDiagram({ code }) {
+[<abstract>Agent
+  | name: string
+  | tools: Tool[]
+  | run(msg): Response]
+
+[Tool
+  | name: string
+  | description: string
+  |execute(params): any]
+
+[SearchTool
+  | apiKey: string
+  | execute(query): List]
+
+[CodeTool
+  | runtime: string
+  | execute(code): string]
+
+[ModelAdapter
+  | modelId: string
+  | complete(prompt): string]
+
+[Agent] -> [ModelAdapter]
+[Agent] +-> [Tool]
+[Tool] <:- [SearchTool]
+[Tool] <:- [CodeTool]`,
+  },
+  {
+    id: 'arch', label: 'Architecture', icon: '⬡',
+    desc: 'System components and data flows',
+    code: `#background: #f8fafc
+#stroke: #475569
+#fill: #dbeafe; #e0f2fe
+#font: 13
+#fontSize: 13
+#leading: 1.4
+#padding: 12
+
+[<actor>User]
+
+[<frame>React Frontend
+  | [Chat UI]
+  | [Dashboard Pages]
+  | [Lab Tools]]
+
+[<frame>Express Backend
+  | [REST API]
+  | [Auth Middleware]
+  | [Migration Runner]]
+
+[<database>MySQL
+  | assessments
+  | roi_models
+  | lab_gallery]
+
+[<frame>AI Services
+  | [Claude API]
+  | [Embeddings]
+  | [Vector Store]]
+
+[User] -> [React Frontend]
+[React Frontend] -> [Express Backend]
+[Express Backend] -> [MySQL]
+[Express Backend] -> [AI Services]`,
+  },
+  {
+    id: 'sequence', label: 'Sequence', icon: '⟶',
+    desc: 'Message passing, process flow',
+    code: `#background: #f8fafc
+#stroke: #475569
+#fill: #f0fdf4; #dcfce7
+#font: 13
+#fontSize: 13
+#leading: 1.4
+#padding: 12
+
+[<actor>User] ask -> [App]
+[App] embed -> [Embed API]
+[Embed API] vector --> [App]
+[App] search -> [Vector DB]
+[Vector DB] chunks --> [App]
+[App] prompt -> [LLM]
+[LLM] answer --> [App]
+[App] response --> [<actor>User]`,
+  },
+];
+
+// ── When to use which ─────────────────────────────────────────────────────────
+const DECISION_GUIDE = [
+  {
+    need: 'Process / decision flow',
+    recommended: 'Mermaid flowchart',
+    why: 'Readable syntax, excellent GitHub rendering, supports subgraphs and styling.',
+    alt: 'nomnoml activity',
+  },
+  {
+    need: 'API sequence diagram',
+    recommended: 'Mermaid sequenceDiagram',
+    why: 'First-class participant/message syntax, autonumber, loop/alt blocks.',
+    alt: 'PlantUML sequence',
+  },
+  {
+    need: 'Project timeline',
+    recommended: 'Mermaid gantt',
+    why: 'Only major browser-native Gantt library. Handles date math and milestones.',
+    alt: 'None (Mermaid only option)',
+  },
+  {
+    need: 'UML class diagram',
+    recommended: 'nomnoml',
+    why: 'Cleaner output than Mermaid class, more styling control, pure browser.',
+    alt: 'Mermaid classDiagram, PlantUML',
+  },
+  {
+    need: 'System architecture',
+    recommended: 'nomnoml',
+    why: 'Supports frames, actors, databases as first-class shapes. Very readable.',
+    alt: 'Mermaid flowchart, ReactFlow',
+  },
+  {
+    need: 'Interactive drag-and-drop',
+    recommended: 'ReactFlow',
+    why: 'Full React component control. Custom node types. Live in this lab at /lab/graph.',
+    alt: 'Excalidraw (freehand)',
+  },
+  {
+    need: 'Freehand whiteboard',
+    recommended: 'Excalidraw',
+    why: 'Hand-drawn aesthetic, great for brainstorming. Live in this lab at /lab/excalidraw.',
+    alt: 'draw.io',
+  },
+  {
+    need: 'Network / graph analysis',
+    recommended: 'Cytoscape.js',
+    why: 'Built for graph algorithms, clustering, large node counts. Live at /lab/cytoscape.',
+    alt: 'D3.js force layout',
+  },
+  {
+    need: 'Docs-as-code pipeline',
+    recommended: 'Mermaid or Kroki',
+    why: 'GitHub/GitLab render Mermaid natively. Kroki handles 30+ formats via server API.',
+    alt: 'PlantUML + CI plugin',
+  },
+];
+
+// ── Other libraries reference ─────────────────────────────────────────────────
+const OTHER_LIBS = [
+  {
+    name: 'PlantUML', url: 'https://plantuml.com', license: 'GPL/MIT',
+    render: 'Java / server',
+    sample: '@startuml\nAlice -> Bob: Hello\nBob --> Alice: Hi!\n@enduml',
+    note: 'Gold standard for enterprise UML. Requires Java locally or a render server.',
+  },
+  {
+    name: 'Graphviz / viz.js', url: 'https://viz-js.com', license: 'MIT / EPL-2.0',
+    render: 'Browser (WASM)',
+    sample: 'digraph G {\n  A -> B -> C\n  A -> C\n}',
+    note: 'DOT language. Pure graph layout — not flowcharts. Runs Graphviz compiled to WASM.',
+  },
+  {
+    name: 'Markmap', url: 'https://markmap.js.org', license: 'MIT',
+    render: 'Browser (D3)',
+    sample: '# Root\n## Branch A\n### Leaf 1\n## Branch B',
+    note: 'Converts Markdown headings into a collapsible, interactive mind map SVG.',
+  },
+  {
+    name: 'Kroki', url: 'https://kroki.io', license: 'MIT',
+    render: 'Server (self-host)',
+    sample: 'POST https://kroki.io/{format}/svg\n{ "diagram_source": "..." }',
+    note: 'One API for 30+ formats. Self-host or use the public endpoint. Great for docs pipelines.',
+  },
+  {
+    name: 'D2', url: 'https://d2lang.com', license: 'Mozilla PL 2.0',
+    render: 'CLI / server',
+    sample: 'frontend -> backend: HTTP\nbackend -> db: SQL',
+    note: 'Modern diagram scripting language with beautiful layouts. CLI-first, no browser renderer.',
+  },
+];
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+let mmdSeq = 0;
+
+function MermaidPanel({ examples }) {
+  const [activeId, setActiveId] = useState(examples[0].id);
+  const [codes, setCodes] = useState(() => Object.fromEntries(examples.map(e => [e.id, e.code])));
   const [svg, setSvg] = useState('');
   const [err, setErr] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const active = examples.find(e => e.id === activeId);
+  const code = codes[activeId];
 
   useEffect(() => {
     let live = true;
-    const id = `mmd-${++renderSeq}`;
-    mermaid.render(id, code.trim())
-      .then(({ svg }) => { if (live) { setSvg(svg); setErr(null); } })
+    setSvg(''); setErr(null);
+    mermaid.render(`mmd-${++mmdSeq}`, code.trim())
+      .then(r => { if (live) setSvg(r.svg); })
       .catch(e => { if (live) setErr(String(e.message || e).split('\n')[0]); });
     return () => { live = false; };
+  }, [code, activeId]);
+
+  const reset = useCallback(() => setCodes(c => ({ ...c, [activeId]: active.code })), [activeId, active.code]);
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
   }, [code]);
 
-  if (err) return (
-    <div className="p-4 text-xs font-mono text-red-600 bg-red-50 rounded-xl border border-red-200 leading-relaxed whitespace-pre-wrap">
-      {err}
-    </div>
-  );
-  if (!svg) return (
-    <div className="flex items-center justify-center h-32 text-slate-300 text-sm">Rendering…</div>
-  );
   return (
-    <div
-      className="flex justify-center items-center p-4 overflow-auto"
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    <div className="card p-0 overflow-hidden">
+      {/* Diagram type tabs */}
+      <div className="flex border-b border-slate-100 overflow-x-auto">
+        {examples.map(e => (
+          <button key={e.id} onClick={() => setActiveId(e.id)}
+            className={`px-3 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1 border-b-2 ${
+              activeId === e.id
+                ? 'border-blue-500 text-blue-700 bg-blue-50/50'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <span>{e.icon}</span> {e.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Toolbar */}
+      <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <p className="text-xs text-slate-400">{active.desc} · edit code to update preview</p>
+        <div className="flex gap-2">
+          <button onClick={reset} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors">
+            <RotateCcw size={10} /> Reset
+          </button>
+          <button onClick={copy} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors">
+            {copied ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+      </div>
+
+      {/* Editor + Preview split */}
+      <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+        <textarea
+          value={code}
+          onChange={e => setCodes(c => ({ ...c, [activeId]: e.target.value }))}
+          className="w-full h-72 lg:h-80 px-4 py-4 text-sm font-mono text-slate-100 bg-slate-900 resize-none focus:outline-none leading-relaxed"
+          spellCheck={false}
+        />
+        <div className="bg-white min-h-72 lg:min-h-80 flex items-center justify-center p-4 overflow-auto">
+          {err
+            ? <div className="text-xs font-mono text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 w-full">{err}</div>
+            : svg
+              ? <div dangerouslySetInnerHTML={{ __html: svg }} className="w-full flex justify-center" />
+              : <div className="text-slate-300 text-sm">Rendering…</div>
+          }
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-export default function LabFlowcharts() {
-  const [activeId, setActiveId] = useState(EXAMPLES[0].id);
-  const [codes, setCodes] = useState(() => Object.fromEntries(EXAMPLES.map(e => [e.id, e.code])));
+function NomnomlPanel({ examples }) {
+  const [activeId, setActiveId] = useState(examples[0].id);
+  const [codes, setCodes] = useState(() => Object.fromEntries(examples.map(e => [e.id, e.code])));
+  const [svg, setSvg] = useState('');
+  const [err, setErr] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  const active = EXAMPLES.find(e => e.id === activeId);
+  const active = examples.find(e => e.id === activeId);
   const code = codes[activeId];
 
-  const reset = useCallback(() => {
-    setCodes(c => ({ ...c, [activeId]: active.code }));
-  }, [activeId, active.code]);
+  useEffect(() => {
+    try {
+      const result = nomnoml.renderSvg(code);
+      setSvg(result);
+      setErr(null);
+    } catch (e) {
+      setErr(String(e.message || e));
+    }
+  }, [code, activeId]);
 
+  const reset = useCallback(() => setCodes(c => ({ ...c, [activeId]: active.code })), [activeId, active.code]);
   const copy = useCallback(() => {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
+    navigator.clipboard.writeText(code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
   }, [code]);
+
+  return (
+    <div className="card p-0 overflow-hidden">
+      <div className="flex border-b border-slate-100 overflow-x-auto">
+        {examples.map(e => (
+          <button key={e.id} onClick={() => setActiveId(e.id)}
+            className={`px-3 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1 border-b-2 ${
+              activeId === e.id
+                ? 'border-violet-500 text-violet-700 bg-violet-50/50'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <span>{e.icon}</span> {e.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <p className="text-xs text-slate-400">{active.desc} · edit code to update preview</p>
+        <div className="flex gap-2">
+          <button onClick={reset} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors">
+            <RotateCcw size={10} /> Reset
+          </button>
+          <button onClick={copy} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors">
+            {copied ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+        <textarea
+          value={code}
+          onChange={e => setCodes(c => ({ ...c, [activeId]: e.target.value }))}
+          className="w-full h-72 lg:h-80 px-4 py-4 text-sm font-mono text-slate-100 bg-slate-900 resize-none focus:outline-none leading-relaxed"
+          spellCheck={false}
+        />
+        <div className="bg-white min-h-72 lg:min-h-80 flex items-center justify-center p-4 overflow-auto">
+          {err
+            ? <div className="text-xs font-mono text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 w-full">{err}</div>
+            : svg
+              ? <div dangerouslySetInnerHTML={{ __html: svg }} className="w-full flex justify-center" />
+              : <div className="text-slate-300 text-sm">Rendering…</div>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+const LIBS = ['mermaid', 'nomnoml', 'guide'];
+
+export default function LabFlowcharts() {
+  const [activeLib, setActiveLib] = useState('mermaid');
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start gap-3 mb-2">
+      <div className="flex items-start gap-3 mb-4">
         <div className="p-2.5 rounded-xl bg-slate-800 flex-shrink-0 mt-0.5">
           <GitBranch size={18} className="text-slate-200" />
         </div>
         <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h1 className="text-2xl font-extrabold text-slate-900">Flowchart Libraries</h1>
-            <a
-              href="https://github.com/mermaid-js/mermaid"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors"
-            >
-              mermaid-js/mermaid <ExternalLink size={10} />
-            </a>
-            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">MIT</span>
-            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">v11</span>
-          </div>
+          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">Diagram & Flowchart Options</h1>
           <p className="text-slate-500 text-sm">
-            Live Mermaid.js editor — text-to-diagram in the browser. Edit any example below, then compare other open-source options.
+            Open-source browser-native diagram libraries — live editors, syntax comparison, and a decision guide for picking the right tool.
           </p>
         </div>
       </div>
 
-      {/* Feature badges */}
-      <div className="flex flex-wrap gap-2 mb-8 mt-3">
-        {['Flowchart', 'Sequence', 'Gantt', 'State', 'Mind Map', 'ER Diagram', 'Git Graph', 'Pie Chart', 'Class Diagram'].map(f => (
-          <span key={f} className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">{f}</span>
-        ))}
+      {/* Library selector */}
+      <div className="flex gap-2 mb-6 flex-wrap">
+        <button
+          onClick={() => setActiveLib('mermaid')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+            activeLib === 'mermaid'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+              : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700'
+          }`}
+        >
+          <span className="text-base">⬡</span>
+          Mermaid.js
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${activeLib === 'mermaid' ? 'bg-blue-500 text-blue-100' : 'bg-slate-100 text-slate-500'}`}>8 types</span>
+        </button>
+        <button
+          onClick={() => setActiveLib('nomnoml')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+            activeLib === 'nomnoml'
+              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+              : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300 hover:text-violet-700'
+          }`}
+        >
+          <span className="text-base">⬜</span>
+          nomnoml
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${activeLib === 'nomnoml' ? 'bg-violet-500 text-violet-100' : 'bg-slate-100 text-slate-500'}`}>UML</span>
+        </button>
+        <button
+          onClick={() => setActiveLib('guide')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+            activeLib === 'guide'
+              ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
+              : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800'
+          }`}
+        >
+          All Libraries + Decision Guide
+        </button>
       </div>
 
-      {/* Live Editor */}
-      <div className="card p-0 overflow-hidden mb-8">
-        {/* Diagram type tabs */}
-        <div className="flex gap-0 border-b border-slate-100 overflow-x-auto">
-          {EXAMPLES.map(e => (
-            <button
-              key={e.id}
-              onClick={() => setActiveId(e.id)}
-              className={`px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 border-b-2 ${
-                activeId === e.id
-                  ? 'border-blue-500 text-blue-700 bg-blue-50/50'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <span className="text-base leading-none">{e.icon}</span>
-              {e.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-          <p className="text-xs text-slate-500">{active.desc} · editable below</p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={reset}
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg transition-colors"
-            >
-              <RotateCcw size={11} /> Reset
-            </button>
-            <button
-              onClick={copy}
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg transition-colors"
-            >
-              {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
-              {copied ? 'Copied' : 'Copy'}
-            </button>
+      {/* ── MERMAID PANEL ──────────────────────────────────────────────────── */}
+      {activeLib === 'mermaid' && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <a href="https://mermaid.js.org" target="_blank" rel="noopener noreferrer"
+              className="font-bold text-slate-800 hover:text-blue-700 transition-colors flex items-center gap-1">
+              Mermaid.js <ExternalLink size={13} />
+            </a>
+            <a href="https://github.com/mermaid-js/mermaid" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-slate-500 hover:text-blue-600 flex items-center gap-1">
+              mermaid-js/mermaid <ExternalLink size={11} />
+            </a>
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">MIT</span>
+            <span className="text-xs text-slate-400">v11 · installed</span>
           </div>
-        </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Text-to-diagram library with 12+ diagram types. Renders directly in the browser as SVG. Native support in GitHub, GitLab, Notion, Confluence, and VS Code.
+          </p>
+          <MermaidPanel examples={MERMAID_EXAMPLES} />
 
-        {/* Split: editor + preview */}
-        <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
-          {/* Code editor */}
-          <div className="bg-slate-900 rounded-none">
-            <textarea
-              value={code}
-              onChange={e => setCodes(c => ({ ...c, [activeId]: e.target.value }))}
-              className="w-full h-72 lg:h-96 px-5 py-4 text-sm font-mono text-slate-100 bg-transparent resize-none focus:outline-none leading-relaxed"
-              spellCheck={false}
-              placeholder="Mermaid diagram code…"
-            />
-          </div>
+          <div className="mt-4 card bg-slate-900 p-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Install & use</p>
+            <pre className="text-xs font-mono text-slate-300 leading-relaxed">{`npm install mermaid
 
-          {/* Rendered diagram */}
-          <div className="bg-white min-h-72 lg:min-h-96 flex flex-col justify-center">
-            <MermaidDiagram key={activeId} code={code} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Text-to-diagram comparison ─────────────────────────────────────── */}
-      <h2 className="text-lg font-bold text-slate-800 mb-1">Text-to-Diagram Libraries</h2>
-      <p className="text-sm text-slate-500 mb-4">Write diagram code, get SVG/PNG. No drag-and-drop — great for docs-as-code pipelines and version-controlled diagrams.</p>
-
-      <div className="space-y-3 mb-8">
-        {TEXT_TO_DIAGRAM.map(lib => (
-          <div key={lib.name} className={`card flex gap-4 items-start ${lib.highlight ? 'border-blue-200 bg-blue-50/30' : ''}`}>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <a
-                  href={lib.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-bold text-slate-800 hover:text-blue-700 transition-colors"
-                >
-                  {lib.name} ↗
-                </a>
-                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">{lib.license}</span>
-                {lib.highlight && (
-                  <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">Featured above ↑</span>
-                )}
-              </div>
-              <p className="text-xs text-slate-500 mb-2">{lib.note}</p>
-              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-600">
-                <div><span className="font-semibold text-slate-400 uppercase tracking-wide text-[10px]">Diagram types </span>{lib.types}</div>
-                <div><span className="font-semibold text-slate-400 uppercase tracking-wide text-[10px]">Rendering </span>{lib.rendering}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Interactive canvas libraries ───────────────────────────────────── */}
-      <h2 className="text-lg font-bold text-slate-800 mb-1">Interactive Canvas Libraries</h2>
-      <p className="text-sm text-slate-500 mb-4">Drag-and-drop node editors and freehand canvas tools — code-defined or user-drawn. All already demoed in this lab.</p>
-
-      <div className="grid sm:grid-cols-2 gap-3">
-        {INTERACTIVE.map(lib => (
-          <div key={lib.name} className="card flex flex-col gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <a
-                href={lib.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold text-slate-800 hover:text-blue-700 transition-colors text-sm"
-              >
-                {lib.name} ↗
-              </a>
-              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">{lib.license}</span>
-              {lib.to && (
-                <NavLink
-                  to={lib.to}
-                  className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors"
-                >
-                  View demo →
-                </NavLink>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed">{lib.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Install snippet */}
-      <div className="mt-8 card bg-slate-900 text-slate-100 p-5">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick start</p>
-        <pre className="text-sm font-mono leading-relaxed text-slate-200">{`# Install
-npm install mermaid
-
-# React usage
 import mermaid from 'mermaid';
-
 mermaid.initialize({ startOnLoad: false, theme: 'default' });
 
-const { svg } = await mermaid.render('diagram-id', \`
+const { svg } = await mermaid.render('unique-id', \`
   flowchart LR
-    A[Input] --> B[Process] --> C[Output]
+    A[Start] --> B[Process] --> C[End]
 \`);
+document.getElementById('diagram').innerHTML = svg;`}</pre>
+          </div>
+        </div>
+      )}
 
-// Inject SVG into DOM
-element.innerHTML = svg;`}</pre>
-      </div>
+      {/* ── NOMNOML PANEL ──────────────────────────────────────────────────── */}
+      {activeLib === 'nomnoml' && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <a href="https://nomnoml.com" target="_blank" rel="noopener noreferrer"
+              className="font-bold text-slate-800 hover:text-violet-700 transition-colors flex items-center gap-1">
+              nomnoml <ExternalLink size={13} />
+            </a>
+            <a href="https://github.com/skanaar/nomnoml" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-slate-500 hover:text-violet-600 flex items-center gap-1">
+              skanaar/nomnoml <ExternalLink size={11} />
+            </a>
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">MIT</span>
+            <span className="text-xs text-slate-400">v1.7 · installed</span>
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Minimal UML diagram tool with clean output and powerful styling directives. Excellent for class diagrams and architecture sketches. No dependencies, pure browser SVG.
+          </p>
+
+          <div className="card bg-amber-50 border-amber-200 p-4 mb-4">
+            <p className="text-xs font-semibold text-amber-700 mb-1">nomnoml vs Mermaid for UML</p>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              nomnoml produces cleaner, more compact class diagrams than Mermaid. It supports frames, actors, and databases as first-class shapes — ideal for architecture diagrams.
+              Mermaid wins on variety (Gantt, sequence, git graph) and ecosystem (GitHub rendering).
+            </p>
+          </div>
+
+          <NomnomlPanel examples={NOMNOML_EXAMPLES} />
+
+          <div className="mt-4 card bg-slate-900 p-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Install & use</p>
+            <pre className="text-xs font-mono text-slate-300 leading-relaxed">{`npm install nomnoml
+
+import nomnoml from 'nomnoml';
+
+// Render directly to SVG string
+const svg = nomnoml.renderSvg(\`
+  [User] -> [App]
+  [App] -> [Database]
+\`);
+document.getElementById('diagram').innerHTML = svg;
+
+// Or draw to a canvas element
+nomnoml.draw(canvasElement, source);`}</pre>
+          </div>
+        </div>
+      )}
+
+      {/* ── GUIDE PANEL ────────────────────────────────────────────────────── */}
+      {activeLib === 'guide' && (
+        <div>
+          {/* Decision guide */}
+          <h2 className="text-base font-bold text-slate-800 mb-1">When to use which library</h2>
+          <p className="text-sm text-slate-500 mb-4">Pick based on your specific diagram need, not the most popular library.</p>
+
+          <div className="card p-0 overflow-hidden mb-8">
+            <div className="grid grid-cols-12 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-100 px-4 py-2.5 gap-3">
+              <div className="col-span-3">You need…</div>
+              <div className="col-span-3">Use this</div>
+              <div className="col-span-4">Why</div>
+              <div className="col-span-2">Alternatives</div>
+            </div>
+            {DECISION_GUIDE.map((row, i) => (
+              <div key={i} className={`grid grid-cols-12 gap-3 px-4 py-3 text-xs border-b border-slate-50 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                <div className="col-span-3 text-slate-700 font-medium">{row.need}</div>
+                <div className="col-span-3">
+                  <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{row.recommended}</span>
+                </div>
+                <div className="col-span-4 text-slate-500 leading-relaxed">{row.why}</div>
+                <div className="col-span-2 text-slate-400">{row.alt}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Other libraries */}
+          <h2 className="text-base font-bold text-slate-800 mb-1">Other open-source options</h2>
+          <p className="text-sm text-slate-500 mb-4">Libraries that don't run purely in the browser or cover specific niches.</p>
+
+          <div className="space-y-3 mb-8">
+            {OTHER_LIBS.map(lib => (
+              <div key={lib.name} className="card">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <a href={lib.url} target="_blank" rel="noopener noreferrer"
+                    className="font-bold text-slate-800 hover:text-blue-700 transition-colors flex items-center gap-1 text-sm">
+                    {lib.name} <ExternalLink size={11} />
+                  </a>
+                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">{lib.license}</span>
+                  <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{lib.render}</span>
+                </div>
+                <p className="text-xs text-slate-500 mb-2 leading-relaxed">{lib.note}</p>
+                <pre className="text-xs font-mono text-slate-500 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100 leading-relaxed">{lib.sample}</pre>
+              </div>
+            ))}
+          </div>
+
+          {/* Links to other lab tools */}
+          <h2 className="text-base font-bold text-slate-800 mb-1">Interactive canvas tools — already in this lab</h2>
+          <p className="text-sm text-slate-500 mb-4">For drag-and-drop diagrams, freehand drawing, or graph analysis — use these lab demos.</p>
+
+          <div className="grid sm:grid-cols-3 gap-3">
+            {[
+              { to: '/lab/graph', name: 'ReactFlow', desc: 'Node-based graph editor — custom nodes, edge routing, minimap.', color: 'blue' },
+              { to: '/lab/excalidraw', name: 'Excalidraw', desc: 'Hand-drawn whiteboard — persistent scenes, free-form sketching.', color: 'violet' },
+              { to: '/lab/cytoscape', name: 'Cytoscape.js', desc: '6 live network graphs — knowledge graph, tech stack, learning paths.', color: 'emerald' },
+            ].map(item => (
+              <NavLink key={item.to} to={item.to}
+                className="card group hover:-translate-y-0.5 transition-transform duration-150 block">
+                <p className="font-bold text-slate-800 group-hover:text-blue-700 transition-colors text-sm mb-1">
+                  {item.name} →
+                </p>
+                <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

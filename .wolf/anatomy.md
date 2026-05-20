@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T11:42:12.766Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T11:50:46.062Z
 > Files: 106 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -131,7 +131,7 @@
 - `LabCytoscape.jsx` — ── Use-case graph definitions ──────────────────────────────────────────────── (~7284 tok)
 - `LabDatabase.jsx` — COLOR_MAP (~2837 tok)
 - `LabExcalidraw.jsx` — Excalidraw (~4152 tok)
-- `LabFlowcharts.jsx` — EXAMPLES (~5023 tok)
+- `LabFlowcharts.jsx` — MERMAID_EXAMPLES (~8320 tok)
 - `LabGraph.jsx` — SECTIONS — renders chart — uses useNavigate, useCallback (~3576 tok)
 - `LabHome.jsx` — NOTES_KEY (~3400 tok)
 - `LabTimeline.jsx` — EVENTS (~2122 tok)

@@ -6,6 +6,101 @@
       "count": 1,
       "tokens": 3294,
       "first_read": "2026-05-20T11:42:03.840Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/Landing.jsx": {
+      "count": 1,
+      "tokens": 3892,
+      "first_read": "2026-05-20T11:46:04.425Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/LearnHome.jsx": {
+      "count": 1,
+      "tokens": 2495,
+      "first_read": "2026-05-20T11:46:20.501Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/LearningApproach.jsx": {
+      "count": 1,
+      "tokens": 4111,
+      "first_read": "2026-05-20T11:46:20.720Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/IndividualAdoption.jsx": {
+      "count": 1,
+      "tokens": 3873,
+      "first_read": "2026-05-20T11:46:21.028Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/TechWhatIsAI.jsx": {
+      "count": 1,
+      "tokens": 3443,
+      "first_read": "2026-05-20T11:46:21.144Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/TechCategories.jsx": {
+      "count": 1,
+      "tokens": 3683,
+      "first_read": "2026-05-20T11:46:21.358Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/TechHowWork.jsx": {
+      "count": 1,
+      "tokens": 4298,
+      "first_read": "2026-05-20T11:46:21.770Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/TechDeployment.jsx": {
+      "count": 1,
+      "tokens": 4416,
+      "first_read": "2026-05-20T11:46:25.612Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/TechIntegrations.jsx": {
+      "count": 1,
+      "tokens": 5293,
+      "first_read": "2026-05-20T11:46:25.622Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/TechGlossary.jsx": {
+      "count": 1,
+      "tokens": 4287,
+      "first_read": "2026-05-20T11:46:26.048Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/EnterpriseWhatAI.jsx": {
+      "count": 1,
+      "tokens": 7650,
+      "first_read": "2026-05-20T11:46:26.277Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/EnterpriseValue.jsx": {
+      "count": 1,
+      "tokens": 4705,
+      "first_read": "2026-05-20T11:46:26.485Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/EnterpriseHowAdopt.jsx": {
+      "count": 1,
+      "tokens": 4830,
+      "first_read": "2026-05-20T11:46:26.701Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/AIConceptsLLM.jsx": {
+      "count": 1,
+      "tokens": 4516,
+      "first_read": "2026-05-20T11:46:34.734Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/AIConceptsRAG.jsx": {
+      "count": 1,
+      "tokens": 5034,
+      "first_read": "2026-05-20T11:46:34.977Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/AIConceptsAgents.jsx": {
+      "count": 1,
+      "tokens": 4997,
+      "first_read": "2026-05-20T11:46:35.459Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/Assessment.jsx": {
+      "count": 1,
+      "tokens": 3306,
+      "first_read": "2026-05-20T11:46:35.466Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/Roadmap.jsx": {
+      "count": 1,
+      "tokens": 3205,
+      "first_read": "2026-05-20T11:46:35.679Z"
+    },
+    "/home/user/AI_for_SMB/frontend/src/pages/lab/LabFlowcharts.jsx": {
+      "count": 1,
+      "tokens": 5023,
+      "first_read": "2026-05-20T11:47:41.321Z"
     }
   },
   "files_written": [
@@ -14,14 +109,21 @@
       "action": "edit",
       "tokens": 20,
       "at": "2026-05-20T11:42:12.792Z"
+    },
+    {
+      "file": "/home/user/AI_for_SMB/frontend/src/pages/lab/LabFlowcharts.jsx",
+      "action": "create",
+      "tokens": 8320,
+      "at": "2026-05-20T11:50:46.071Z"
     }
   ],
   "edit_counts": {
-    "frontend/src/components/LeftSidebar.jsx": 1
+    "frontend/src/components/LeftSidebar.jsx": 1,
+    "frontend/src/pages/lab/LabFlowcharts.jsx": 1
   },
-  "anatomy_hits": 1,
+  "anatomy_hits": 20,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
-  "stop_count": 0
+  "stop_count": 1
 }
