@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T12:05:45.241Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-20T12:22:23.733Z
 > Files: 106 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -36,7 +36,7 @@
 
 ## frontend/
 
-- `Dockerfile` — Docker container definition (~95 tok)
+- `Dockerfile` — Docker container definition (~107 tok)
 - `index.html` — AI Adoption Dashboard (~157 tok)
 - `nginx.conf` — Nginx configuration (~219 tok)
 - `package-lock.json` — npm lock file (~98481 tok)
