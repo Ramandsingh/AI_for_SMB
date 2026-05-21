@@ -1,21 +1,15 @@
 name: Deploy to MBserver
 
 on:
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Reason for deployment (optional)'
-        required: false
-        default: 'Manual release'
   push:
     branches:
+      - claude/docker-react-vite-mysql-PeMvf
       - main
-    tags:
-      - 'v*'
 
 jobs:
   deploy:
     runs-on: self-hosted
+    if: contains(github.event.head_commit.message, '[deploy]')
 
     steps:
       - name: Checkout code
