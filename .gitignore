@@ -13,6 +13,8 @@ webhook.log
 .wolf/cron-state.json
 .wolf/designqc-report.json
 .wolf/suggestions.json
+.wolf/hooks/_session.json
+.wolf/anatomy.md
 
 # graphify — generated code map (rebuilt with: npx graphify build .)
 graphify-out/
