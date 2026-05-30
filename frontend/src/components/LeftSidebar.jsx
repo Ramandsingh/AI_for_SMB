@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useCompany } from '../context/CompanyContext';
+import SiteSearch from './SiteSearch';
 
 const NAV_GROUPS = [
   {
@@ -284,6 +285,8 @@ export default function LeftSidebar({ isOpen, onToggle }) {
               </>
             )}
           </NavLink>
+
+          <SiteSearch />
         </div>
 
         {/* Navigation */}
