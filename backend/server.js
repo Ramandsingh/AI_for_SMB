@@ -3,7 +3,6 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 const multer = require('multer');
 const os = require('os');
-const fs = require('fs');
 const path = require('path');
 const { PDFDocument, PDFName, PDFString, PDFNumber, rgb } = require('pdf-lib');
 const { v4: uuidv4 } = require('uuid');
@@ -563,9 +562,11 @@ async function runMigrations(db) {
       original_name VARCHAR(255) NOT NULL,
       stored_name  VARCHAR(255) NOT NULL,
       size         INT NOT NULL,
+      file_data    LONGBLOB,
       created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  await db.query('ALTER TABLE pdf_files ADD COLUMN IF NOT EXISTS file_data LONGBLOB');
 
   // ── pdf_annotations ──────────────────────────────────────────────────────
   await db.query(`
@@ -597,9 +598,6 @@ async function runMigrations(db) {
     )
   `);
 
-  // ensure upload directory exists
-  const pdfDir = path.join(__dirname, 'uploads', 'pdfs');
-  fs.mkdirSync(pdfDir, { recursive: true });
 }
 
 // ── Health ────────────────────────────────────────────────────────────────────
@@ -974,16 +972,8 @@ app.put('/api/planning', async (req, res) => {
 });
 
 // ── PDF Lab ───────────────────────────────────────────────────────────────────
-const pdfStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, 'uploads', 'pdfs');
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => cb(null, `${uuidv4()}.pdf`),
-});
 const pdfUpload = multer({
-  storage: pdfStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     cb(null, file.mimetype === 'application/pdf');
@@ -994,11 +984,11 @@ const pdfUpload = multer({
 app.post('/api/lab/pdf/upload', pdfUpload.single('pdf'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No PDF file provided' });
-    const id = path.basename(req.file.filename, '.pdf');
+    const id = uuidv4();
     const db = await getPool();
     await db.query(
-      'INSERT INTO pdf_files (id, original_name, stored_name, size) VALUES (?, ?, ?, ?)',
-      [id, req.file.originalname, req.file.filename, req.file.size]
+      'INSERT INTO pdf_files (id, original_name, stored_name, size, file_data) VALUES (?, ?, ?, ?, ?)',
+      [id, req.file.originalname, req.file.originalname, req.file.size, req.file.buffer]
     );
     res.json({ id, original_name: req.file.originalname, size: req.file.size });
   } catch (err) {
@@ -1021,12 +1011,11 @@ app.get('/api/lab/pdf/files', async (req, res) => {
 app.get('/api/lab/pdf/files/:id/raw', async (req, res) => {
   try {
     const db = await getPool();
-    const [[file]] = await db.query('SELECT * FROM pdf_files WHERE id = ?', [req.params.id]);
-    if (!file) return res.status(404).json({ error: 'Not found' });
-    const filePath = path.join(__dirname, 'uploads', 'pdfs', file.stored_name);
+    const [[file]] = await db.query('SELECT original_name, file_data FROM pdf_files WHERE id = ?', [req.params.id]);
+    if (!file || !file.file_data) return res.status(404).json({ error: 'Not found' });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${file.original_name}"`);
-    fs.createReadStream(filePath).pipe(res);
+    res.send(file.file_data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -1036,10 +1025,8 @@ app.get('/api/lab/pdf/files/:id/raw', async (req, res) => {
 app.delete('/api/lab/pdf/files/:id', async (req, res) => {
   try {
     const db = await getPool();
-    const [[file]] = await db.query('SELECT * FROM pdf_files WHERE id = ?', [req.params.id]);
+    const [[file]] = await db.query('SELECT id FROM pdf_files WHERE id = ?', [req.params.id]);
     if (!file) return res.status(404).json({ error: 'Not found' });
-    const filePath = path.join(__dirname, 'uploads', 'pdfs', file.stored_name);
-    try { fs.unlinkSync(filePath); } catch {}
     await db.query('DELETE FROM pdf_annotations WHERE pdf_id = ?', [req.params.id]);
     await db.query('DELETE FROM pdf_files WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -1095,17 +1082,15 @@ app.delete('/api/lab/pdf/annotations/:id', async (req, res) => {
 app.get('/api/lab/pdf/files/:id/download', async (req, res) => {
   try {
     const db = await getPool();
-    const [[file]] = await db.query('SELECT * FROM pdf_files WHERE id = ?', [req.params.id]);
-    if (!file) return res.status(404).json({ error: 'Not found' });
+    const [[file]] = await db.query('SELECT original_name, file_data FROM pdf_files WHERE id = ?', [req.params.id]);
+    if (!file || !file.file_data) return res.status(404).json({ error: 'Not found' });
 
     const [annotations] = await db.query(
       'SELECT * FROM pdf_annotations WHERE pdf_id = ? ORDER BY page_index, created_at',
       [req.params.id]
     );
 
-    const filePath = path.join(__dirname, 'uploads', 'pdfs', file.stored_name);
-    const pdfBytes = fs.readFileSync(filePath);
-    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pdfDoc = await PDFDocument.load(file.file_data);
     const pages = pdfDoc.getPages();
 
     for (const ann of annotations) {

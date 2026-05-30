@@ -388,8 +388,8 @@ export default function BizQ2() {
         </div>
 
         <div className="mt-6 flex items-center gap-3">
-          <NavLink to="/biz/q4" className="btn-primary">
-            Continue to Q4 <ChevronRight className="w-4 h-4" />
+          <NavLink to="/biz/q3" className="btn-primary">
+            Continue to Q3 <ChevronRight className="w-4 h-4" />
           </NavLink>
           <NavLink to="/biz" className="btn-ghost">
             ← Back to Hub
