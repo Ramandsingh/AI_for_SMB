@@ -21,13 +21,13 @@ git checkout "$BRANCH"
 git pull origin "$BRANCH"
 log "Code updated to $(git rev-parse --short HEAD)"
 
-# Stop existing containers (keep volumes)
-log "Stopping containers..."
-docker compose down --remove-orphans
+# Rebuild only the app containers — MySQL keeps running so there's no DB restart delay.
+# Layer cache means npm install is skipped when package.json hasn't changed.
+log "Building frontend and backend..."
+DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose build frontend backend
 
-# Rebuild and start
-log "Building and starting services..."
-docker compose up -d --build
+log "Restarting app containers..."
+docker compose up -d --no-deps frontend backend
 
 # Wait for health
 log "Waiting for services to become healthy..."
