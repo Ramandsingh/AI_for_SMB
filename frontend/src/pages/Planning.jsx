@@ -34,11 +34,13 @@ export default function Planning() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text }),
       });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
       const data = await res.json();
       setUpdatedAt(data.updated_at);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 2000);
-    } catch {
+    } catch (err) {
+      console.error('[Planning] save failed:', err.message);
       setSaveState('error');
       setTimeout(() => setSaveState('idle'), 3000);
     }
