@@ -493,31 +493,59 @@ Always prioritize information from the uploaded documents over general training 
 
       {/* ── Integration tab ── */}
       {tab === 'code' && (
-        <div className="card border-2 border-emerald-200 bg-emerald-50">
-          <div className="flex items-start gap-3">
-            <Zap size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
-            <div className="w-full">
-              <p className="text-sm font-bold text-emerald-800 mb-3">Activate live Claude responses</p>
-              <div className="space-y-1.5 text-xs text-emerald-700 font-mono bg-emerald-100 rounded-lg p-3">
-                <p className="text-emerald-500"># 1. Install the SDK</p>
-                <p>npm install @anthropic-ai/sdk</p>
-                <p className="mt-3 text-emerald-500"># 2. backend/server.js — chat endpoint</p>
-                <p>const Anthropic = require('@anthropic-ai/sdk');</p>
-                <p>const client = new Anthropic();</p>
-                <p className="mt-2">app.post('/api/chat', async (req, res) =&gt; {'{'}</p>
-                <p>{'  '}const {'{'} messages, context {'}'} = req.body;</p>
-                <p>{'  '}const response = await client.messages.create({'{'}</p>
-                <p>{'    '}model: 'claude-sonnet-4-6',</p>
-                <p>{'    '}max_tokens: 1024,</p>
-                <p>{'    '}system: SYSTEM_PROMPT + '\n\n# Context\n' + context,</p>
-                <p>{'    '}messages,</p>
-                <p>{'  '}{'}'});</p>
-                <p>{'  '}res.json({'{'} text: response.content[0].text {'}'});</p>
-                <p>{'}'});</p>
-                <p className="mt-3 text-emerald-500"># 3. Replace SYSTEM_PROMPT with the template from the System Prompt tab</p>
-                <p className="text-emerald-500"># 4. Pass your FAQ / website scrape as `context` per request</p>
+        <div className="space-y-4">
+          <div className="card border-2 border-emerald-200 bg-emerald-50">
+            <div className="flex items-start gap-3">
+              <Zap size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div className="w-full">
+                <p className="text-sm font-bold text-emerald-800 mb-3">Activate live Claude responses</p>
+                <div className="space-y-1.5 text-xs text-emerald-700 font-mono bg-emerald-100 rounded-lg p-3">
+                  <p className="text-emerald-500"># 1. Install the SDK</p>
+                  <p>npm install @anthropic-ai/sdk</p>
+                  <p className="mt-3 text-emerald-500"># 2. backend/server.js — chat endpoint</p>
+                  <p>const Anthropic = require('@anthropic-ai/sdk');</p>
+                  <p>const client = new Anthropic();</p>
+                  <p className="mt-2">app.post('/api/chat', async (req, res) =&gt; {'{'}</p>
+                  <p>{'  '}const {'{'} messages, context {'}'} = req.body;</p>
+                  <p>{'  '}const response = await client.messages.create({'{'}</p>
+                  <p>{'    '}model: 'claude-sonnet-4-6',</p>
+                  <p>{'    '}max_tokens: 1024,</p>
+                  <p>{'    '}system: SYSTEM_PROMPT + '\n\n# Context\n' + context,</p>
+                  <p>{'    '}messages,</p>
+                  <p>{'  '}{'}'});</p>
+                  <p>{'  '}res.json({'{'} text: response.content[0].text {'}'});</p>
+                  <p>{'}'});</p>
+                  <p className="mt-3 text-emerald-500"># 3. Replace SYSTEM_PROMPT with the template from the System Prompt tab</p>
+                  <p className="text-emerald-500"># 4. Pass your FAQ / website scrape as `context` per request</p>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Further reading */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Further Reading</p>
+            <a
+              href="https://www.freecodecamp.org/news/how-to-build-an-ai-chatbot-with-redis-python-and-gpt/#how-to-build-real-time-systems-with-redis"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-orange-600">fCC</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug">
+                  How to Build an AI Chatbot with Redis, Python and GPT
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Real-time systems with Redis — covers chat history, pub/sub messaging, and streaming responses for production chatbots.
+                </p>
+                <span className="inline-flex items-center gap-1 mt-1.5 text-xs text-blue-500">
+                  freecodecamp.org <ExternalLink size={10} />
+                </span>
+              </div>
+            </a>
           </div>
         </div>
       )}
