@@ -8,13 +8,17 @@ import { useSections } from '../App';
 const TRUE_FULL_BLEED = ['/p34', '/lab/excalidraw'];
 
 // Pages where right sidebar is auto-closed to give max canvas space
-const NO_RIGHT_SIDEBAR = ['/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch', '/lab/pdf'];
+const NO_RIGHT_SIDEBAR = [
+  '/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch', '/lab/pdf',
+  '/biz/industries', '/biz/usecases',
+];
 
 // Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
 const LAB_ROUTES = [
   '/planning',
   '/lab', '/lab/upload', '/lab/graph', '/lab/chat',
   '/lab/arch', '/lab/timeline', '/lab/charts', '/lab/calendar', '/lab/database', '/lab/cytoscape', '/lab/flowcharts', '/lab/pdf',
+  '/biz', '/biz/q1', '/biz/q2', '/biz/q3', '/biz/q4', '/biz/industries', '/biz/usecases',
 ];
 
 export default function Layout({ children }) {

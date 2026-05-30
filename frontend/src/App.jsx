@@ -50,6 +50,13 @@ import LearnQ2              from './pages/LearnQ2';
 import LearnQ3              from './pages/LearnQ3';
 import LearnQ4              from './pages/LearnQ4';
 import LearnPythonSyntax    from './pages/learn/LearnPythonSyntax';
+import BizHome              from './pages/biz/BizHome';
+import BizQ1                from './pages/biz/BizQ1';
+import BizQ2                from './pages/biz/BizQ2';
+import BizQ3                from './pages/biz/BizQ3';
+import BizQ4                from './pages/biz/BizQ4';
+import BizIndustries        from './pages/biz/BizIndustries';
+import BizUseCases          from './pages/biz/BizUseCases';
 import MaturityCanvas       from './pages/MaturityCanvas';
 import Planning             from './pages/Planning';
 import LabHome              from './pages/lab/LabHome';
@@ -140,6 +147,13 @@ export default function App() {
             <Route path="/lab/flowcharts" element={<LabFlowcharts />} />
             <Route path="/lab/pdf"        element={<LabPDF />} />
             <Route path="/lab/excalidraw" element={<Suspense fallback={null}><LabExcalidraw /></Suspense>} />
+            <Route path="/biz"            element={<BizHome />} />
+            <Route path="/biz/q1"         element={<BizQ1 />} />
+            <Route path="/biz/q2"         element={<BizQ2 />} />
+            <Route path="/biz/q3"         element={<BizQ3 />} />
+            <Route path="/biz/q4"         element={<BizQ4 />} />
+            <Route path="/biz/industries" element={<BizIndustries />} />
+            <Route path="/biz/usecases"   element={<BizUseCases />} />
           </Routes>
         </Layout>
       </SectionsContext.Provider>

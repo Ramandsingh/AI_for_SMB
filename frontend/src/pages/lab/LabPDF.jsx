@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { fabric } from 'fabric';
 import {
-  FileText, Upload, Download, Trash2, Plus, X, Loader2,
+  FileText, Download, Trash2, Plus, X, Loader2, Save,
   FolderOpen, MousePointer2, Pencil, Highlighter, Square,
   Circle, Type, Eraser, Undo2, ChevronLeft, ChevronRight,
-  ZoomIn, ZoomOut, Palette,
+  ZoomIn, ZoomOut, CheckCheck,
 } from 'lucide-react';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -160,7 +160,6 @@ const TOOLS = [
 ];
 
 const COLORS = ['#1e293b', '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7'];
-const STROKES = [{ id: 'S', v: 2 }, { id: 'M', v: 4 }, { id: 'L', v: 8 }];
 
 // ── PDF Viewer with Fabric canvas overlay ────────────────────────────────────
 function PDFCanvas({ pdfUrl, fileId }) {
@@ -171,16 +170,16 @@ function PDFCanvas({ pdfUrl, fileId }) {
   const pageDataRef = useRef({});   // { "1": fabricJSON, "2": fabricJSON, ... }
   const saveTimerRef = useRef(null);
 
+  const [docVersion, setDocVersion] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [scale, setScale] = useState(1.2);
   const [tool, setTool] = useState('pen');
   const [color, setColor] = useState('#1e293b');
-  const [strokeId, setStrokeId] = useState('M');
+  const [strokeWidth, setStrokeWidth] = useState(3);
   const [rendering, setRendering] = useState(false);
   const [history, setHistory] = useState([]);
-
-  const sw = STROKES.find(s => s.id === strokeId)?.v ?? 4;
+  const [justSaved, setJustSaved] = useState(false);
 
   // Load PDF document on fileId/pdfUrl change
   useEffect(() => {
@@ -199,6 +198,9 @@ function PDFCanvas({ pdfUrl, fileId }) {
         const saved = await api.getFabric(fileId);
         if (!cancelled && saved?.pages) pageDataRef.current = saved.pages;
       } catch { /* no saved data yet */ }
+      // Increment docVersion AFTER both doc and fabric data are loaded
+      // so the render effect fires once with everything ready
+      if (!cancelled) setDocVersion(v => v + 1);
     };
     load();
     return () => { cancelled = true; };
@@ -276,19 +278,19 @@ function PDFCanvas({ pdfUrl, fileId }) {
       fc.on('object:modified', onChange);
       fc.on('object:removed',  onChange);
 
-      applyTool(fc, tool, color, sw);
+      applyTool(fc, tool, color, strokeWidth);
       setRendering(false);
     };
 
     render();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfDocRef.current, currentPage, scale]);
+  }, [docVersion, currentPage, scale]);
 
-  // Re-apply tool when tool/color/sw changes (without re-rendering PDF)
+  // Re-apply tool when tool/color/strokeWidth changes (without re-rendering PDF)
   useEffect(() => {
-    if (fabricRef.current) applyTool(fabricRef.current, tool, color, sw);
-  }, [tool, color, sw]);
+    if (fabricRef.current) applyTool(fabricRef.current, tool, color, strokeWidth);
+  }, [tool, color, strokeWidth]);
 
   const scheduleSave = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -329,10 +331,19 @@ function PDFCanvas({ pdfUrl, fileId }) {
       fc.on('object:added', onChange);
       fc.on('object:modified', onChange);
       fc.on('object:removed', onChange);
-      applyTool(fc, tool, color, sw);
+      applyTool(fc, tool, color, strokeWidth);
     });
     setHistory(h => h.slice(0, -1));
   };
+
+  const saveNow = useCallback(() => {
+    if (fabricRef.current) {
+      pageDataRef.current[String(currentPage)] = fabricRef.current.toJSON();
+    }
+    api.saveFabric(fileId, pageDataRef.current)
+      .then(() => { setJustSaved(true); setTimeout(() => setJustSaved(false), 2000); })
+      .catch(() => {});
+  }, [fileId, currentPage]);
 
   const clearPage = () => {
     if (!fabricRef.current) return;
@@ -372,24 +383,22 @@ function PDFCanvas({ pdfUrl, fileId }) {
           {COLORS.map(c => (
             <button key={c} title={c}
               onClick={() => setColor(c)}
-              className={`w-5 h-5 rounded-full border-2 transition-transform ${color === c ? 'border-slate-600 scale-110' : 'border-transparent hover:scale-105'}`}
+              className={`w-4 h-4 rounded-full border-2 transition-transform ${color === c ? 'border-slate-600 scale-110' : 'border-transparent hover:scale-105'}`}
               style={{ background: c }}
             />
           ))}
+          <input type="color" value={color} onChange={e => setColor(e.target.value)}
+            className="w-5 h-5 rounded cursor-pointer border border-slate-300" title="Custom colour" />
         </div>
 
         <div className="w-px h-5 bg-slate-200" />
 
-        {/* Stroke */}
-        <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
-          {STROKES.map(s => (
-            <button key={s.id}
-              onClick={() => setStrokeId(s.id)}
-              className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${strokeId === s.id ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              {s.id}
-            </button>
-          ))}
+        {/* Stroke slider */}
+        <div className="flex items-center gap-1.5">
+          <input type="range" min="1" max="20" value={strokeWidth}
+            onChange={e => setStrokeWidth(Number(e.target.value))}
+            className="w-20 accent-blue-600" style={{ height: '4px' }} />
+          <span className="text-xs font-semibold text-slate-600 w-5 text-center">{strokeWidth}</span>
         </div>
 
         <div className="w-px h-5 bg-slate-200" />
@@ -405,6 +414,19 @@ function PDFCanvas({ pdfUrl, fileId }) {
         </button>
 
         <div className="flex-1" />
+
+        {/* Save / Download — grouped */}
+        <button title="Save annotations" onClick={saveNow}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+          {justSaved ? <CheckCheck size={12} /> : <Save size={12} />}
+          {justSaved ? 'Saved' : 'Save'}
+        </button>
+        <button title="Download PDF" onClick={() => window.open(api.downloadUrl(fileId), '_blank')}
+          className="p-1.5 rounded-md text-slate-500 hover:text-slate-800 transition-colors">
+          <Download size={14} />
+        </button>
+
+        <div className="w-px h-5 bg-slate-200" />
 
         {/* Zoom */}
         <button onClick={() => setScale(s => Math.max(0.5, +(s - 0.1).toFixed(1)))}
@@ -487,10 +509,6 @@ export default function LabPDF() {
           <>
             <div className="flex-1" />
             <span className="text-xs text-slate-400 max-w-[200px] truncate">{selected.original_name}</span>
-            <button onClick={() => window.open(api.downloadUrl(selected.id), '_blank')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
-              <Download size={12} /> Download
-            </button>
           </>
         )}
       </div>

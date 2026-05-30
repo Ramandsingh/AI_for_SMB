@@ -113,6 +113,18 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Business Hub',
+    items: [
+      { to: '/biz',             label: 'Biz Learning Hub',   icon: '◈', end: true },
+      { to: '/biz/q1',          label: 'Q1 — Tool Fluency',  icon: '○' },
+      { to: '/biz/q2',          label: 'Q2 — Workflows',     icon: '○' },
+      { to: '/biz/q3',          label: 'Q3 — Dept Playbooks',icon: '○' },
+      { to: '/biz/q4',          label: 'Q4 — Orchestration', icon: '○' },
+      { to: '/biz/industries',  label: 'Industry Use Cases', icon: '○' },
+      { to: '/biz/usecases',    label: 'Dept Use Cases',     icon: '○' },
+    ],
+  },
+  {
     label: 'Your AI Fit',
     items: [
       { to: '/p33', label: 'How AI Fits You', icon: '◈' },
