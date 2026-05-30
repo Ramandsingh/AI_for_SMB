@@ -298,11 +298,11 @@ export default function LabPDF() {
   });
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
-    sidebarTabs: (tabs) => tabs,
+    sidebarTabs: () => [],
   });
 
   return (
-    <div className="flex flex-col h-full" style={{ minHeight: 'calc(100vh - 2rem)' }}>
+    <div className="flex flex-col">
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -329,7 +329,7 @@ export default function LabPDF() {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 min-h-0 rounded-xl border border-slate-200 overflow-hidden shadow-sm" style={{ height: 'calc(100vh - 9rem)' }}>
+      <div className="flex rounded-xl border border-slate-200 overflow-hidden shadow-sm" style={{ height: 'calc(100vh - 9rem)' }}>
 
         {/* File List */}
         <FilePanel
@@ -342,7 +342,7 @@ export default function LabPDF() {
         />
 
         {/* PDF Viewer */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden h-full">
           {!selected ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <FileText size={48} className="text-slate-200 mb-4" />

@@ -8,7 +8,7 @@ import { useSections } from '../App';
 const TRUE_FULL_BLEED = ['/p34', '/lab/excalidraw'];
 
 // Pages where right sidebar is auto-closed to give max canvas space
-const NO_RIGHT_SIDEBAR = ['/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch'];
+const NO_RIGHT_SIDEBAR = ['/p34', '/lab/excalidraw', '/lab/graph', '/lab/arch', '/lab/pdf'];
 
 // Lab pages: no max-width constraint, but standard padding so content doesn't hug the edge
 const LAB_ROUTES = [
