@@ -17,13 +17,13 @@ jobs:
 
       - name: Write .env
         run: |
-          cat > .env <<EOF
-          DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-          DB_USER=${{ secrets.DB_USER }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          LAN_IP=${{ secrets.LAN_IP }}
-          EOF
+          {
+            echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}"
+            echo "DB_USER=${{ secrets.DB_USER }}"
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+            echo "DB_NAME=${{ secrets.DB_NAME }}"
+            echo "LAN_IP=${{ secrets.LAN_IP }}"
+          } > .env
 
       - name: Stop existing containers
         run: docker compose down --remove-orphans
