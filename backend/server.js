@@ -586,6 +586,17 @@ async function runMigrations(db) {
     )
   `);
 
+  // ── pdf_fabric_data ──────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS pdf_fabric_data (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      file_id    VARCHAR(36) NOT NULL,
+      pages_json MEDIUMTEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_file (file_id)
+    )
+  `);
+
   // ensure upload directory exists
   const pdfDir = path.join(__dirname, 'uploads', 'pdfs');
   fs.mkdirSync(pdfDir, { recursive: true });
@@ -1149,6 +1160,29 @@ app.get('/api/lab/pdf/files/:id/download', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Get Fabric.js canvas JSON for all pages of a file
+app.get('/api/lab/pdf/files/:id/fabric', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.query('SELECT pages_json FROM pdf_fabric_data WHERE file_id = ?', [req.params.id]);
+    if (!rows.length) return res.json({});
+    res.json(JSON.parse(rows[0].pages_json || '{}'));
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Save Fabric.js canvas JSON (upsert)
+app.put('/api/lab/pdf/files/:id/fabric', async (req, res) => {
+  try {
+    const db = await getPool();
+    const json = JSON.stringify(req.body.pages || {});
+    await db.query(
+      'INSERT INTO pdf_fabric_data (file_id, pages_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE pages_json = ?, updated_at = NOW()',
+      [req.params.id, json, json]
+    );
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
