@@ -36,6 +36,9 @@
 
 ## Do-Not-Repeat
 
+- [2026-05-30] Never use `[deploy]` only on some commits — every commit that changes backend code or adds new DB migrations MUST include `[deploy]` or it will never reach the server. The planning_doc table and LessonsTab were stuck undeployed for 3+ commits.
+- [2026-05-30] Never use `multer.diskStorage` for PDFs (or any files) in this project — all file storage must be MySQL LONGBLOB. Container filesystem is ephemeral; disk files are lost on every deploy. Use `multer.memoryStorage()` + store `req.file.buffer` in DB.
+
 - [2026-05-30] Never put `ref.current` values in useEffect dependency arrays — React doesn't track ref mutations. Use a state counter (`docVersion`) incremented after async work instead.
 - [2026-05-30] Never use `--no-cache` in the deploy workflow `docker compose build` step — this forces a full npm reinstall every deploy (10-15 min). Remove it and rely on layer caching.
 - [2026-05-30] Don't `docker compose down` before a code deploy — it kills MySQL unnecessarily. Use `--no-deps frontend backend` to restart only app containers.
@@ -45,6 +48,7 @@
 
 ## Decision Log
 
+- [2026-05-30] PDF file storage migrated to MySQL LONGBLOB (`file_data` column in `pdf_files` table) — mirrors gallery pattern, survives all container restarts.
 - [2026-05-30] PDF annotations stored in MySQL (`pdf_fabric_data` table, JSON column) rather than filesystem — avoids container persistence problem entirely.
 - [2026-05-30] CLI module kept in Q1 of Business Hub but tagged "Advanced / Optional" — accessible to power users without blocking non-technical learners.
 - [2026-05-30] MCP moved from Q1 to Q3 Business Hub — it's a power-user topic appropriate after functional specialisation is established.
