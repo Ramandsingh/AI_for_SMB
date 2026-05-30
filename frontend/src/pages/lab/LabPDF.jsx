@@ -1,73 +1,240 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import { highlightPlugin, MessageIcon, Trigger } from '@react-pdf-viewer/highlight';
+import { highlightPlugin, Trigger } from '@react-pdf-viewer/highlight';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import '@react-pdf-viewer/highlight/lib/styles/index.css';
-import { Upload, FileText, Download, Trash2, MessageSquare, X, Highlighter } from 'lucide-react';
+import {
+  FileText, Upload, Download, Trash2, Highlighter,
+  MessageSquare, Plus, X, Loader2, FolderOpen,
+} from 'lucide-react';
 
 const WORKER_URL = `https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
 
-function UploadZone({ onFile }) {
-  const inputRef = useRef(null);
-  const [dragging, setDragging] = useState(false);
+// ── API helpers ───────────────────────────────────────────────────────────────
+const api = {
+  list: () => fetch('/api/lab/pdf/files').then(r => r.json()),
+  upload: (file) => {
+    const fd = new FormData();
+    fd.append('pdf', file);
+    return fetch('/api/lab/pdf/upload', { method: 'POST', body: fd }).then(r => r.json());
+  },
+  delete: (id) => fetch(`/api/lab/pdf/files/${id}`, { method: 'DELETE' }).then(r => r.json()),
+  getAnnotations: (id) => fetch(`/api/lab/pdf/files/${id}/annotations`).then(r => r.json()),
+  addAnnotation: (id, ann) => fetch(`/api/lab/pdf/files/${id}/annotations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(ann),
+  }).then(r => r.json()),
+  deleteAnnotation: (annId) => fetch(`/api/lab/pdf/annotations/${annId}`, { method: 'DELETE' }),
+  downloadUrl: (id) => `/api/lab/pdf/files/${id}/download`,
+  rawUrl: (id) => `/api/lab/pdf/files/${id}/raw`,
+};
 
-  const handle = (file) => {
-    if (file && file.type === 'application/pdf') {
-      const url = URL.createObjectURL(file);
-      onFile({ url, name: file.name, size: file.size });
+function fmt(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function timeAgo(dateStr) {
+  const d = new Date(dateStr);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return d.toLocaleDateString();
+}
+
+// ── File List Panel ───────────────────────────────────────────────────────────
+function FilePanel({ files, selected, onSelect, onUpload, onDelete, uploading }) {
+  const inputRef = useRef(null);
+
+  const handleFiles = async (fileList) => {
+    for (const f of fileList) {
+      if (f.type === 'application/pdf') await onUpload(f);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setDragging(false); handle(e.dataTransfer.files[0]); }}
-        onClick={() => inputRef.current?.click()}
-        className={`w-full max-w-lg border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all ${
-          dragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
-        }`}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <span className="p-4 rounded-2xl bg-blue-50">
-            <FileText size={36} className="text-blue-500" />
-          </span>
-          <div>
-            <p className="font-semibold text-slate-800 text-lg mb-1">Drop a PDF here</p>
-            <p className="text-slate-500 text-sm">or click to browse</p>
+    <div className="w-64 flex-shrink-0 flex flex-col border-r border-slate-200 bg-slate-50">
+      <div className="p-3 border-b border-slate-200">
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 transition-colors"
+        >
+          {uploading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+          {uploading ? 'Uploading…' : 'Upload PDF'}
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="application/pdf"
+          multiple
+          className="hidden"
+          onChange={(e) => handleFiles(Array.from(e.target.files || []))}
+        />
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {files.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+            <FolderOpen size={28} className="text-slate-300 mb-2" />
+            <p className="text-xs text-slate-400">No PDFs yet.<br />Upload one to get started.</p>
           </div>
-          <span className="text-xs text-slate-400 bg-slate-100 px-3 py-1 rounded-full">PDF files only</span>
-        </div>
-        <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => handle(e.target.files[0])} />
+        )}
+        {files.map((f) => (
+          <div
+            key={f.id}
+            onClick={() => onSelect(f)}
+            className={`group flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+              selected?.id === f.id ? 'bg-blue-100 border border-blue-200' : 'hover:bg-white border border-transparent'
+            }`}
+          >
+            <FileText size={16} className={`mt-0.5 flex-shrink-0 ${selected?.id === f.id ? 'text-blue-600' : 'text-slate-400'}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-slate-800 truncate">{f.original_name}</p>
+              <p className="text-xs text-slate-400">{fmt(f.size)} · {timeAgo(f.created_at)}</p>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(f); }}
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-300 hover:text-red-500 transition-all flex-shrink-0"
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
+// ── Annotations Panel ─────────────────────────────────────────────────────────
+function AnnotationsPanel({ annotations, onDelete, onDownload, pdfName }) {
+  return (
+    <div className="w-64 flex-shrink-0 flex flex-col border-l border-slate-200 bg-slate-50">
+      <div className="p-3 border-b border-slate-200 flex items-center justify-between">
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          Annotations {annotations.length > 0 && `(${annotations.length})`}
+        </p>
+        <button
+          onClick={onDownload}
+          title="Download PDF with annotations embedded"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+        >
+          <Download size={11} /> Save PDF
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-2 space-y-2">
+        {annotations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+            <Highlighter size={24} className="text-slate-300 mb-2" />
+            <p className="text-xs text-slate-400">Select text in the PDF to highlight it, or use the note tool.</p>
+          </div>
+        ) : (
+          annotations.map((ann) => (
+            <div key={ann.id} className="bg-white rounded-lg border border-slate-200 p-2.5 group">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  {ann.type === 'highlight'
+                    ? <Highlighter size={11} className="text-yellow-500" />
+                    : <MessageSquare size={11} className="text-blue-500" />
+                  }
+                  <span className="text-xs text-slate-400">p.{ann.page_index + 1}</span>
+                </div>
+                <button
+                  onClick={() => onDelete(ann.id)}
+                  className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-all"
+                >
+                  <Trash2 size={11} />
+                </button>
+              </div>
+              {ann.quoted_text && (
+                <p className="text-xs italic text-slate-600 leading-snug mb-1 border-l-2 border-yellow-300 pl-2">
+                  "{ann.quoted_text.slice(0, 100)}{ann.quoted_text.length > 100 ? '…' : ''}"
+                </p>
+              )}
+              {ann.content && (
+                <p className="text-xs text-slate-800 font-medium leading-snug">{ann.content}</p>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="p-3 border-t border-slate-200">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Annotations are saved to the server. "Save PDF" downloads the file with highlights and notes embedded.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function LabPDF() {
-  const [pdf, setPdf] = useState(null);
-  const [notes, setNotes] = useState([]);
-  const [showNotes, setShowNotes] = useState(true);
+  const [files, setFiles]           = useState([]);
+  const [selected, setSelected]     = useState(null);
+  const [annotations, setAnnotations] = useState([]);
+  const [uploading, setUploading]   = useState(false);
+  const [loading, setLoading]       = useState(true);
 
-  const handleFile = useCallback((file) => {
-    if (pdf?.url) URL.revokeObjectURL(pdf.url);
-    setPdf(file);
-    setNotes([]);
-  }, [pdf]);
+  // Load file list on mount
+  useEffect(() => {
+    api.list().then(setFiles).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
-  const handleClose = () => {
-    if (pdf?.url) URL.revokeObjectURL(pdf.url);
-    setPdf(null);
-    setNotes([]);
+  // Load annotations when a file is selected
+  useEffect(() => {
+    if (!selected) { setAnnotations([]); return; }
+    api.getAnnotations(selected.id).then(setAnnotations).catch(() => setAnnotations([]));
+  }, [selected]);
+
+  const handleUpload = async (file) => {
+    setUploading(true);
+    try {
+      const result = await api.upload(file);
+      if (result.id) {
+        const updated = await api.list();
+        setFiles(updated);
+        setSelected(result);
+      }
+    } finally {
+      setUploading(false);
+    }
   };
 
-  // Highlight plugin — opens a note popup on text selection
-  const renderHighlightTarget = (props) => (
+  const handleDelete = async (f) => {
+    if (!confirm(`Delete "${f.original_name}"?`)) return;
+    await api.delete(f.id);
+    const updated = await api.list();
+    setFiles(updated);
+    if (selected?.id === f.id) setSelected(null);
+  };
+
+  const handleDeleteAnnotation = async (annId) => {
+    await api.deleteAnnotation(annId);
+    setAnnotations(a => a.filter(x => x.id !== annId));
+  };
+
+  const handleDownload = () => {
+    if (!selected) return;
+    window.open(api.downloadUrl(selected.id), '_blank');
+  };
+
+  // Highlight plugin — save annotation to server on text selection
+  const renderHighlightTarget = useCallback((props) => (
     <div
-      style={{ left: `${props.selectionRegion.left}%`, top: `${props.selectionRegion.top + props.selectionRegion.height}%`, transform: 'translate(0, 8px)', position: 'absolute', zIndex: 10 }}
+      style={{
+        left: `${props.selectionRegion.left}%`,
+        top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
+        transform: 'translate(0, 8px)',
+        position: 'absolute',
+        zIndex: 10,
+      }}
       className="flex gap-1 bg-white border border-slate-200 rounded-lg shadow-lg p-1"
     >
       <button
@@ -77,28 +244,43 @@ export default function LabPDF() {
         <Highlighter size={12} /> Highlight
       </button>
     </div>
-  );
+  ), []);
 
-  const renderHighlightContent = (props) => {
-    const addNote = () => {
-      const note = prompt('Add a note to this highlight (optional):');
-      setNotes(n => [...n, {
-        id: Date.now(),
-        quote: props.selectedText.slice(0, 120) + (props.selectedText.length > 120 ? '…' : ''),
-        note: note || '',
-        pageIndex: props.highlightAreas[0]?.pageIndex ?? 0,
-      }]);
+  const renderHighlightContent = useCallback((props) => {
+    const save = async () => {
+      const note = prompt('Add a note to this highlight (optional):') || '';
+      const area = props.highlightAreas[0] || {};
+      const ann = await api.addAnnotation(selected.id, {
+        type: 'highlight',
+        page_index: area.pageIndex ?? 0,
+        x: area.left ?? 0,
+        y: area.top ?? 0,
+        width: area.width ?? 0,
+        height: area.height ?? 0,
+        color: 'yellow',
+        quoted_text: props.selectedText,
+        content: note,
+      });
+      setAnnotations(a => [...a, ann]);
       props.cancel();
     };
     return (
       <div
-        style={{ left: `${props.selectionRegion.left}%`, top: `${props.selectionRegion.top + props.selectionRegion.height}%`, transform: 'translate(0, 8px)', position: 'absolute', zIndex: 10 }}
-        className="bg-white border border-slate-200 rounded-xl shadow-xl p-3 w-56"
+        style={{
+          left: `${props.selectionRegion.left}%`,
+          top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
+          transform: 'translate(0, 8px)',
+          position: 'absolute',
+          zIndex: 10,
+        }}
+        className="bg-white border border-slate-200 rounded-xl shadow-xl p-3 w-52"
       >
-        <p className="text-xs text-slate-500 mb-2 italic line-clamp-2">"{props.selectedText.slice(0, 80)}"</p>
+        <p className="text-xs text-slate-500 mb-2 italic line-clamp-2">
+          "{props.selectedText.slice(0, 80)}"
+        </p>
         <div className="flex gap-2">
-          <button onClick={addNote} className="flex-1 px-2 py-1.5 bg-yellow-500 text-white text-xs font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
-            Save highlight
+          <button onClick={save} className="flex-1 px-2 py-1.5 bg-yellow-500 text-white text-xs font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
+            Save
           </button>
           <button onClick={props.cancel} className="px-2 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-lg hover:bg-slate-200 transition-colors">
             Cancel
@@ -106,19 +288,17 @@ export default function LabPDF() {
         </div>
       </div>
     );
-  };
-
-  const renderHighlights = (props) => <div />;
+  }, [selected]);
 
   const highlightPluginInstance = highlightPlugin({
     renderHighlightTarget,
     renderHighlightContent,
-    renderHighlights,
+    renderHighlights: () => <div />,
     trigger: Trigger.TextSelection,
   });
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
-    sidebarTabs: (defaultTabs) => defaultTabs,
+    sidebarTabs: (tabs) => tabs,
   });
 
   return (
@@ -127,114 +307,70 @@ export default function LabPDF() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-lg bg-blue-100">
-            <FileText size={16} className="text-blue-600" />
+          <span className="p-1.5 rounded-lg bg-red-100">
+            <FileText size={16} className="text-red-600" />
           </span>
           <h1 className="text-xl font-extrabold text-slate-900">PDF Viewer</h1>
         </div>
-
-        <div className="flex items-center gap-1.5 ml-1">
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-            react-pdf-viewer ↗
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full border bg-red-50 text-red-700 border-red-200">
+            react-pdf-viewer
           </span>
           <span className="text-xs font-medium px-2 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
-            PDF.js 3.11
+            pdf-lib
           </span>
         </div>
-
-        <div className="flex-1" />
-
-        {pdf && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 max-w-[200px] truncate">{pdf.name}</span>
-            <button
-              onClick={() => setShowNotes(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                showNotes ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-white text-slate-600 border-slate-200 hover:border-yellow-400'
-              }`}
-            >
-              <MessageSquare size={12} />
-              Notes {notes.length > 0 && `(${notes.length})`}
-            </button>
-            <a
-              href={pdf.url}
-              download={pdf.name}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-700 transition-colors"
-            >
-              <Download size={12} /> Download
-            </a>
-            <button
-              onClick={handleClose}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-500 hover:border-red-300 hover:text-red-600 transition-colors"
-            >
-              <X size={12} /> Close
-            </button>
-          </div>
+        {selected && (
+          <>
+            <div className="flex-1" />
+            <span className="text-xs text-slate-400 max-w-[200px] truncate">{selected.original_name}</span>
+          </>
         )}
       </div>
 
       {/* Body */}
-      {!pdf ? (
-        <UploadZone onFile={handleFile} />
-      ) : (
-        <div className="flex gap-4 flex-1 min-h-0" style={{ height: 'calc(100vh - 9rem)' }}>
+      <div className="flex flex-1 min-h-0 rounded-xl border border-slate-200 overflow-hidden shadow-sm" style={{ height: 'calc(100vh - 9rem)' }}>
 
-          {/* PDF Viewer */}
-          <div className="flex-1 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+        {/* File List */}
+        <FilePanel
+          files={files}
+          selected={selected}
+          onSelect={setSelected}
+          onUpload={handleUpload}
+          onDelete={handleDelete}
+          uploading={uploading}
+        />
+
+        {/* PDF Viewer */}
+        <div className="flex-1 min-w-0">
+          {!selected ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-8">
+              <FileText size={48} className="text-slate-200 mb-4" />
+              <p className="font-semibold text-slate-500 mb-1">No PDF selected</p>
+              <p className="text-sm text-slate-400">Upload a PDF from the panel on the left, then click it to open.</p>
+            </div>
+          ) : (
             <Worker workerUrl={WORKER_URL}>
               <Viewer
-                fileUrl={pdf.url}
+                key={selected.id}
+                fileUrl={api.rawUrl(selected.id)}
                 plugins={[defaultLayoutPluginInstance, highlightPluginInstance]}
                 defaultScale={1.0}
               />
             </Worker>
-          </div>
-
-          {/* Notes Panel */}
-          {showNotes && (
-            <div className="w-72 flex-shrink-0 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Highlights & Notes</p>
-                {notes.length > 0 && (
-                  <button onClick={() => setNotes([])} className="text-xs text-red-400 hover:text-red-600">Clear all</button>
-                )}
-              </div>
-
-              {notes.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
-                  <Highlighter size={24} className="text-slate-300 mb-2" />
-                  <p className="text-xs text-slate-400">Select text in the PDF<br />to add a highlight</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2 overflow-y-auto">
-                  {notes.map((n) => (
-                    <div key={n.id} className="card py-3 px-3 border-l-4 border-l-yellow-400 group">
-                      <div className="flex items-start justify-between gap-1 mb-1.5">
-                        <span className="text-xs text-slate-400">Page {n.pageIndex + 1}</span>
-                        <button
-                          onClick={() => setNotes(ns => ns.filter(x => x.id !== n.id))}
-                          className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-all"
-                        >
-                          <Trash2 size={11} />
-                        </button>
-                      </div>
-                      <p className="text-xs text-slate-600 italic mb-1.5 leading-snug">"{n.quote}"</p>
-                      {n.note && <p className="text-xs text-slate-800 font-medium leading-snug">{n.note}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-auto pt-2 border-t border-slate-100">
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Select any text in the viewer to highlight it and add a note.
-                  Use the toolbar above the PDF to zoom, search, and navigate pages.
-                </p>
-              </div>
-            </div>
           )}
         </div>
-      )}
+
+        {/* Annotations Panel */}
+        {selected && (
+          <AnnotationsPanel
+            annotations={annotations}
+            onDelete={handleDeleteAnnotation}
+            onDownload={handleDownload}
+            pdfName={selected.original_name}
+          />
+        )}
+      </div>
     </div>
   );
 }

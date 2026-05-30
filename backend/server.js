@@ -3,6 +3,10 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 const multer = require('multer');
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const { PDFDocument, PDFName, PDFString, PDFNumber, rgb } = require('pdf-lib');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(cors());
@@ -551,6 +555,40 @@ async function runMigrations(db) {
     await db.query('INSERT INTO planning_doc (content) VALUES (?)', [defaultContent]);
     console.log('planning_doc seeded');
   }
+
+  // ── pdf_files ────────────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS pdf_files (
+      id           VARCHAR(36) PRIMARY KEY,
+      original_name VARCHAR(255) NOT NULL,
+      stored_name  VARCHAR(255) NOT NULL,
+      size         INT NOT NULL,
+      created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ── pdf_annotations ──────────────────────────────────────────────────────
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS pdf_annotations (
+      id           INT AUTO_INCREMENT PRIMARY KEY,
+      pdf_id       VARCHAR(36) NOT NULL,
+      type         VARCHAR(30) NOT NULL,
+      page_index   INT NOT NULL DEFAULT 0,
+      x            FLOAT NOT NULL DEFAULT 0,
+      y            FLOAT NOT NULL DEFAULT 0,
+      width        FLOAT NOT NULL DEFAULT 0,
+      height       FLOAT NOT NULL DEFAULT 0,
+      color        VARCHAR(20) DEFAULT 'yellow',
+      content      TEXT,
+      quoted_text  TEXT,
+      created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX (pdf_id)
+    )
+  `);
+
+  // ensure upload directory exists
+  const pdfDir = path.join(__dirname, 'uploads', 'pdfs');
+  fs.mkdirSync(pdfDir, { recursive: true });
 }
 
 // ── Health ────────────────────────────────────────────────────────────────────
@@ -919,6 +957,195 @@ app.put('/api/planning', async (req, res) => {
     }
     const [[row]] = await db.query('SELECT content, updated_at FROM planning_doc ORDER BY id LIMIT 1');
     res.json(row);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── PDF Lab ───────────────────────────────────────────────────────────────────
+const pdfStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, 'uploads', 'pdfs');
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => cb(null, `${uuidv4()}.pdf`),
+});
+const pdfUpload = multer({
+  storage: pdfStorage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    cb(null, file.mimetype === 'application/pdf');
+  },
+});
+
+// Upload a PDF
+app.post('/api/lab/pdf/upload', pdfUpload.single('pdf'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No PDF file provided' });
+    const id = path.basename(req.file.filename, '.pdf');
+    const db = await getPool();
+    await db.query(
+      'INSERT INTO pdf_files (id, original_name, stored_name, size) VALUES (?, ?, ?, ?)',
+      [id, req.file.originalname, req.file.filename, req.file.size]
+    );
+    res.json({ id, original_name: req.file.originalname, size: req.file.size });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List all PDFs
+app.get('/api/lab/pdf/files', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.query('SELECT * FROM pdf_files ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Serve original PDF
+app.get('/api/lab/pdf/files/:id/raw', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [[file]] = await db.query('SELECT * FROM pdf_files WHERE id = ?', [req.params.id]);
+    if (!file) return res.status(404).json({ error: 'Not found' });
+    const filePath = path.join(__dirname, 'uploads', 'pdfs', file.stored_name);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${file.original_name}"`);
+    fs.createReadStream(filePath).pipe(res);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete a PDF and its annotations
+app.delete('/api/lab/pdf/files/:id', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [[file]] = await db.query('SELECT * FROM pdf_files WHERE id = ?', [req.params.id]);
+    if (!file) return res.status(404).json({ error: 'Not found' });
+    const filePath = path.join(__dirname, 'uploads', 'pdfs', file.stored_name);
+    try { fs.unlinkSync(filePath); } catch {}
+    await db.query('DELETE FROM pdf_annotations WHERE pdf_id = ?', [req.params.id]);
+    await db.query('DELETE FROM pdf_files WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get annotations for a PDF
+app.get('/api/lab/pdf/files/:id/annotations', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.query(
+      'SELECT * FROM pdf_annotations WHERE pdf_id = ? ORDER BY created_at ASC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Save an annotation
+app.post('/api/lab/pdf/files/:id/annotations', async (req, res) => {
+  try {
+    const { type, page_index, x, y, width, height, color, content, quoted_text } = req.body;
+    const db = await getPool();
+    const [result] = await db.query(
+      `INSERT INTO pdf_annotations (pdf_id, type, page_index, x, y, width, height, color, content, quoted_text)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.params.id, type, page_index ?? 0, x ?? 0, y ?? 0, width ?? 0, height ?? 0,
+       color ?? 'yellow', content ?? '', quoted_text ?? '']
+    );
+    const [[row]] = await db.query('SELECT * FROM pdf_annotations WHERE id = ?', [result.insertId]);
+    res.json(row);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete an annotation
+app.delete('/api/lab/pdf/annotations/:id', async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.query('DELETE FROM pdf_annotations WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Download PDF with annotations embedded via pdf-lib
+app.get('/api/lab/pdf/files/:id/download', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [[file]] = await db.query('SELECT * FROM pdf_files WHERE id = ?', [req.params.id]);
+    if (!file) return res.status(404).json({ error: 'Not found' });
+
+    const [annotations] = await db.query(
+      'SELECT * FROM pdf_annotations WHERE pdf_id = ? ORDER BY page_index, created_at',
+      [req.params.id]
+    );
+
+    const filePath = path.join(__dirname, 'uploads', 'pdfs', file.stored_name);
+    const pdfBytes = fs.readFileSync(filePath);
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pages = pdfDoc.getPages();
+
+    for (const ann of annotations) {
+      const pageIdx = ann.page_index;
+      if (pageIdx >= pages.length) continue;
+      const page = pages[pageIdx];
+      const { width: pw, height: ph } = page.getSize();
+
+      // Convert % coords (top-left origin) → PDF points (bottom-left origin)
+      const pdfX  = (ann.x / 100) * pw;
+      const pdfY  = ph - ((ann.y + ann.height) / 100) * ph;
+      const pdfW  = (ann.width / 100) * pw;
+      const pdfH  = (ann.height / 100) * ph;
+
+      if (ann.type === 'highlight') {
+        const annotObj = pdfDoc.context.obj({
+          Type:       PDFName.of('Annot'),
+          Subtype:    PDFName.of('Highlight'),
+          Rect:       [pdfX, pdfY, pdfX + pdfW, pdfY + pdfH],
+          QuadPoints: [pdfX, pdfY + pdfH, pdfX + pdfW, pdfY + pdfH, pdfX, pdfY, pdfX + pdfW, pdfY],
+          C:          [1, 0.85, 0],
+          Contents:   PDFString.of(ann.quoted_text || ''),
+          F:          PDFNumber.of(4),
+        });
+        const ref = pdfDoc.context.register(annotObj);
+        const existing = page.node.get(PDFName.of('Annots'));
+        if (existing) { existing.push(ref); }
+        else { page.node.set(PDFName.of('Annots'), pdfDoc.context.obj([ref])); }
+      }
+
+      if (ann.type === 'note') {
+        const noteX = pdfX, noteY = pdfY;
+        const annotObj = pdfDoc.context.obj({
+          Type:     PDFName.of('Annot'),
+          Subtype:  PDFName.of('Text'),
+          Rect:     [noteX, noteY, noteX + 20, noteY + 20],
+          Contents: PDFString.of(ann.content || ''),
+          Name:     PDFName.of('Comment'),
+          F:        PDFNumber.of(4),
+        });
+        const ref = pdfDoc.context.register(annotObj);
+        const existing = page.node.get(PDFName.of('Annots'));
+        if (existing) { existing.push(ref); }
+        else { page.node.set(PDFName.of('Annots'), pdfDoc.context.obj([ref])); }
+      }
+    }
+
+    const modifiedBytes = await pdfDoc.save();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="annotated-${file.original_name}"`);
+    res.send(Buffer.from(modifiedBytes));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
