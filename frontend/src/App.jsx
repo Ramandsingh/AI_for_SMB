@@ -63,6 +63,7 @@ import LabCalendar          from './pages/lab/LabCalendar';
 import LabDatabase          from './pages/lab/LabDatabase';
 import LabCytoscape         from './pages/lab/LabCytoscape';
 import LabFlowcharts        from './pages/lab/LabFlowcharts';
+import LabPDF               from './pages/lab/LabPDF';
 const LabExcalidraw = lazy(() => import('./pages/lab/LabExcalidraw'));
 
 export const SectionsContext = createContext({ sections: [], setSections: () => {} });
@@ -137,6 +138,7 @@ export default function App() {
             <Route path="/lab/database"   element={<LabDatabase />} />
             <Route path="/lab/cytoscape"  element={<LabCytoscape />} />
             <Route path="/lab/flowcharts" element={<LabFlowcharts />} />
+            <Route path="/lab/pdf"        element={<LabPDF />} />
             <Route path="/lab/excalidraw" element={<Suspense fallback={null}><LabExcalidraw /></Suspense>} />
           </Routes>
         </Layout>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine, Network, GitBranch } from 'lucide-react';
+import { Upload, Share2, MessageSquare, Box, Clock, BarChart2, CalendarDays, FlaskConical, StickyNote, Pencil, Check, X, Database, PenLine, Network, GitBranch, FileText } from 'lucide-react';
 
 const NOTES_KEY = 'lab-home-notes';
 const DEFAULT_NOTES = `## Key Libraries
@@ -209,6 +209,18 @@ const EXPERIMENTS = [
     iconColor: 'text-blue-600',
     desc: 'Live text-to-diagram editor with 6 diagram types — flowchart, sequence, Gantt, state machine, mind map, and ER diagram. Editable code, instant SVG render.',
     tags: ['mermaid', 'flowchart', 'sequence', 'gantt', 'svg'],
+  },
+  {
+    to: '/lab/pdf',
+    icon: FileText,
+    title: 'PDF Viewer',
+    library: 'react-pdf-viewer',
+    libraryUrl: 'https://react-pdf-viewer.dev',
+    color: 'border-l-red-500',
+    iconBg: 'bg-red-50',
+    iconColor: 'text-red-600',
+    desc: 'Upload any PDF and view it with full toolbar — zoom, search, page navigation. Select text to highlight and annotate with notes. Powered by PDF.js.',
+    tags: ['pdf', 'viewer', 'highlight', 'annotation', 'pdf.js'],
   },
   {
     to: '/lab/cytoscape',
