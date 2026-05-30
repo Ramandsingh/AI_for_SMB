@@ -73,6 +73,15 @@ const SEARCH_INDEX = [
   // Your AI Fit
   { title: 'How AI Fits You', route: '/p33', section: 'Your AI Fit', keywords: 'how ai fits you personal role function department use cases' },
 
+  // Business Hub
+  { title: 'Biz Learning Hub', route: '/biz', section: 'Business Hub', keywords: 'business hub non-technical learning 20-80 rule productivity AI copilot role selector' },
+  { title: 'Q1 — Tool Fluency', route: '/biz/q1', section: 'Business Hub', keywords: 'q1 tool fluency copilot gemini RACE prompting enterprise cowork CLI' },
+  { title: 'Q2 — Connected Workflows', route: '/biz/q2', section: 'Business Hub', keywords: 'q2 workflows zapier make power automate pipelines hallucination verification structured output' },
+  { title: 'Q3 — Dept Playbooks', route: '/biz/q3', section: 'Business Hub', keywords: 'q3 department playbooks marketing sales finance operations hr legal IT strategy MCP' },
+  { title: 'Q4 — Orchestration', route: '/biz/q4', section: 'Business Hub', keywords: 'q4 orchestration multi-agent HITL human in the loop prompt library workflow templates' },
+  { title: 'Industry Use Cases', route: '/biz/industries', section: 'Business Hub', keywords: 'industry use cases BFSI healthcare retail manufacturing TMT energy real estate professional services hospitality education public sector' },
+  { title: 'Dept Use Cases', route: '/biz/usecases', section: 'Business Hub', keywords: 'department use cases matrix 25 functions marketing sales finance operations HR legal IT strategy research procurement support' },
+
   // Admin
   { title: 'Pitch & Narrative', route: '/p8', section: 'Admin', keywords: 'pitch narrative story presentation slides executive' },
   { title: 'Companies', route: '/admin', section: 'Admin', keywords: 'companies admin clients organisations management' },

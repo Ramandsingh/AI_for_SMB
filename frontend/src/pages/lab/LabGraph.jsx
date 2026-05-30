@@ -12,18 +12,21 @@ import 'reactflow/dist/style.css';
 
 // ── Section metadata ──────────────────────────────────────────────────────────
 const SECTIONS = {
-  Overview:                   { color: '#1e293b' },
-  Foundation:                 { color: '#1d4ed8' },
-  Planning:                   { color: '#7c3aed' },
-  Implementation:             { color: '#0f766e' },
-  'People & Culture':         { color: '#be185d' },
-  'Sales Toolkit':            { color: '#b45309' },
-  'Technology of AI':         { color: '#0369a1' },
-  'Enterprise Context':       { color: '#065f46' },
-  'Executive Insights':       { color: '#1e3a8a' },
-  'Enterprise AI Development':{ color: '#312e81' },
-  'Your AI Fit':              { color: '#047857' },
-  'Experimental UI':          { color: '#374151' },
+  Overview:                    { color: '#1e293b' },
+  Foundation:                  { color: '#1d4ed8' },
+  Planning:                    { color: '#7c3aed' },
+  Implementation:              { color: '#0f766e' },
+  'People & Culture':          { color: '#be185d' },
+  'Sales Toolkit':             { color: '#b45309' },
+  'Technology of AI':          { color: '#0369a1' },
+  'Enterprise Context':        { color: '#065f46' },
+  'Executive Insights':        { color: '#1e3a8a' },
+  'Enterprise AI Development': { color: '#312e81' },
+  'Your AI Fit':               { color: '#047857' },
+  'Learning Hub':              { color: '#0284c7' },
+  'Business Hub':              { color: '#7c3aed' },
+  'Experimental UI':           { color: '#374151' },
+  Admin:                       { color: '#64748b' },
 };
 
 // ── Page definitions ──────────────────────────────────────────────────────────
@@ -73,16 +76,40 @@ const PAGE_DEFS = [
   { id: 'p27',          section: 'Enterprise AI Development',   title: 'Governance & Risk',       route: '/p27' },
   { id: 'p28',          section: 'Enterprise AI Development',   title: 'Building the AI Team',    route: '/p28' },
   // Your AI Fit
-  { id: 'p33',          section: 'Your AI Fit',                 title: 'How AI Fits You',         route: '/p33' },
+  { id: 'p33',              section: 'Your AI Fit',    title: 'How AI Fits You',         route: '/p33' },
+  // Learning Hub
+  { id: 'learn',            section: 'Learning Hub',   title: 'Learning Hub Home',       route: '/learn' },
+  { id: 'learn-q1',         section: 'Learning Hub',   title: 'Q1 — Foundations',        route: '/learn/q1' },
+  { id: 'learn-q2',         section: 'Learning Hub',   title: 'Q2 — Classical ML',       route: '/learn/q2' },
+  { id: 'learn-q3',         section: 'Learning Hub',   title: 'Q3 — Deep Learning',      route: '/learn/q3' },
+  { id: 'learn-q4',         section: 'Learning Hub',   title: 'Q4 — GenAI & MLOps',      route: '/learn/q4' },
+  { id: 'learn-python',     section: 'Learning Hub',   title: 'Python Syntax',           route: '/learn/q1/python-syntax' },
+  // Business Hub
+  { id: 'biz',              section: 'Business Hub',   title: 'Biz Learning Hub',        route: '/biz' },
+  { id: 'biz-q1',           section: 'Business Hub',   title: 'Q1 — Tool Fluency',       route: '/biz/q1' },
+  { id: 'biz-q2',           section: 'Business Hub',   title: 'Q2 — Workflows',          route: '/biz/q2' },
+  { id: 'biz-q3',           section: 'Business Hub',   title: 'Q3 — Dept Playbooks',     route: '/biz/q3' },
+  { id: 'biz-q4',           section: 'Business Hub',   title: 'Q4 — Orchestration',      route: '/biz/q4' },
+  { id: 'biz-industries',   section: 'Business Hub',   title: 'Industry Use Cases',      route: '/biz/industries' },
+  { id: 'biz-usecases',     section: 'Business Hub',   title: 'Dept Use Cases',          route: '/biz/usecases' },
   // Experimental UI
-  { id: 'lab',          section: 'Experimental UI',             title: 'Lab Home',                route: '/lab' },
-  { id: 'lab-upload',   section: 'Experimental UI',             title: 'Image Upload',            route: '/lab/upload' },
-  { id: 'lab-graph',    section: 'Experimental UI',             title: 'Site Graph',              route: '/lab/graph' },
-  { id: 'lab-chat',     section: 'Experimental UI',             title: 'Chat Agent',              route: '/lab/chat' },
-  { id: 'lab-arch',     section: 'Experimental UI',             title: 'Architecture',            route: '/lab/arch' },
-  { id: 'lab-timeline', section: 'Experimental UI',             title: 'Timeline',                route: '/lab/timeline' },
-  { id: 'lab-charts',   section: 'Experimental UI',             title: 'Data Viz',                route: '/lab/charts' },
-  { id: 'lab-calendar', section: 'Experimental UI',             title: 'Calendar',                route: '/lab/calendar' },
+  { id: 'lab',              section: 'Experimental UI', title: 'Lab Home',               route: '/lab' },
+  { id: 'lab-upload',       section: 'Experimental UI', title: 'Image Upload',           route: '/lab/upload' },
+  { id: 'lab-graph',        section: 'Experimental UI', title: 'Site Graph',             route: '/lab/graph' },
+  { id: 'lab-chat',         section: 'Experimental UI', title: 'Chat Agent',             route: '/lab/chat' },
+  { id: 'lab-arch',         section: 'Experimental UI', title: 'Architecture',           route: '/lab/arch' },
+  { id: 'lab-timeline',     section: 'Experimental UI', title: 'Timeline',               route: '/lab/timeline' },
+  { id: 'lab-charts',       section: 'Experimental UI', title: 'Data Viz',               route: '/lab/charts' },
+  { id: 'lab-calendar',     section: 'Experimental UI', title: 'Calendar',               route: '/lab/calendar' },
+  { id: 'lab-database',     section: 'Experimental UI', title: 'Database Platforms',     route: '/lab/database' },
+  { id: 'lab-cytoscape',    section: 'Experimental UI', title: 'Cytoscape Graph Viz',    route: '/lab/cytoscape' },
+  { id: 'lab-flowcharts',   section: 'Experimental UI', title: 'Flowcharts · Mermaid',   route: '/lab/flowcharts' },
+  { id: 'lab-pdf',          section: 'Experimental UI', title: 'PDF Viewer · Markup',    route: '/lab/pdf' },
+  { id: 'lab-excalidraw',   section: 'Experimental UI', title: 'Excalidraw',             route: '/lab/excalidraw' },
+  // Admin
+  { id: 'admin',            section: 'Admin',           title: 'Companies & Lessons',    route: '/admin' },
+  { id: 'planning',         section: 'Admin',           title: 'Planning',               route: '/planning' },
+  { id: 'pitch',            section: 'Admin',           title: 'Pitch & Narrative',      route: '/p8' },
 ];
 
 // ── Cluster origin positions ───────────────────────────────────────────────────
@@ -98,7 +125,10 @@ const CLUSTER_ORIGINS = {
   'Executive Insights':          { x: 1050, y: 700  },
   'Enterprise AI Development':   { x: 50,   y: 1100 },
   'Your AI Fit':                 { x: 1050, y: 200  },
+  'Learning Hub':                { x: 1350, y: 700  },
+  'Business Hub':                { x: 1350, y: 1100 },
   'Experimental UI':             { x: 1350, y: 200  },
+  'Admin':                       { x: 1050, y: 1100 },
 };
 
 // ── Build node positions ───────────────────────────────────────────────────────
