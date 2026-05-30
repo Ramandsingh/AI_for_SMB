@@ -38,6 +38,9 @@
 
 - [2026-05-30] Never use `[deploy]` only on some commits — every commit that changes backend code or adds new DB migrations MUST include `[deploy]` or it will never reach the server. The planning_doc table and LessonsTab were stuck undeployed for 3+ commits.
 - [2026-05-30] Never use `multer.diskStorage` for PDFs (or any files) in this project — all file storage must be MySQL LONGBLOB. Container filesystem is ephemeral; disk files are lost on every deploy. Use `multer.memoryStorage()` + store `req.file.buffer` in DB.
+- [2026-05-30] Never use SELECT * on a table that has a LONGBLOB column — it transfers the full binary on every list call. Always name the columns explicitly in the list route.
+- [2026-05-30] Never load PDF.js worker from an external CDN URL — use Vite's `?url` import to serve it locally: `import workerSrc from 'pdfjs-dist/build/pdf.worker.min.js?url'`. CDN unreachability silently breaks all PDF rendering with no error to the user.
+- [2026-05-30] Always wrap `pdfjsLib.getDocument(url).promise` in a try/catch and set an error state — unhandled rejections leave a blank canvas with no feedback. Applies to any async PDF.js call.
 
 - [2026-05-30] Never put `ref.current` values in useEffect dependency arrays — React doesn't track ref mutations. Use a state counter (`docVersion`) incremented after async work instead.
 - [2026-05-30] Never use `--no-cache` in the deploy workflow `docker compose build` step — this forces a full npm reinstall every deploy (10-15 min). Remove it and rely on layer caching.
