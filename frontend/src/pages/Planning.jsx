@@ -56,15 +56,13 @@ export default function Planning() {
     timerRef.current = setTimeout(() => persist(text), AUTOSAVE_MS);
   };
 
-  // Ctrl/Cmd+S → save immediately
+  // Ctrl/Cmd+S → save immediately (always, not just when autosave is pending)
   useEffect(() => {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        if (pendingRef.current) {
-          clearTimeout(timerRef.current);
-          persist(content);
-        }
+        clearTimeout(timerRef.current);
+        persist(content);
       }
     };
     window.addEventListener('keydown', handler);

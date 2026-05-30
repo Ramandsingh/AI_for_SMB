@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { fabric } from 'fabric';
 import {
   FileText, Download, Trash2, Plus, X, Loader2, Save,
   FolderOpen, MousePointer2, Pencil, Highlighter, Square,
   Circle, Type, Eraser, Undo2, ChevronLeft, ChevronRight,
-  ZoomIn, ZoomOut, CheckCheck,
+  ZoomIn, ZoomOut, CheckCheck, AlertCircle,
 } from 'lucide-react';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 const api = {
@@ -180,6 +180,7 @@ function PDFCanvas({ pdfUrl, fileId }) {
   const [rendering, setRendering] = useState(false);
   const [history, setHistory] = useState([]);
   const [justSaved, setJustSaved] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   // Load PDF document on fileId/pdfUrl change
   useEffect(() => {
@@ -187,20 +188,25 @@ function PDFCanvas({ pdfUrl, fileId }) {
     pageDataRef.current = {};
     setCurrentPage(1);
     setHistory([]);
+    setLoadError(null);
 
     const load = async () => {
-      const doc = await pdfjsLib.getDocument(pdfUrl).promise;
-      if (cancelled) return;
-      pdfDocRef.current = doc;
-      setTotalPages(doc.numPages);
-      // Load saved fabric data from backend
       try {
-        const saved = await api.getFabric(fileId);
-        if (!cancelled && saved?.pages) pageDataRef.current = saved.pages;
-      } catch { /* no saved data yet */ }
-      // Increment docVersion AFTER both doc and fabric data are loaded
-      // so the render effect fires once with everything ready
-      if (!cancelled) setDocVersion(v => v + 1);
+        const doc = await pdfjsLib.getDocument(pdfUrl).promise;
+        if (cancelled) return;
+        pdfDocRef.current = doc;
+        setTotalPages(doc.numPages);
+        // Load saved fabric data from backend
+        try {
+          const saved = await api.getFabric(fileId);
+          if (!cancelled && saved?.pages) pageDataRef.current = saved.pages;
+        } catch { /* no saved data yet */ }
+        // Increment docVersion AFTER both doc and fabric data are loaded
+        // so the render effect fires once with everything ready
+        if (!cancelled) setDocVersion(v => v + 1);
+      } catch (err) {
+        if (!cancelled) setLoadError(err?.message || 'Failed to load PDF');
+      }
     };
     load();
     return () => { cancelled = true; };
@@ -447,12 +453,22 @@ function PDFCanvas({ pdfUrl, fileId }) {
 
       {/* Canvas area */}
       <div ref={wrapperRef} className="flex-1 overflow-auto flex items-start justify-center p-4 relative">
-        {rendering && (
-          <div className="absolute inset-0 flex items-center justify-center z-20 bg-slate-100/70">
-            <Loader2 size={24} className="animate-spin text-slate-500" />
+        {loadError ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
+            <AlertCircle size={36} className="text-red-400" />
+            <p className="text-sm font-semibold text-slate-700">Could not load PDF</p>
+            <p className="text-xs text-slate-400 max-w-xs">{loadError}</p>
           </div>
+        ) : (
+          <>
+            {rendering && (
+              <div className="absolute inset-0 flex items-center justify-center z-20 bg-slate-100/70">
+                <Loader2 size={24} className="animate-spin text-slate-500" />
+              </div>
+            )}
+            <canvas ref={canvasElRef} />
+          </>
         )}
-        <canvas ref={canvasElRef} />
       </div>
     </div>
   );

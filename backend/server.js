@@ -1000,7 +1000,7 @@ app.post('/api/lab/pdf/upload', pdfUpload.single('pdf'), async (req, res) => {
 app.get('/api/lab/pdf/files', async (req, res) => {
   try {
     const db = await getPool();
-    const [rows] = await db.query('SELECT * FROM pdf_files ORDER BY created_at DESC');
+    const [rows] = await db.query('SELECT id, original_name, size, created_at FROM pdf_files ORDER BY created_at DESC');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1028,6 +1028,7 @@ app.delete('/api/lab/pdf/files/:id', async (req, res) => {
     const [[file]] = await db.query('SELECT id FROM pdf_files WHERE id = ?', [req.params.id]);
     if (!file) return res.status(404).json({ error: 'Not found' });
     await db.query('DELETE FROM pdf_annotations WHERE pdf_id = ?', [req.params.id]);
+    await db.query('DELETE FROM pdf_fabric_data WHERE file_id = ?', [req.params.id]);
     await db.query('DELETE FROM pdf_files WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
