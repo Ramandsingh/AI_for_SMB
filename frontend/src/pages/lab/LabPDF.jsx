@@ -200,7 +200,7 @@ function PDFCanvas({ pdfUrl, fileId }) {
         // Load saved fabric data from backend
         try {
           const saved = await api.getFabric(fileId);
-          if (!cancelled && saved?.pages) pageDataRef.current = saved.pages;
+          if (!cancelled && saved && Object.keys(saved).length) pageDataRef.current = saved;
         } catch { /* no saved data yet */ }
         // Increment docVersion AFTER both doc and fabric data are loaded
         // so the render effect fires once with everything ready
