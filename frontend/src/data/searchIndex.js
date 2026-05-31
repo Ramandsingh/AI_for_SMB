@@ -84,7 +84,7 @@ const SEARCH_INDEX = [
 
   // Admin
   { title: 'Pitch & Narrative', route: '/p8', section: 'Admin', keywords: 'pitch narrative story presentation slides executive' },
-  { title: 'Companies', route: '/admin', section: 'Admin', keywords: 'companies admin clients organisations management' },
+  { title: 'Companies & Lessons Learned', route: '/admin', section: 'Admin', keywords: 'companies admin clients organisations management lessons learned docker vite mysql build deploy engineering' },
 
   // Experimental UI
   { title: 'Lab Home', route: '/lab', section: 'Experimental UI', keywords: 'lab home experiments experimental react ui libraries' },
