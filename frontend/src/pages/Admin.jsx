@@ -176,6 +176,50 @@ dist            # built output — not needed as build input
 .git`,
     tags: ['.dockerignore', 'build-context', 'cache', 'node_modules'],
   },
+  {
+    id: 'buildkit-registry-auth',
+    category: 'Docker',
+    icon: Rocket,
+    color: 'red',
+    title: 'BuildKit Re-authenticates Docker Hub on Every Build',
+    severity: 'fix-applied',
+    summary: 'Docker BuildKit contacts registry.docker.io on every build to verify the base image manifest — even when node:20-alpine is already cached locally. This causes i/o timeout errors on restricted or rate-limited networks.',
+    problem: 'After switching from --no-cache to layer caching, builds started failing with: "failed to authorize: failed to fetch anonymous token: dial tcp 104.18.x.x:443: i/o timeout". BuildKit is aggressive — it always tries to re-verify the base image with Docker Hub even when the image is sitting on disk. The flag --no-pull does not exist in Docker Compose v2 and throws "unknown flag" if used.',
+    fix: 'Set DOCKER_BUILDKIT=0 to use the legacy builder, which trusts the local image cache and skips the registry auth call. Layer caching (COPY package*.json → RUN npm ci) still works identically with the legacy builder. The deploy.sh and GitHub Actions workflow both now use DOCKER_BUILDKIT=0.',
+    code: `# deploy.sh — legacy builder skips Docker Hub auth for cached images
+DOCKER_BUILDKIT=0 docker compose build frontend backend
+
+# Common mistakes:
+# ✗ docker compose build --no-pull   → "unknown flag" in Compose v2
+# ✗ DOCKER_BUILDKIT=1 docker compose build  → contacts registry.docker.io every time
+# ✓ DOCKER_BUILDKIT=0 docker compose build  → uses local cache, no network needed`,
+    tags: ['buildkit', 'docker-hub', 'registry', 'timeout', 'DOCKER_BUILDKIT'],
+  },
+  {
+    id: 'github-actions-self-hosted',
+    category: 'Docker',
+    icon: Zap,
+    color: 'violet',
+    title: 'GitHub Actions Self-Hosted Runner — Deploy Only Fires with [deploy] in Commit',
+    severity: 'info',
+    summary: 'The CI/CD workflow only triggers when the commit message contains [deploy]. Commits without it are pushed to GitHub but never deployed — the server keeps running old code silently.',
+    problem: 'Several commits (Planning page, Admin Lessons tab, Business Hub routes) were pushed without [deploy] in the message. The runner received the push event but the workflow\'s `if: contains(github.event.head_commit.message, \'[deploy]\')` condition filtered them out. Users saw "autosave not working" and "tab not visible" — the features were in the codebase but never reached the server.',
+    fix: 'Always include [deploy] in commit messages when changing backend code, adding DB migrations, or updating frontend pages. The runner also needs to be running continuously — it must be started as a service (`./svc.sh start` on macOS) or kept alive with `./run.sh`. Jobs queue on GitHub but never execute if the runner process has stopped.',
+    code: `# Commit message format that triggers deploy:
+git commit -m "Add feature X [deploy]"
+
+# Start the runner as a persistent service (macOS):
+cd ~/actions-runner
+sudo ./svc.sh install
+sudo ./svc.sh start
+
+# Check if runner is alive:
+ps aux | grep Runner.Listener | grep -v grep
+
+# The workflow condition in .github/workflows/deploy.yml:
+if: contains(github.event.head_commit.message, '[deploy]')`,
+    tags: ['github-actions', 'self-hosted-runner', 'deploy-keyword', 'ci-cd'],
+  },
 ];
 
 const SEVERITY_META = {
