@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { fabric } from 'fabric';
+import { PDFDocument } from 'pdf-lib';
 import {
   FileText, Download, Trash2, Plus, X, Loader2, Save,
   FolderOpen, MousePointer2, Pencil, Highlighter, Square,
@@ -163,7 +164,7 @@ const TOOLS = [
 const COLORS = ['#1e293b', '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7'];
 
 // ── PDF Viewer with Fabric canvas overlay ────────────────────────────────────
-function PDFCanvas({ pdfUrl, fileId }) {
+function PDFCanvas({ pdfUrl, fileId, fileName }) {
   const wrapperRef  = useRef(null);
   const canvasElRef = useRef(null);
   const fabricRef   = useRef(null);
@@ -182,6 +183,7 @@ function PDFCanvas({ pdfUrl, fileId }) {
   const [history, setHistory] = useState([]);
   const [justSaved, setJustSaved] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [downloading, setDownloading] = useState(false);
 
   // Load PDF document on fileId/pdfUrl change
   useEffect(() => {
@@ -352,6 +354,80 @@ function PDFCanvas({ pdfUrl, fileId }) {
       .catch(() => {});
   }, [fileId, currentPage]);
 
+  const downloadAnnotated = useCallback(async () => {
+    if (!pdfDocRef.current) return;
+    // Flush current page state before downloading
+    if (fabricRef.current) {
+      pageDataRef.current[String(currentPage)] = fabricRef.current.toJSON();
+    }
+    setDownloading(true);
+    try {
+      const originalBytes = await fetch(api.rawUrl(fileId)).then(r => r.arrayBuffer());
+      const pdfDoc = await PDFDocument.load(originalBytes);
+
+      for (let p = 1; p <= totalPages; p++) {
+        const pageData = pageDataRef.current[String(p)];
+        if (!pageData?.objects?.length) continue;
+
+        // Render PDF page to offscreen canvas at export scale
+        const pdfPage = await pdfDocRef.current.getPage(p);
+        const vp = pdfPage.getViewport({ scale: 1.5 });
+        const offscreen = document.createElement('canvas');
+        offscreen.width = vp.width;
+        offscreen.height = vp.height;
+        await pdfPage.render({ canvasContext: offscreen.getContext('2d'), viewport: vp }).promise;
+        const bgUrl = offscreen.toDataURL('image/jpeg', 0.95);
+
+        // Render annotations onto a StaticCanvas over the PDF background
+        const tempEl = document.createElement('canvas');
+        tempEl.width = vp.width;
+        tempEl.height = vp.height;
+        const fc = new fabric.StaticCanvas(tempEl, { width: vp.width, height: vp.height });
+
+        await new Promise(resolve => {
+          fabric.Image.fromURL(bgUrl, img => {
+            img.set({ selectable: false, evented: false });
+            fc.setBackgroundImage(img, () => { fc.renderAll(); resolve(); });
+          });
+        });
+        await new Promise(resolve => {
+          fc.loadFromJSON(pageData, () => {
+            fabric.Image.fromURL(bgUrl, img => {
+              img.set({ selectable: false, evented: false });
+              fc.setBackgroundImage(img, () => { fc.renderAll(); resolve(); });
+            });
+          });
+        });
+
+        // Export composite as PNG and embed in the PDF page
+        const dataUrl = fc.toDataURL({ format: 'png', multiplier: 1 });
+        const b64 = dataUrl.split(',')[1];
+        const pngBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        const libPage = pdfDoc.getPage(p - 1);
+        const { width: pw, height: ph } = libPage.getSize();
+        const pngImg = await pdfDoc.embedPng(pngBytes);
+        libPage.drawImage(pngImg, { x: 0, y: 0, width: pw, height: ph });
+
+        fc.dispose();
+      }
+
+      const saved = await pdfDoc.save();
+      const blob = new Blob([saved], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName ? fileName.replace(/\.pdf$/i, '_annotated.pdf') : 'annotated.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Annotated download failed:', e);
+    } finally {
+      setDownloading(false);
+    }
+  }, [fileId, fileName, currentPage, totalPages]);
+
   const clearPage = () => {
     if (!fabricRef.current) return;
     const fc = fabricRef.current;
@@ -428,9 +504,9 @@ function PDFCanvas({ pdfUrl, fileId }) {
           {justSaved ? <CheckCheck size={12} /> : <Save size={12} />}
           {justSaved ? 'Saved' : 'Save'}
         </button>
-        <button title="Download PDF" onClick={() => window.open(api.downloadUrl(fileId), '_blank')}
-          className="p-1.5 rounded-md text-slate-500 hover:text-slate-800 transition-colors">
-          <Download size={14} />
+        <button title="Download PDF with annotations" onClick={downloadAnnotated} disabled={downloading}
+          className="p-1.5 rounded-md text-slate-500 hover:text-slate-800 disabled:opacity-40 transition-colors">
+          {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
         </button>
 
         <div className="w-px h-5 bg-slate-200" />
@@ -559,6 +635,7 @@ export default function LabPDF() {
             key={selected.id}
             pdfUrl={api.rawUrl(selected.id)}
             fileId={selected.id}
+            fileName={selected.original_name}
           />
         )}
       </div>
