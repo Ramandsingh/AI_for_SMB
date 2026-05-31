@@ -99,16 +99,14 @@ function applyTool(fc, tool, color, sw) {
 }
 
 // ── File List Panel ───────────────────────────────────────────────────────────
-function FilePanel({ files, selected, onSelect, onUpload, onDelete, uploading }) {
+function FilePanel({ files, selected, onSelect, onUpload, onDelete, uploading, uploadError }) {
   const inputRef = useRef(null);
   const handleFiles = async (fileList) => {
-    for (const f of fileList) {
-      if (f.type === 'application/pdf') await onUpload(f);
-    }
+    for (const f of fileList) await onUpload(f);
   };
   return (
     <div className="w-60 flex-shrink-0 flex flex-col border-r border-slate-200 bg-slate-50">
-      <div className="p-3 border-b border-slate-200">
+      <div className="p-3 border-b border-slate-200 space-y-2">
         <button
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
@@ -117,7 +115,10 @@ function FilePanel({ files, selected, onSelect, onUpload, onDelete, uploading })
           {uploading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
           {uploading ? 'Uploading…' : 'Upload PDF'}
         </button>
-        <input ref={inputRef} type="file" accept="application/pdf" multiple className="hidden"
+        {uploadError && (
+          <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-2 py-1.5 leading-snug">{uploadError}</p>
+        )}
+        <input ref={inputRef} type="file" accept=".pdf,application/pdf" multiple className="hidden"
           onChange={e => handleFiles(Array.from(e.target.files || []))} />
       </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -479,7 +480,8 @@ export default function LabPDF() {
   const [files, setFiles]       = useState([]);
   const [selected, setSelected] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading]     = useState(true);
+  const [uploadError, setUploadError] = useState('');
 
   useEffect(() => {
     api.list().then(setFiles).catch(() => {}).finally(() => setLoading(false));
@@ -487,13 +489,18 @@ export default function LabPDF() {
 
   const handleUpload = async (file) => {
     setUploading(true);
+    setUploadError('');
     try {
       const result = await api.upload(file);
       if (result.id) {
         const updated = await api.list();
         setFiles(updated);
         setSelected(result);
+      } else {
+        setUploadError(result.error || 'Upload failed');
       }
+    } catch (e) {
+      setUploadError(e.message || 'Upload failed');
     } finally { setUploading(false); }
   };
 
@@ -538,6 +545,7 @@ export default function LabPDF() {
           onUpload={handleUpload}
           onDelete={handleDelete}
           uploading={uploading}
+          uploadError={uploadError}
         />
 
         {!selected ? (
