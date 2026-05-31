@@ -605,7 +605,30 @@ app.get('/api/health', async (req, res) => {
   try {
     const db = await getPool();
     await db.query('SELECT 1');
-    res.json({ status: 'ok', database: 'connected' });
+
+    // Show which tables exist and spot-check key migration columns
+    const [tables] = await db.query(
+      "SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME"
+    );
+    const tableNames = tables.map(t => t.name);
+
+    // Check critical columns added by runMigrations
+    const checks = {};
+
+    if (tableNames.includes('pdf_files')) {
+      const [cols] = await db.query(
+        "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pdf_files'"
+      );
+      checks.pdf_files_columns = cols.map(c => c.COLUMN_NAME);
+    }
+    if (tableNames.includes('planning_doc')) {
+      const [[{ cnt }]] = await db.query('SELECT COUNT(*) AS cnt FROM planning_doc');
+      checks.planning_doc_rows = cnt;
+    }
+
+    const [[{ version }]] = await db.query('SELECT VERSION() AS version');
+
+    res.json({ status: 'ok', database: 'connected', mysql_version: version, tables: tableNames, checks });
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message });
   }
