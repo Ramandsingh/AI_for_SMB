@@ -567,7 +567,10 @@ async function runMigrations(db) {
       created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  await db.query('ALTER TABLE pdf_files ADD COLUMN IF NOT EXISTS file_data LONGBLOB');
+  const [pdfCols] = await db.query(`SHOW COLUMNS FROM pdf_files LIKE 'file_data'`);
+  if (!pdfCols.length) {
+    await db.query(`ALTER TABLE pdf_files ADD COLUMN file_data LONGBLOB`);
+  }
 
   // ── pdf_annotations ──────────────────────────────────────────────────────
   await db.query(`
