@@ -107,7 +107,8 @@ const PAGE_DEFS = [
   { id: 'lab-pdf',          section: 'Experimental UI', title: 'PDF Viewer · Markup',    route: '/lab/pdf' },
   { id: 'lab-excalidraw',   section: 'Experimental UI', title: 'Excalidraw',             route: '/lab/excalidraw' },
   // Admin
-  { id: 'admin',            section: 'Admin',           title: 'Companies & Lessons',    route: '/admin' },
+  { id: 'admin',            section: 'Admin',           title: 'Companies',              route: '/admin' },
+  { id: 'admin-lessons',    section: 'Admin',           title: 'Lessons Learned',        route: '/admin/lessons' },
   { id: 'planning',         section: 'Admin',           title: 'Planning',               route: '/planning' },
   { id: 'pitch',            section: 'Admin',           title: 'Pitch & Narrative',      route: '/p8' },
 ];

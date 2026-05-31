@@ -133,8 +133,9 @@ const NAV_GROUPS = [
   {
     label: 'Admin',
     items: [
-      { to: '/p8',   label: 'Pitch & Narrative', icon: '○' },
-      { to: '/admin', label: 'Companies',         icon: '○' },
+      { to: '/p8',            label: 'Pitch & Narrative', icon: '○' },
+      { to: '/admin',         label: 'Companies',          icon: '○' },
+      { to: '/admin/lessons', label: 'Lessons Learned',    icon: '○' },
     ],
   },
   {

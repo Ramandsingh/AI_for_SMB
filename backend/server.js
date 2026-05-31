@@ -13,7 +13,7 @@ app.use(express.json({ limit: '20mb' }));
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
 });
 
 const dbConfig = {
@@ -23,6 +23,7 @@ const dbConfig = {
   database: process.env.DB_NAME || 'ai_dashboard_db',
   waitForConnections: true,
   connectionLimit: 10,
+  maxAllowedPacket: 256 * 1024 * 1024,
 };
 
 let pool;
