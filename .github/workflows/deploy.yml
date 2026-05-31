@@ -26,15 +26,10 @@ jobs:
           } > .env
 
       - name: Build and restart app containers
-        env:
-          DOCKER_BUILDKIT: "1"
-          COMPOSE_DOCKER_CLI_BUILD: "1"
         run: |
-          # Build with layer cache — skips npm install when package.json is unchanged.
-          # DOCKER_BUILDKIT=0 uses the legacy builder which reads from local image cache
-          # without contacting Docker Hub. BuildKit re-authenticates with the registry
-          # on every build even for cached images, causing timeouts on restricted networks.
-          # Only rebuilds frontend + backend; MySQL is left untouched.
+          # DOCKER_BUILDKIT=0 uses the legacy builder — skips Docker Hub registry
+          # auth on every build. BuildKit contacts registry.docker.io even for
+          # cached images, causing i/o timeout on restricted networks.
           DOCKER_BUILDKIT=0 docker compose build frontend backend
           docker compose up -d
 
