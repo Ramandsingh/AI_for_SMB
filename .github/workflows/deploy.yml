@@ -31,9 +31,11 @@ jobs:
           COMPOSE_DOCKER_CLI_BUILD: "1"
         run: |
           # Build with layer cache — skips npm install when package.json is unchanged.
-          # --no-pull uses the locally cached base image instead of hitting Docker Hub.
+          # DOCKER_BUILDKIT=0 uses the legacy builder which reads from local image cache
+          # without contacting Docker Hub. BuildKit re-authenticates with the registry
+          # on every build even for cached images, causing timeouts on restricted networks.
           # Only rebuilds frontend + backend; MySQL is left untouched.
-          docker compose build --no-pull frontend backend
+          DOCKER_BUILDKIT=0 docker compose build frontend backend
           docker compose up -d --no-deps frontend backend
 
       - name: Verify containers are running

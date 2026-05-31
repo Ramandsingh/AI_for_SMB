@@ -22,9 +22,11 @@ git pull origin "$BRANCH"
 log "Code updated to $(git rev-parse --short HEAD)"
 
 # Rebuild only the app containers — MySQL keeps running so there's no DB restart delay.
-# --no-pull uses the locally cached base image (node:20-alpine) instead of hitting Docker Hub.
+# DOCKER_BUILDKIT=0 uses the legacy builder which reads from local image cache without
+# contacting Docker Hub. BuildKit (default) tries to re-auth with registry.docker.io
+# even when the base image is already cached, causing timeouts on restricted networks.
 log "Building frontend and backend..."
-DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose build --no-pull frontend backend
+DOCKER_BUILDKIT=0 docker compose build frontend backend
 
 log "Restarting app containers..."
 docker compose up -d --no-deps frontend backend
