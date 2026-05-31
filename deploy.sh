@@ -28,8 +28,8 @@ log "Code updated to $(git rev-parse --short HEAD)"
 log "Building frontend and backend..."
 DOCKER_BUILDKIT=0 docker compose build frontend backend
 
-log "Restarting app containers..."
-docker compose up -d --no-deps frontend backend
+log "Starting all services (MySQL data is safe in named volume)..."
+docker compose up -d
 
 # Wait for health
 log "Waiting for services to become healthy..."

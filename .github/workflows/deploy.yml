@@ -36,7 +36,7 @@ jobs:
           # on every build even for cached images, causing timeouts on restricted networks.
           # Only rebuilds frontend + backend; MySQL is left untouched.
           DOCKER_BUILDKIT=0 docker compose build frontend backend
-          docker compose up -d --no-deps frontend backend
+          docker compose up -d
 
       - name: Verify containers are running
         run: |
