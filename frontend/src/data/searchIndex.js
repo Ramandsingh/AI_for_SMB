@@ -86,6 +86,7 @@ const SEARCH_INDEX = [
   { title: 'Pitch & Narrative', route: '/p8', section: 'Admin', keywords: 'pitch narrative story presentation slides executive' },
   { title: 'Companies', route: '/admin', section: 'Admin', keywords: 'companies admin clients organisations management' },
   { title: 'Lessons Learned', route: '/admin/lessons', section: 'Admin', keywords: 'lessons learned docker vite mysql build deploy engineering persistence blob longblob layer cache buildkit github actions self-hosted runner' },
+  { title: 'Tech Stack', route: '/admin/stack', section: 'Admin', keywords: 'tech stack architecture docker compose nginx express mysql react vite tailwind ci cd github actions services containers request flow' },
 
   // Experimental UI
   { title: 'Lab Home', route: '/lab', section: 'Experimental UI', keywords: 'lab home experiments experimental react ui libraries' },

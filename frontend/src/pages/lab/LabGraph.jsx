@@ -109,6 +109,7 @@ const PAGE_DEFS = [
   // Admin
   { id: 'admin',            section: 'Admin',           title: 'Companies',              route: '/admin' },
   { id: 'admin-lessons',    section: 'Admin',           title: 'Lessons Learned',        route: '/admin/lessons' },
+  { id: 'admin-stack',      section: 'Admin',           title: 'Tech Stack',             route: '/admin/stack' },
   { id: 'planning',         section: 'Admin',           title: 'Planning',               route: '/planning' },
   { id: 'pitch',            section: 'Admin',           title: 'Pitch & Narrative',      route: '/p8' },
 ];

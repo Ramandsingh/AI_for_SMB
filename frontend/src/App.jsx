@@ -16,6 +16,7 @@ import IndividualAdoption from './pages/IndividualAdoption';
 import OrgContributions from './pages/OrgContributions';
 import Admin from './pages/Admin';
 import LessonsLearned from './pages/LessonsLearned';
+import Stack from './pages/Stack';
 import EnterpriseWhatAI    from './pages/EnterpriseWhatAI';
 import EnterpriseValue      from './pages/EnterpriseValue';
 import EnterpriseHowAdopt   from './pages/EnterpriseHowAdopt';
@@ -136,6 +137,7 @@ export default function App() {
             <Route path="/p34"         element={<MaturityCanvas />} />
             <Route path="/admin"         element={<Admin />} />
             <Route path="/admin/lessons" element={<LessonsLearned />} />
+            <Route path="/admin/stack"   element={<Stack />} />
             <Route path="/lab"         element={<LabHome />} />
             <Route path="/lab/upload"  element={<LabUppy />} />
             <Route path="/lab/graph"   element={<LabGraph />} />
