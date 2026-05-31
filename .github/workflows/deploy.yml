@@ -31,8 +31,9 @@ jobs:
           COMPOSE_DOCKER_CLI_BUILD: "1"
         run: |
           # Build with layer cache — skips npm install when package.json is unchanged.
+          # --no-pull uses the locally cached base image instead of hitting Docker Hub.
           # Only rebuilds frontend + backend; MySQL is left untouched.
-          docker compose build frontend backend
+          docker compose build --no-pull frontend backend
           docker compose up -d --no-deps frontend backend
 
       - name: Verify containers are running

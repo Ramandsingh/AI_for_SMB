@@ -22,9 +22,9 @@ git pull origin "$BRANCH"
 log "Code updated to $(git rev-parse --short HEAD)"
 
 # Rebuild only the app containers — MySQL keeps running so there's no DB restart delay.
-# Layer cache means npm install is skipped when package.json hasn't changed.
+# --no-pull uses the locally cached base image (node:20-alpine) instead of hitting Docker Hub.
 log "Building frontend and backend..."
-DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose build frontend backend
+DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose build --no-pull frontend backend
 
 log "Restarting app containers..."
 docker compose up -d --no-deps frontend backend
