@@ -99,6 +99,40 @@ const LabFlowcharts = lazy(() => import('./pages/lab/LabFlowcharts'));
     tags: ['bundle-size', 'lazy-loading', 'mermaid', 'code-splitting'],
   },
   {
+    id: 'vite-bundle-splitting',
+    category: 'Frontend / Vite',
+    icon: Zap,
+    color: 'violet',
+    title: 'Vite Bundle OOM in Docker — manualChunks Required',
+    severity: 'fix-applied',
+    summary: "Without manualChunks, Vite produces a single 6.4 MB JS chunk. Rollup's worker threads run out of memory transforming it inside Docker, causing \"The operation was canceled.\" Build passes locally but fails on the CI runner.",
+    problem: "The default Vite build bundled everything — React pages, Mermaid (40+ parsers), PDF.js, Fabric.js, Excalidraw, nomnoml — into one 6.4 MB index.js chunk. Rollup uses worker threads to transform and minify chunks in parallel. A 6.4 MB chunk demands more heap than Docker allows even with NODE_OPTIONS=--max-old-space-size=3072. The error 'Error: The operation was canceled.' is Rollup's signal when a worker thread is killed by OOM. The build passes locally (more headroom) but fails consistently on the self-hosted CI runner.",
+    fix: "Add manualChunks to vite.config.js to split heavy vendor libraries into dedicated chunks. This reduces the largest chunk from 6.4 MB → 3.4 MB and cuts build time from 62s → 36s. Browser caching still works — each vendor chunk is cached independently and only re-downloaded when that library version changes.",
+    code: `// vite.config.js
+export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':      ['react', 'react-dom', 'react-router-dom'],
+          'vendor-lucide':     ['lucide-react'],
+          'vendor-mermaid':    ['mermaid'],
+          'vendor-excalidraw': ['@excalidraw/excalidraw'],
+          'vendor-pdf':        ['pdf-lib', 'pdfjs-dist'],
+          'vendor-fabric':     ['fabric'],
+          'vendor-nomnoml':    ['nomnoml'],
+        },
+      },
+    },
+  },
+});
+
+// Before: 1 chunk × 6.4 MB → Rollup worker OOM in Docker
+// After:  7 vendor chunks × <2 MB → 36s build, no OOM`,
+    tags: ['vite', 'rollup', 'manualChunks', 'OOM', 'code-splitting', 'docker-build'],
+  },
+  {
     id: 'mysql-healthcheck',
     category: 'MySQL / Database',
     icon: Database,

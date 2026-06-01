@@ -16,7 +16,7 @@ const SERVICES = [
     icon: Globe,
     color: { ring: 'ring-blue-200', bg: 'bg-blue-50', icon: 'text-blue-600', badge: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
     runtime: 'nginx:1.25-alpine',
-    summary: 'Two-stage Docker build. Stage 1 runs Vite to produce a static dist/. Stage 2 copies dist/ into nginx and serves it. nginx also reverse-proxies /api/* to the backend container.',
+    summary: 'Two-stage Docker build. Stage 1 runs Vite to produce a static dist/. Stage 2 copies dist/ into nginx and serves it. nginx also reverse-proxies /api/* to the backend container. vite.config.js uses manualChunks to split heavy libraries (Mermaid, PDF.js, Fabric, Excalidraw, nomnoml) into separate vendor chunks — required to prevent Rollup OOM in Docker (6.4 MB → 3.4 MB largest chunk).',
     config: 'frontend/nginx.conf',
     deps: [
       { name: 'React 18', role: 'UI framework' },
@@ -87,7 +87,7 @@ const CICD = [
   { step: '2', label: 'GitHub Actions trigger', detail: 'Workflow runs only if commit message contains [deploy]' },
   { step: '3', label: 'Self-hosted runner', detail: 'Runs on the Mac Mini server; must be running as a service (svc.sh start)' },
   { step: '4', label: 'Write .env', detail: 'Secrets injected from GitHub Secrets: DB_ROOT_PASSWORD, DB_USER, DB_PASSWORD, DB_NAME, LAN_IP' },
-  { step: '5', label: 'DOCKER_BUILDKIT=0 build', detail: 'Legacy builder used — skips Docker Hub registry auth on restricted networks. Layer cache reused when package.json unchanged (fast path ~2 min).' },
+  { step: '5', label: 'DOCKER_BUILDKIT=0 build', detail: 'Legacy builder — skips Docker Hub registry auth on restricted networks. manualChunks in vite.config.js splits the bundle into vendor chunks (<2 MB each) to prevent Rollup OOM. Layer cache reused when package.json unchanged (fast path ~36s build).' },
   { step: '6', label: 'docker compose up -d', detail: 'All containers restarted. MySQL untouched (data in named volume). runMigrations() runs on backend startup.' },
   { step: '7', label: 'Health check', detail: 'curl frontend :3001 + /api/health; reports container status in Actions log' },
 ];
@@ -246,7 +246,7 @@ export default function Stack() {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs font-semibold text-amber-700 mb-1">Fast path (code only)</p>
-            <p className="text-xs text-slate-600">package.json unchanged → npm install layer cached → rebuild in ~2 min. Only changed source files re-copy.</p>
+            <p className="text-xs text-slate-600">package.json unchanged → npm install layer cached → Vite build ~36s. manualChunks keeps the largest chunk under 2 MB (was 6.4 MB) — no Rollup OOM.</p>
           </div>
           <div className="rounded-xl border border-violet-200 bg-violet-50 p-3">
             <p className="text-xs font-semibold text-violet-700 mb-1">Slow path (new dependency)</p>
