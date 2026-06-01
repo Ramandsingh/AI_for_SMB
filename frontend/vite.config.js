@@ -16,4 +16,20 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':      ['react', 'react-dom', 'react-router-dom'],
+          'vendor-lucide':     ['lucide-react'],
+          'vendor-mermaid':    ['mermaid'],
+          'vendor-excalidraw': ['@excalidraw/excalidraw'],
+          'vendor-pdf':        ['pdf-lib', 'pdfjs-dist'],
+          'vendor-fabric':     ['fabric'],
+          'vendor-nomnoml':    ['nomnoml'],
+        },
+      },
+    },
+  },
 });
