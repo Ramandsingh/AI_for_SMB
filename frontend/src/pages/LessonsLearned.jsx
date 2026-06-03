@@ -219,7 +219,29 @@ DOCKER_BUILDKIT=0 docker compose build frontend backend
     tags: ['buildkit', 'docker-hub', 'registry', 'timeout', 'DOCKER_BUILDKIT'],
   },
   {
-    id: 'github-actions-self-hosted',
+    id: 'runner-duplicate-process',
+    category: 'CI/CD',
+    icon: Zap,
+    color: 'red',
+    title: 'Duplicate Runner Processes — Two Listeners Cause Job File Conflicts',
+    severity: 'fix-applied',
+    summary: 'Running two Runner.Listener processes simultaneously causes jobs to fail with "Missing file at path: set_output_*". Each runner grabs the same job but only one creates the temp files.',
+    problem: "When a second `./run.sh` or monitoring script is started while the service runner is already running, two Runner.Listener processes coexist. When a job fires, both processes attempt to handle it. The temp files (set_output_*, add_path_*, etc.) that the runner creates at job start get created by one process but expected by the other — or simply not created in the right context — causing the error: 'Error: Missing file at path: /Users/ramanmac/actions-runner/_work/_temp/_runner_file_commands/set_output_*'.",
+    fix: "Kill the extra runner process. The service runner (started with `--startuptype service`) is the one to keep. Any interactive `./run.sh` or monitoring loop that also starts the listener must be stopped. Check for duplicates with `ps aux | grep Runner.Listener | grep -v grep` — there should be exactly one.",
+    code: `# Detect duplicate runners:
+ps aux | grep Runner.Listener | grep -v grep
+# If you see 2 lines, kill the non-service one (the one without --startuptype service):
+kill <PID>
+
+# Correct state — exactly one process:
+# ramanmac 35914 ... /bin/Runner.Listener run --startuptype service  ✓
+
+# Common triggers:
+# - Running /loop or monitoring scripts that also invoke ./run.sh
+# - Opening a second terminal and running ./run.sh manually
+# - Service runner + interactive runner both alive after a system restart`,
+    tags: ['github-actions', 'runner', 'duplicate-process', 'set_output', 'conflict'],
+  },
     category: 'CI/CD',
     icon: Zap,
     color: 'violet',
