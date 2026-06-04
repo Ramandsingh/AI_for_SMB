@@ -242,6 +242,7 @@ kill <PID>
 # - Service runner + interactive runner both alive after a system restart`,
     tags: ['github-actions', 'runner', 'duplicate-process', 'set_output', 'conflict'],
   },
+  {
     category: 'CI/CD',
     icon: Zap,
     color: 'violet',

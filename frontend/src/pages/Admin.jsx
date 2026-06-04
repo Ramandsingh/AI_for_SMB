@@ -11,6 +11,46 @@ const SIZES = ['1–10', '11–50', '51–200', '201–500', '500+'];
 
 const EMPTY_FORM = { name: '', industry: '', size: '', contact_name: '', notes: '' };
 
+const PIPELINE_STEPS = [
+  {
+    title: 'Commit with [deploy]',
+    desc: 'Push to branch claude/docker-react-vite-mysql-PeMvf with [deploy] in the commit message. The GitHub Actions workflow only fires when the message contains this keyword — commits without it are silently ignored by the runner.',
+    code: 'git commit -m "Add feature X [deploy]"',
+  },
+  {
+    title: 'GitHub notifies your server',
+    desc: "GitHub sends a job via HTTPS to the self-hosted runner agent running on MBserver. GitHub's cloud machines are not involved in the actual build — they only store the code and act as the trigger.",
+  },
+  {
+    title: 'Runner checks out source code',
+    desc: "The runner runs git checkout on the server, pulling all JSX files, configs, and Dockerfiles onto the server's disk.",
+  },
+  {
+    title: 'Docker Stage 1 — Vite compiles JSX',
+    desc: 'A temporary Node 20 container runs npm ci (cached if package.json unchanged) then npm run build. Vite compiles every .jsx file into plain HTML + JS + CSS in /app/dist/. The Node container is then discarded entirely.',
+    code: 'npm run build  # JSX → /app/dist/ — static files, no Node needed to serve them',
+  },
+  {
+    title: 'Docker Stage 2 — nginx image',
+    desc: 'Only the /dist/ files are copied into a tiny nginx image. The final running container has no Node.js, no JSX, no npm — just static files and a web server config.',
+  },
+  {
+    title: 'Containers restart',
+    desc: 'docker compose up -d restarts nginx (port 3001) and the Express API. MySQL is never restarted — its data lives in a named Docker volume that survives every deploy.',
+  },
+  {
+    title: 'Browser loads the app',
+    desc: 'nginx returns the same index.html for every URL. React Router runs in the browser, reads the URL path, and renders the correct page component client-side. Only DB operations (assessments, ROI saves) hit the backend API at /api/*.',
+  },
+];
+
+const BUILD_TIMES = [
+  ['git checkout', 'Server (runner)', '~5 sec'],
+  ['npm ci', 'Inside Docker, server', '~10 sec cached / ~2 min cold'],
+  ['npm run build (Vite)', 'Inside Docker, server', '~1–3 min'],
+  ['docker compose up', 'Server', '~10 sec'],
+];
+
 export default function Admin() {
   const { activeCompany, selectCompany } = useCompany();
   const { setSections } = useSections();
@@ -20,6 +60,7 @@ export default function Admin() {
   const [form, setForm]           = useState(EMPTY_FORM);
   const [saving, setSaving]       = useState(false);
   const [error, setError]         = useState('');
+  const [tab, setTab]             = useState('companies');
 
   useEffect(() => {
     setSections([
@@ -60,13 +101,30 @@ export default function Admin() {
       {/* Header */}
       <div className="mb-6">
         <span className="badge">Admin</span>
-        <h1 className="mt-3 text-3xl font-bold text-slate-900">Companies</h1>
+        <h1 className="mt-3 text-3xl font-bold text-slate-900">Admin</h1>
         <p className="mt-2 text-slate-500">
-          Manage client companies and set an active client context across the app.
+          Manage clients and view system documentation.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Tab bar */}
+      <div className="flex gap-1 mb-6 border-b border-slate-200">
+        {[['companies', 'Companies'], ['architecture', 'Architecture']].map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === id
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'companies' && <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
         {/* ── Left: company list ─────────────────────────────── */}
         <section id="clients">
@@ -237,7 +295,72 @@ export default function Admin() {
             </div>
           )}
         </section>
-      </div>
+      </div>}
+
+      {tab === 'architecture' && (
+        <div className="space-y-6">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p className="font-semibold text-blue-800 text-sm">The build runs on your server, not GitHub's cloud.</p>
+            <p className="text-blue-700 text-sm mt-1">
+              GitHub stores code and sends a trigger. Your server (MBserver) has a self-hosted runner agent
+              that receives the job and does all the work locally.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {PIPELINE_STEPS.map((step, i) => (
+              <div key={i} className="card flex gap-4">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' }}
+                >
+                  {i + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-800">{step.title}</p>
+                  <p className="text-sm text-slate-500 mt-0.5">{step.desc}</p>
+                  {step.code && (
+                    <pre className="mt-2 text-xs bg-slate-900 text-green-400 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">{step.code}</pre>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <h3 className="font-semibold text-slate-800 mb-3">Typical Build Time</h3>
+            <table className="text-sm w-full">
+              <thead>
+                <tr className="text-xs uppercase text-slate-400 border-b border-slate-100">
+                  <th className="text-left pb-2 font-semibold">Step</th>
+                  <th className="text-left pb-2 font-semibold">Where</th>
+                  <th className="text-right pb-2 font-semibold">Duration</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {BUILD_TIMES.map(([step, where, time]) => (
+                  <tr key={step}>
+                    <td className="py-2 font-medium text-slate-700">{step}</td>
+                    <td className="py-2 text-slate-500">{where}</td>
+                    <td className="py-2 text-right text-slate-600 font-mono text-xs">{time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="card">
+            <h3 className="font-semibold text-slate-800 mb-3">Key Facts</h3>
+            <ul className="space-y-2 text-sm text-slate-600">
+              <li className="flex gap-2"><span className="text-blue-500 font-bold flex-shrink-0">→</span>The compiled <code className="bg-slate-100 px-1 rounded">/dist/</code> folder is never stored in GitHub — it lives only inside the Docker image on the server.</li>
+              <li className="flex gap-2"><span className="text-blue-500 font-bold flex-shrink-0">→</span>Every deploy produces a fresh image from source. Docker layer caching skips npm ci if package.json hasn't changed.</li>
+              <li className="flex gap-2"><span className="text-blue-500 font-bold flex-shrink-0">→</span>MySQL data lives in a named Docker volume and is never affected by deploys.</li>
+              <li className="flex gap-2"><span className="text-blue-500 font-bold flex-shrink-0">→</span>Pages are "static" files but the app is a full React SPA — all routing and UI logic runs in the browser. The backend is only called for DB reads/writes.</li>
+              <li className="flex gap-2"><span className="text-blue-500 font-bold flex-shrink-0">→</span>nginx's <code className="bg-slate-100 px-1 rounded">try_files $uri /index.html</code> means every URL path (including new routes) works without any nginx config changes.</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
