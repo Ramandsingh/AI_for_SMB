@@ -2,6 +2,10 @@
 node_modules/
 */node_modules/
 frontend/dist/
+
+# Built site artefacts (populated by npm run build, not source-tracked)
+sites/ai-smb/*
+!sites/ai-smb/.gitkeep
 deploy.log
 webhook.log
 

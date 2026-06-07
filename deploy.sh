@@ -21,15 +21,26 @@ git checkout "$BRANCH"
 git pull origin "$BRANCH"
 log "Code updated to $(git rev-parse --short HEAD)"
 
-# Rebuild only the app containers — MySQL keeps running so there's no DB restart delay.
-# DOCKER_BUILDKIT=0 uses the legacy builder which reads from local image cache without
-# contacting Docker Hub. BuildKit (default) tries to re-auth with registry.docker.io
-# even when the base image is already cached, causing timeouts on restricted networks.
-log "Building frontend and backend..."
-DOCKER_BUILDKIT=0 docker compose build frontend backend
+# Build frontend static files into sites/ai-smb/ (outDir set in vite.config.js).
+# No Docker image rebuild needed — nginx mounts the files directly as a volume.
+log "Building frontend..."
+cd frontend
+npm ci --silent --legacy-peer-deps
+NODE_OPTIONS=--max-old-space-size=3072 npm run build
+cd "$REPO_DIR"
+
+# Rebuild backend image only (Node/Express code changes).
+# DOCKER_BUILDKIT=0 uses the legacy builder — skips Docker Hub registry auth on
+# restricted networks where BuildKit contacts registry.docker.io even for cached images.
+log "Building backend..."
+DOCKER_BUILDKIT=0 docker compose build backend
 
 log "Starting all services (MySQL data is safe in named volume)..."
-docker compose up -d
+# --remove-orphans cleans up containers for services no longer in compose (e.g. old 'frontend')
+docker compose up -d --remove-orphans
+
+log "Reloading nginx config and site files..."
+docker compose restart nginx
 
 # Wait for health
 log "Waiting for services to become healthy..."

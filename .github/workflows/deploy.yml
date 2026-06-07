@@ -25,13 +25,22 @@ jobs:
             echo "LAN_IP=${{ secrets.LAN_IP }}"
           } > .env
 
-      - name: Build and restart app containers
+      - name: Build frontend static files
+        run: |
+          cd frontend
+          npm ci --silent --legacy-peer-deps
+          NODE_OPTIONS=--max-old-space-size=3072 npm run build
+          cd ..
+
+      - name: Build backend image and start services
         run: |
           # DOCKER_BUILDKIT=0 uses the legacy builder — skips Docker Hub registry
           # auth on every build. BuildKit contacts registry.docker.io even for
           # cached images, causing i/o timeout on restricted networks.
-          DOCKER_BUILDKIT=0 docker compose build frontend backend
-          docker compose up -d
+          DOCKER_BUILDKIT=0 docker compose build backend
+          # --remove-orphans cleans up containers for services no longer in compose (e.g. old 'frontend')
+          docker compose up -d --remove-orphans
+          docker compose restart nginx
 
       - name: Verify containers are running
         run: |

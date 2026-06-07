@@ -17,6 +17,7 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: '../sites/ai-smb',
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {

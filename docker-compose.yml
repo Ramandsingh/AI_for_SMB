@@ -1,10 +1,11 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+  nginx:
+    image: nginx:1.25-alpine
     ports:
       - "3001:80"
+    volumes:
+      - ./sites/ai-smb:/usr/share/nginx/html:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
       - backend
     networks:
