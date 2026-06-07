@@ -39,14 +39,20 @@ jobs:
           # cached images, causing i/o timeout on restricted networks.
           DOCKER_BUILDKIT=0 docker compose build backend
           # --remove-orphans cleans up containers for services no longer in compose (e.g. old 'frontend')
-          docker compose up -d --remove-orphans
+          # --force-recreate backend ensures a fresh container even if image hash is unchanged
+          docker compose up -d --remove-orphans --force-recreate backend
+          docker compose up -d mysql nginx
           docker compose restart nginx
 
       - name: Verify containers are running
         run: |
           echo "--- Container status ---"
           docker compose ps
+          echo "--- Backend startup logs ---"
+          docker compose logs backend --tail=30
           echo "--- Health check ---"
-          sleep 10
-          curl -sf http://localhost:3001 > /dev/null && echo "Frontend OK" || echo "Frontend not responding yet"
-          curl -sf http://localhost:3001/api/health && echo "Backend OK" || echo "Backend not ready yet"
+          sleep 15
+          curl -sf http://localhost:3001 > /dev/null && echo "Frontend OK" || echo "WARNING: Frontend not responding"
+          curl -sf http://localhost:3001/api/health | python3 -m json.tool || echo "WARNING: Backend health check failed"
+          # Fail the job if backend is not responding
+          curl -sf http://localhost:3001/api/health > /dev/null || { echo "ERROR: Backend is down"; docker compose logs backend --tail=50; exit 1; }

@@ -35,23 +35,36 @@ cd "$REPO_DIR"
 log "Building backend..."
 DOCKER_BUILDKIT=0 docker compose build backend
 
-log "Starting all services (MySQL data is safe in named volume)..."
-# --remove-orphans cleans up containers for services no longer in compose (e.g. old 'frontend')
-docker compose up -d --remove-orphans
-
-log "Reloading nginx config and site files..."
+log "Starting services..."
+# --force-recreate backend ensures fresh container with the newly built image
+# --remove-orphans cleans up containers no longer in compose (e.g. old 'frontend')
+docker compose up -d --remove-orphans --force-recreate backend
+docker compose up -d mysql nginx
 docker compose restart nginx
 
-# Wait for health
 log "Waiting for services to become healthy..."
-sleep 10
+sleep 15
 
-if docker compose ps | grep -q "unhealthy"; then
-  log "ERROR: One or more services are unhealthy"
-  docker compose ps
+log "--- Container status ---"
+docker compose ps
+log "--- Backend startup logs ---"
+docker compose logs backend --tail=30
+
+log "--- Health check ---"
+if curl -sf http://localhost:3001/api/health > /dev/null; then
+  log "Backend OK — $(curl -s http://localhost:3001/api/health | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get(\"status\"), d.get(\"database\"))')"
+else
+  log "ERROR: Backend health check failed"
+  docker compose logs backend --tail=50
   exit 1
 fi
 
+if curl -sf http://localhost:3001 > /dev/null; then
+  log "Frontend OK"
+else
+  log "WARNING: Frontend not responding on port 3001"
+fi
+
 log "=== Deployment complete ==="
-log "Frontend: http://localhost:5173"
-log "Backend:  http://localhost:3001/api/health"
+log "App:     http://localhost:3001"
+log "Health:  http://localhost:3001/api/health"
