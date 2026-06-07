@@ -11,13 +11,14 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://backend:3002',
+        // In dev, backend is exposed on host port BACKEND_PORT (default 3101)
+        target: 'http://localhost:3101',
         changeOrigin: true,
       },
     },
   },
   build: {
-    outDir: '../sites/ai-smb',
+    outDir: 'dist',
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {

@@ -4,67 +4,108 @@ A structured AI adoption guide for business leaders — from first awareness to 
 
 ## Stack
 
-- **Frontend** — React 18 + Vite + Tailwind CSS, served via nginx
+- **Frontend** — React 18 + Vite + Tailwind CSS
 - **Backend** — Node.js 22 / Express
 - **Database** — MySQL 8.0
-- **Infrastructure** — Docker Compose, self-hosted GitHub Actions runner
+- **Infrastructure** — Docker Compose (backend + DB only), host-managed Nginx, self-hosted GitHub Actions runner
+
+## Deployment architecture
+
+This repo owns only:
+- the frontend build output (`frontend/dist/`)
+- its backend container (`ai-smb-backend` on port `BACKEND_PORT`)
+- its MySQL container (`ai-smb-mysql`)
+- its own Nginx vhost snippet (`deploy/nginx/site.conf.template`)
+
+**Nginx is managed at the host level.** Each site drops in its own vhost file — one site's deploy never touches another site's config.
+
+```
+Host machine
+├── /srv/sites/ai-smb/current/     ← built frontend (rsync'd by deploy)
+├── /etc/nginx/conf.d/
+│   ├── ai-smb.conf                ← generated from deploy/nginx/site.conf.template
+│   └── other-site.conf            ← another site's vhost (untouched by this deploy)
+└── Docker containers
+    ├── ai-smb-backend  (127.0.0.1:3101 → container:3002)
+    ├── ai-smb-mysql    (internal only)
+    └── other-site-backend  (127.0.0.1:3102 → container:3002)
+```
+
+## First-time server setup
+
+```bash
+# 1. Clone the repo
+git clone <repo-url> /opt/ai-smb
+cd /opt/ai-smb
+
+# 2. Create .env from the example
+cp deploy/.env.example .env
+nano .env   # fill in SITE_DOMAIN, SITE_ROOT, BACKEND_PORT, DB_*, NGINX_*
+
+# 3. Create the site root
+mkdir -p /srv/sites/ai-smb/current
+
+# 4. Install Node on the host (for frontend build)
+#    macOS: brew install node
+#    Linux: nvm or nodesource
+
+# 5. Run the deploy script
+bash deploy.sh
+```
+
+## GitHub Actions secrets required
+
+| Secret | Example value |
+|--------|---------------|
+| `SITE_DOMAIN` | `ai-smb.example.com` |
+| `SITE_ROOT` | `/srv/sites/ai-smb/current` |
+| `BACKEND_PORT` | `3101` |
+| `NGINX_VHOST_DIR` | `/etc/nginx/conf.d` |
+| `NGINX_RELOAD_CMD` | `sudo nginx -s reload` |
+| `DB_ROOT_PASSWORD` | *(secret)* |
+| `DB_USER` | `ai_smb_user` |
+| `DB_PASSWORD` | *(secret)* |
+| `DB_NAME` | `ai_smb_db` |
+| `LAN_IP` | *(optional)* |
 
 ## How deploys work
 
-The self-hosted CI runner on MBserver deploys automatically when a commit message contains `[deploy]`.
+Commits tagged `[deploy]` trigger the CI runner on MBserver:
 
-```bash
-git commit -m "your message [deploy]"
-git push
-```
+1. **Build frontend** — `npm run build` → `frontend/dist/`
+2. **Sync static files** — `rsync frontend/dist/ → $SITE_ROOT`
+3. **Backend** — `docker compose build backend` + `up -d --force-recreate backend`
+4. **Nginx vhost** — `envsubst` renders `deploy/nginx/site.conf.template` → `$NGINX_VHOST_DIR/ai-smb.conf`, then `nginx -t && reload`
+5. **Health check** — `curl 127.0.0.1:$BACKEND_PORT/api/health` must return 200
 
-Commits **without** `[deploy]` push code to the branch but do not trigger a deploy or take the site down.
-
-### What the pipeline does
-
-1. **Builds the frontend** — runs `npm ci && npm run build` on the runner host; Vite writes compiled assets to `sites/ai-smb/`
-2. **Rebuilds the backend image** — `docker compose build backend`
-3. **Starts services** — `docker compose up -d --remove-orphans`
-4. **Reloads nginx** — `docker compose restart nginx` picks up new files instantly (no image rebuild needed)
-
-### After a frontend-only change
-
-A full Docker image rebuild is not required. On the server:
-
-```bash
-cd frontend
-npm run build            # writes to ../sites/ai-smb/
-cd ..
-docker compose restart nginx
-```
-
-nginx serves the new files immediately from the host-mounted `sites/ai-smb/` directory.
+Frontend changes: no Docker rebuild, just rsync + nginx keeps serving.  
+Backend changes: Docker image rebuild + container recreate.  
+Nginx config changes: edit the template, redeploy.
 
 ## Local development
 
 ```bash
-# Install dependencies
-cd frontend && npm install && cd ..
-cd backend  && npm install && cd ..
+# Start backend + MySQL
+docker compose up -d
 
-# Start MySQL locally
-docker compose up -d mysql
-
-# Run frontend dev server (hot-reload)
-cd frontend && npm run dev
-
-# Run backend
-cd backend && npm start
+# Frontend dev server (hot-reload, proxies /api → localhost:3101)
+cd frontend && npm install && npm run dev
 ```
+
+The Vite dev proxy targets `http://localhost:3101`, which is the host-mapped port for the backend container.
 
 ## Project layout
 
 ```
-frontend/         React + Vite source (JSX, CSS)
-backend/          Node.js / Express API
-sites/ai-smb/     Vite build output — gitignored, populated by npm run build
-nginx/conf.d/     nginx virtual host config (volume-mounted into the container)
-docker-compose.yml
-deploy.sh         Manual deploy script (mirrors CI pipeline)
-.github/workflows/deploy.yml
+frontend/          React + Vite source; builds to frontend/dist/
+backend/           Node.js / Express API
+mysql/             init.sql (schema, runs on first MySQL boot only)
+deploy/
+  nginx/
+    site.conf.template   Nginx vhost template (envsubst markers)
+  .env.example           All required env vars documented
+docker-compose.yml       Backend + MySQL only (no nginx service)
+deploy.sh                Manual deploy (mirrors CI pipeline)
+.github/workflows/
+  deploy.yml             CI: triggered by [deploy] in commit message
 ```

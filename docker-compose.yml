@@ -1,28 +1,21 @@
-services:
-  nginx:
-    image: nginx:1.25-alpine
-    ports:
-      - "3001:80"
-    volumes:
-      - ./sites/ai-smb:/usr/share/nginx/html:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-    depends_on:
-      - backend
-    networks:
-      - app-network
-    restart: unless-stopped
+# Site-scoped stack: backend + database only.
+# Nginx is managed at the host level — see deploy/nginx/site.conf.template.
 
+services:
   backend:
+    container_name: ai-smb-backend
     build:
       context: ./backend
       dockerfile: Dockerfile
-    expose:
-      - "3002"
+    ports:
+      # Bind to loopback only — host nginx proxies in from the outside.
+      # Set BACKEND_PORT in .env to the port reserved for this site (e.g. 3101).
+      - "127.0.0.1:${BACKEND_PORT:-3101}:3002"
     environment:
       - DB_HOST=mysql
-      - DB_USER=${DB_USER:-ai_dashboard_user}
+      - DB_USER=${DB_USER:-ai_smb_user}
       - DB_PASSWORD=${DB_PASSWORD:-change_me_password}
-      - DB_NAME=${DB_NAME:-ai_dashboard_db}
+      - DB_NAME=${DB_NAME:-ai_smb_db}
       - PORT=3002
       - NODE_ENV=production
       - LAN_IP=${LAN_IP:-}
@@ -30,21 +23,22 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - app-network
+      - ai-smb-net
     restart: unless-stopped
 
   mysql:
+    container_name: ai-smb-mysql
     image: mysql:8.0
     command: --max_allowed_packet=256M
     expose:
       - "3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
-      MYSQL_DATABASE: ${DB_NAME:-ai_dashboard_db}
-      MYSQL_USER: ${DB_USER:-ai_dashboard_user}
+      MYSQL_DATABASE: ${DB_NAME:-ai_smb_db}
+      MYSQL_USER: ${DB_USER:-ai_smb_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_password}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ai-smb-mysql-data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -52,12 +46,23 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - app-network
+      - ai-smb-net
     restart: unless-stopped
 
 networks:
-  app-network:
+  ai-smb-net:
     driver: bridge
 
 volumes:
-  mysql_data:
+  # Renamed from mysql_data → ai-smb-mysql-data to avoid conflicts when multiple
+  # sites run on the same host. One-time migration from an existing install:
+  #
+  #   docker volume create ai-smb-mysql-data
+  #   docker run --rm \
+  #     -v mysql_data:/from:ro -v ai-smb-mysql-data:/to \
+  #     alpine sh -c 'cp -a /from/. /to/'
+  #   docker compose up -d
+  #
+  # After verifying the app works, the old volume can be removed:
+  #   docker volume rm mysql_data
+  ai-smb-mysql-data:

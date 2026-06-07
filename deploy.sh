@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# deploy.sh — pull latest code and restart Docker services
+# deploy.sh — build, sync, and restart the ai-smb site
 set -euo pipefail
 
 BRANCH="claude/docker-react-vite-mysql-PeMvf"
@@ -8,63 +8,88 @@ LOG_FILE="$REPO_DIR/deploy.log"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 
+# ── Load site config ──────────────────────────────────────────────────────────
+if [[ ! -f "$REPO_DIR/.env" ]]; then
+  log "ERROR: .env not found — copy deploy/.env.example to .env and fill in values"
+  exit 1
+fi
+set -a; source "$REPO_DIR/.env"; set +a
+
+: "${SITE_DOMAIN:?SITE_DOMAIN must be set in .env}"
+: "${SITE_ROOT:?SITE_ROOT must be set in .env}"
+: "${BACKEND_PORT:?BACKEND_PORT must be set in .env}"
+: "${NGINX_VHOST_DIR:=/etc/nginx/conf.d}"
+: "${NGINX_RELOAD_CMD:=sudo nginx -s reload}"
+
 log "=== Deployment started ==="
-log "Branch: $BRANCH"
-log "Directory: $REPO_DIR"
+log "Site:    $SITE_DOMAIN"
+log "Root:    $SITE_ROOT"
+log "Backend: 127.0.0.1:$BACKEND_PORT"
 
 cd "$REPO_DIR"
 
-# Pull latest changes
+# ── Pull latest code ──────────────────────────────────────────────────────────
 log "Fetching latest code..."
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git pull origin "$BRANCH"
 log "Code updated to $(git rev-parse --short HEAD)"
 
-# Build frontend static files into sites/ai-smb/ (outDir set in vite.config.js).
-# No Docker image rebuild needed — nginx mounts the files directly as a volume.
+# ── Build frontend ────────────────────────────────────────────────────────────
 log "Building frontend..."
 cd frontend
 npm ci --silent --legacy-peer-deps
 NODE_OPTIONS=--max-old-space-size=3072 npm run build
 cd "$REPO_DIR"
 
-# Rebuild backend image only (Node/Express code changes).
-# DOCKER_BUILDKIT=0 uses the legacy builder — skips Docker Hub registry auth on
-# restricted networks where BuildKit contacts registry.docker.io even for cached images.
-log "Building backend..."
+# ── Sync static files to site root ────────────────────────────────────────────
+log "Syncing frontend/dist/ → $SITE_ROOT ..."
+mkdir -p "$SITE_ROOT"
+rsync -a --delete frontend/dist/ "$SITE_ROOT/"
+log "Sync complete — $(find "$SITE_ROOT" -type f | wc -l | tr -d ' ') files"
+
+# ── Build + restart backend ───────────────────────────────────────────────────
+log "Building backend image..."
+# DOCKER_BUILDKIT=0: legacy builder avoids Docker Hub auth on restricted networks
 DOCKER_BUILDKIT=0 docker compose build backend
 
-log "Starting services..."
-# --force-recreate backend ensures fresh container with the newly built image
-# --remove-orphans cleans up containers no longer in compose (e.g. old 'frontend')
-docker compose up -d --remove-orphans --force-recreate backend
-docker compose up -d mysql nginx
-docker compose restart nginx
+log "Starting backend and database..."
+docker compose up -d --force-recreate backend
+docker compose up -d mysql
 
-log "Waiting for services to become healthy..."
-sleep 15
+# ── Install nginx vhost ───────────────────────────────────────────────────────
+log "Installing nginx vhost → $NGINX_VHOST_DIR/ai-smb.conf ..."
+# envsubst substitutes only the listed variables; nginx's own $host etc. are left intact
+envsubst '${SITE_DOMAIN} ${SITE_ROOT} ${BACKEND_PORT}' \
+  < "$REPO_DIR/deploy/nginx/site.conf.template" \
+  > /tmp/ai-smb.conf
+cp /tmp/ai-smb.conf "$NGINX_VHOST_DIR/ai-smb.conf"
 
-log "--- Container status ---"
-docker compose ps
-log "--- Backend startup logs ---"
-docker compose logs backend --tail=30
+log "Reloading nginx..."
+nginx -t 2>&1 | tee -a "$LOG_FILE"
+eval "$NGINX_RELOAD_CMD"
 
-log "--- Health check ---"
-if curl -sf http://localhost:3001/api/health > /dev/null; then
-  log "Backend OK — $(curl -s http://localhost:3001/api/health | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get(\"status\"), d.get(\"database\"))')"
+# ── Health check ──────────────────────────────────────────────────────────────
+log "Waiting for backend to start..."
+sleep 10
+
+log "Backend health check (direct)..."
+if curl -sf "http://127.0.0.1:${BACKEND_PORT}/api/health" > /tmp/health.json; then
+  log "Backend OK — $(python3 -c 'import sys,json; d=json.load(open("/tmp/health.json")); print(d.get("status"), "|", d.get("database"), "| tables:", len(d.get("tables",[])))' 2>/dev/null || cat /tmp/health.json)"
 else
-  log "ERROR: Backend health check failed"
+  log "ERROR: Backend is not responding on port $BACKEND_PORT"
   docker compose logs backend --tail=50
   exit 1
 fi
 
-if curl -sf http://localhost:3001 > /dev/null; then
-  log "Frontend OK"
+log "Frontend check..."
+if curl -sf "http://127.0.0.1:${BACKEND_PORT}" -o /dev/null 2>/dev/null || \
+   [[ -f "$SITE_ROOT/index.html" ]]; then
+  log "Frontend OK — index.html present at $SITE_ROOT"
 else
-  log "WARNING: Frontend not responding on port 3001"
+  log "WARNING: $SITE_ROOT/index.html not found"
 fi
 
 log "=== Deployment complete ==="
-log "App:     http://localhost:3001"
-log "Health:  http://localhost:3001/api/health"
+log "Site:    http://$SITE_DOMAIN"
+log "Health:  http://$SITE_DOMAIN/api/health"

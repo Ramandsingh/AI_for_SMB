@@ -18,6 +18,11 @@ jobs:
       - name: Write .env
         run: |
           {
+            echo "SITE_DOMAIN=${{ secrets.SITE_DOMAIN }}"
+            echo "SITE_ROOT=${{ secrets.SITE_ROOT }}"
+            echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}"
+            echo "NGINX_VHOST_DIR=${{ secrets.NGINX_VHOST_DIR }}"
+            echo "NGINX_RELOAD_CMD=${{ secrets.NGINX_RELOAD_CMD }}"
             echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}"
             echo "DB_USER=${{ secrets.DB_USER }}"
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
@@ -25,34 +30,50 @@ jobs:
             echo "LAN_IP=${{ secrets.LAN_IP }}"
           } > .env
 
-      - name: Build frontend static files
+      - name: Build frontend
         run: |
           cd frontend
           npm ci --silent --legacy-peer-deps
           NODE_OPTIONS=--max-old-space-size=3072 npm run build
           cd ..
 
-      - name: Build backend image and start services
+      - name: Sync static files to site root
         run: |
-          # DOCKER_BUILDKIT=0 uses the legacy builder — skips Docker Hub registry
-          # auth on every build. BuildKit contacts registry.docker.io even for
-          # cached images, causing i/o timeout on restricted networks.
-          DOCKER_BUILDKIT=0 docker compose build backend
-          # --remove-orphans cleans up containers for services no longer in compose (e.g. old 'frontend')
-          # --force-recreate backend ensures a fresh container even if image hash is unchanged
-          docker compose up -d --remove-orphans --force-recreate backend
-          docker compose up -d mysql nginx
-          docker compose restart nginx
+          # SITE_ROOT comes from the .env written above
+          source .env
+          echo "Syncing to $SITE_ROOT"
+          mkdir -p "$SITE_ROOT"
+          rsync -a --delete frontend/dist/ "$SITE_ROOT/"
+          echo "Sync complete — $(find "$SITE_ROOT" -type f | wc -l | tr -d ' ') files deployed"
 
-      - name: Verify containers are running
+      - name: Build and restart backend
         run: |
+          # DOCKER_BUILDKIT=0: legacy builder avoids Docker Hub auth on restricted networks
+          DOCKER_BUILDKIT=0 docker compose build backend
+          docker compose up -d --force-recreate backend
+          docker compose up -d mysql
+
+      - name: Install nginx vhost and reload
+        run: |
+          source .env
+          # Substitute only site variables; nginx's own $host, $uri etc. are left intact
+          envsubst '${SITE_DOMAIN} ${SITE_ROOT} ${BACKEND_PORT}' \
+            < deploy/nginx/site.conf.template \
+            > /tmp/ai-smb.conf
+          cp /tmp/ai-smb.conf "${NGINX_VHOST_DIR:-/etc/nginx/conf.d}/ai-smb.conf"
+          nginx -t
+          eval "${NGINX_RELOAD_CMD:-sudo nginx -s reload}"
+
+      - name: Health check
+        run: |
+          source .env
           echo "--- Container status ---"
           docker compose ps
           echo "--- Backend startup logs ---"
           docker compose logs backend --tail=30
-          echo "--- Health check ---"
+          echo "--- Waiting for backend ---"
           sleep 15
-          curl -sf http://localhost:3001 > /dev/null && echo "Frontend OK" || echo "WARNING: Frontend not responding"
-          curl -sf http://localhost:3001/api/health | python3 -m json.tool || echo "WARNING: Backend health check failed"
-          # Fail the job if backend is not responding
-          curl -sf http://localhost:3001/api/health > /dev/null || { echo "ERROR: Backend is down"; docker compose logs backend --tail=50; exit 1; }
+          echo "--- Backend health (direct) ---"
+          curl -sf "http://127.0.0.1:${BACKEND_PORT}/api/health" | python3 -m json.tool \
+            || { echo "ERROR: Backend health check failed"; docker compose logs backend --tail=50; exit 1; }
+          echo "Backend OK"
