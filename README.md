@@ -2,34 +2,69 @@
 
 A structured AI adoption guide for business leaders — from first awareness to operational value.
 
-## Deployment
+## Stack
 
-The self-hosted CI runner deploys automatically when a commit message contains `[deploy]`.
+- **Frontend** — React 18 + Vite + Tailwind CSS, served via nginx
+- **Backend** — Node.js 22 / Express
+- **Database** — MySQL 8.0
+- **Infrastructure** — Docker Compose, self-hosted GitHub Actions runner
 
-**To deploy:**
+## How deploys work
+
+The self-hosted CI runner on MBserver deploys automatically when a commit message contains `[deploy]`.
+
 ```bash
 git commit -m "your message [deploy]"
 git push
 ```
 
-Commits **without** `[deploy]` push code to the branch but do not trigger a rebuild or take the site down. Use `[deploy]` only when you're ready to release.
+Commits **without** `[deploy]` push code to the branch but do not trigger a deploy or take the site down.
 
-The deploy pipeline:
-1. Stops existing Docker containers
-2. Rebuilds all images from scratch (`--no-cache`)
-3. Starts containers and verifies health
+### What the pipeline does
 
-## Stack
+1. **Builds the frontend** — runs `npm ci && npm run build` on the runner host; Vite writes compiled assets to `sites/ai-smb/`
+2. **Rebuilds the backend image** — `docker compose build backend`
+3. **Starts services** — `docker compose up -d --remove-orphans`
+4. **Reloads nginx** — `docker compose restart nginx` picks up new files instantly (no image rebuild needed)
 
-- **Frontend** — React + Vite + Tailwind CSS, served via nginx
-- **Backend** — Node.js / Express
-- **Database** — MySQL 8.0
-- **Infrastructure** — Docker Compose, self-hosted GitHub Actions runner
+### After a frontend-only change
 
-## Development
+A full Docker image rebuild is not required. On the server:
 
 ```bash
-cd frontend && npm install
-cd backend && npm install
-docker compose up -d   # start MySQL locally
+cd frontend
+npm run build            # writes to ../sites/ai-smb/
+cd ..
+docker compose restart nginx
+```
+
+nginx serves the new files immediately from the host-mounted `sites/ai-smb/` directory.
+
+## Local development
+
+```bash
+# Install dependencies
+cd frontend && npm install && cd ..
+cd backend  && npm install && cd ..
+
+# Start MySQL locally
+docker compose up -d mysql
+
+# Run frontend dev server (hot-reload)
+cd frontend && npm run dev
+
+# Run backend
+cd backend && npm start
+```
+
+## Project layout
+
+```
+frontend/         React + Vite source (JSX, CSS)
+backend/          Node.js / Express API
+sites/ai-smb/     Vite build output — gitignored, populated by npm run build
+nginx/conf.d/     nginx virtual host config (volume-mounted into the container)
+docker-compose.yml
+deploy.sh         Manual deploy script (mirrors CI pipeline)
+.github/workflows/deploy.yml
 ```
