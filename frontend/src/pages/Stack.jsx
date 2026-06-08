@@ -11,13 +11,13 @@ import {
 const SERVICES = [
   {
     id: 'frontend',
-    label: 'frontend',
-    port: '80 (internal) · 3001 (host)',
+    label: 'nginx-proxy (shared)',
+    port: '80 → host :80 → container :80',
     icon: Globe,
     color: { ring: 'ring-blue-200', bg: 'bg-blue-50', icon: 'text-blue-600', badge: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
     runtime: 'nginx:1.25-alpine',
-    summary: 'Two-stage Docker build. Stage 1 runs Vite to produce a static dist/. Stage 2 copies dist/ into nginx and serves it. nginx also reverse-proxies /api/* to the backend container. vite.config.js uses manualChunks to split heavy libraries (Mermaid, PDF.js, Fabric, Excalidraw, nomnoml) into separate vendor chunks — required to prevent Rollup OOM in Docker (6.4 MB → 3.4 MB largest chunk).',
-    config: 'frontend/nginx.conf',
+    summary: 'Shared nginx-proxy Docker container that serves all path-based sites on this host. Static files (Vite build output) are served via host volume mount — no image rebuild needed for frontend changes. Per-site location snippets live in conf.d/sites/*.conf; a shared 00-base.conf includes them all. Each site manages its own snippet independently.',
+    config: 'deploy/nginx/site.conf.template → conf.d/sites/ai-smb.conf',
     deps: [
       { name: 'React 18', role: 'UI framework' },
       { name: 'Vite', role: 'Build tool + dev server' },
@@ -78,7 +78,7 @@ const SERVICES = [
     icon: Database,
     color: { ring: 'ring-orange-200', bg: 'bg-orange-50', icon: 'text-orange-600', badge: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500' },
     runtime: 'mysql:8.0',
-    summary: 'Persisted via named volume mysql_data — survives container restarts and rebuilds. init.sql runs only on first boot (empty data dir). All schema changes after first boot go through runMigrations() in the backend. max_allowed_packet=256M for LONGBLOB file storage.',
+    summary: 'Persisted via named volume ai-smb-mysql-data — survives container restarts and rebuilds. init.sql runs only on first boot (empty data dir). All schema changes after first boot go through runMigrations() in the backend. max_allowed_packet=256M for LONGBLOB file storage.',
     config: 'mysql/init.sql + backend/server.js runMigrations()',
     deps: [
       { name: 'companies', role: 'Client company CRM records' },
@@ -103,14 +103,14 @@ const CICD = [
   { step: '4', label: 'Write .env', detail: 'Secrets injected from GitHub Secrets: DB_ROOT_PASSWORD, DB_USER, DB_PASSWORD, DB_NAME, LAN_IP' },
   { step: '5', label: 'DOCKER_BUILDKIT=0 build', detail: 'Legacy builder — skips Docker Hub registry auth on restricted networks. manualChunks in vite.config.js splits the bundle into vendor chunks (<2 MB each) to prevent Rollup OOM. Layer cache reused when package.json unchanged (fast path ~36s build).' },
   { step: '6', label: 'docker compose up -d', detail: 'All containers restarted. MySQL untouched (data in named volume). runMigrations() runs on backend startup.' },
-  { step: '7', label: 'Health check', detail: 'curl frontend :3001 + /api/health; reports container status in Actions log' },
+  { step: '7', label: 'Health check', detail: 'curl http://127.0.0.1:3101/api/health (direct to backend, bypasses nginx); reports container status in Actions log' },
 ];
 
 const TRAFFIC = [
-  { label: 'Browser', sub: 'external :3 or LAN :3001', icon: Globe, color: 'blue' },
-  { label: 'nginx :80', sub: 'serves static React app\nproxies /api/* → backend', icon: Layers, color: 'blue' },
+  { label: 'Browser', sub: 'port 80 — public or LAN IP', icon: Globe, color: 'blue' },
+  { label: 'nginx-proxy :80', sub: 'static files via volume mount\nproxies /api/* → backend', icon: Layers, color: 'blue' },
   { label: 'Express :3002', sub: 'REST API\nrunMigrations on boot', icon: Server, color: 'emerald' },
-  { label: 'MySQL :3306', sub: 'persistent named volume\nmysql_data', icon: Database, color: 'orange' },
+  { label: 'MySQL :3306', sub: 'named volume\nai-smb-mysql-data', icon: Database, color: 'orange' },
 ];
 
 const COLOR = {
@@ -240,8 +240,8 @@ export default function Stack() {
 
           {/* Port mapping note */}
           <div className="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-500">
-            <p><span className="font-semibold text-slate-700">External access:</span> router forwards :3 → host :3001 → nginx :80</p>
-            <p><span className="font-semibold text-slate-700">API proxy:</span> nginx rewrites <code className="bg-slate-100 px-1 rounded">/api/*</code> → <code className="bg-slate-100 px-1 rounded">http://backend:3002</code></p>
+            <p><span className="font-semibold text-slate-700">External access:</span> browser → host :80 → nginx-proxy container :80 (direct, no translation)</p>
+            <p><span className="font-semibold text-slate-700">API proxy:</span> nginx rewrites <code className="bg-slate-100 px-1 rounded">/api/*</code> → <code className="bg-slate-100 px-1 rounded">ai-smb-backend:3002</code> via Docker network</p>
             <p><span className="font-semibold text-slate-700">DB access:</span> backend only — MySQL port 3306 not exposed to host</p>
           </div>
         </div>
