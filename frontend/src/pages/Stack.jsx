@@ -41,16 +41,30 @@ const SERVICES = [
   {
     id: 'backend',
     label: 'backend',
-    port: '3002 (internal only)',
+    port: '3002 (container) · 3101 (host, health checks only) · ai-smb-backend:3002 (Docker DNS)',
     icon: Server,
     color: { ring: 'ring-emerald-200', bg: 'bg-emerald-50', icon: 'text-emerald-600', badge: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
-    runtime: 'node:20-alpine',
-    summary: 'Express REST API. Handles all database reads/writes, file uploads (multer → MySQL LONGBLOB), PDF annotation persistence, and AI chat proxy. runMigrations() runs on every boot — safe idempotent schema evolution via CREATE TABLE IF NOT EXISTS + SHOW COLUMNS guards.',
+    runtime: 'node:22-alpine',
+    summary: 'Single-file Express REST API (backend/server.js). Handles all DB reads/writes, file uploads (multer → MySQL LONGBLOB), and serves all /api/* routes. Joins both ai-smb-net (to reach MySQL) and nginx-proxy_default (so nginx can reach it by container name via Docker DNS — no host port needed). runMigrations() on every boot creates and evolves tables idempotently.',
     config: 'backend/server.js',
+    apis: [
+      { name: '/api/health', role: 'DB status, table list, column checks' },
+      { name: '/api/planning', role: 'GET + POST — load and autosave planning doc' },
+      { name: '/api/assessments', role: 'POST — save AI readiness quiz results' },
+      { name: '/api/companies', role: 'GET / POST / PUT / DELETE — client CRM records' },
+      { name: '/api/roi-calculations', role: 'POST — save ROI calculator results' },
+      { name: '/api/enterprise/functions', role: 'GET — enterprise AI function seed data' },
+      { name: '/api/lab/pdf/*', role: 'Upload, download, annotations, fabric canvas data' },
+      { name: '/api/lab/gallery', role: 'GET + POST — image upload and listing' },
+      { name: '/api/lab/excalidraw', role: 'GET + POST — save and load whiteboard drawings' },
+      { name: '/api/lab/database-platforms', role: 'GET — no-code DB comparison data' },
+      { name: '/api/chat', role: 'POST — Claude AI chat proxy via Anthropic SDK' },
+      { name: '/api/server-ip', role: 'GET — returns LAN_IP env var for display' },
+    ],
     deps: [
       { name: 'Express', role: 'HTTP server + routing' },
       { name: 'mysql2/promise', role: 'MySQL client (async pool)' },
-      { name: 'multer (memoryStorage)', role: 'Multipart file uploads → buffer' },
+      { name: 'multer (memoryStorage)', role: 'Multipart file uploads → buffer → LONGBLOB' },
       { name: 'pdf-lib', role: 'Server-side PDF annotation baking' },
       { name: 'uuid', role: 'UUID v4 for file IDs' },
       { name: 'cors', role: 'CORS headers for dev mode' },
@@ -134,20 +148,36 @@ function ServiceCard({ svc }) {
       </button>
 
       {open && (
-        <div className="px-4 pb-4 border-t border-slate-200/60 pt-3">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
-            {svc.id === 'mysql' ? 'Tables' : 'Dependencies'}
-          </p>
-          <div className="grid grid-cols-1 gap-1">
-            {svc.deps.map(d => (
-              <div key={d.name} className="flex items-baseline gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${c.dot}`} />
-                <span className="text-xs font-semibold text-slate-700 font-mono">{d.name}</span>
-                <span className="text-xs text-slate-400 flex-1">— {d.role}</span>
+        <div className="px-4 pb-4 border-t border-slate-200/60 pt-3 space-y-3">
+          {svc.apis && (
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">API Routes</p>
+              <div className="grid grid-cols-1 gap-1">
+                {svc.apis.map(d => (
+                  <div key={d.name} className="flex items-baseline gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${c.dot}`} />
+                    <span className="text-xs font-semibold text-slate-700 font-mono">{d.name}</span>
+                    <span className="text-xs text-slate-400 flex-1">— {d.role}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              {svc.id === 'mysql' ? 'Tables' : 'Dependencies'}
+            </p>
+            <div className="grid grid-cols-1 gap-1">
+              {svc.deps.map(d => (
+                <div key={d.name} className="flex items-baseline gap-2">
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${c.dot}`} />
+                  <span className="text-xs font-semibold text-slate-700 font-mono">{d.name}</span>
+                  <span className="text-xs text-slate-400 flex-1">— {d.role}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-3 font-mono">config: {svc.config}</p>
+          <p className="text-xs text-slate-400 font-mono">config: {svc.config}</p>
         </div>
       )}
     </div>
@@ -161,10 +191,11 @@ export default function Stack() {
 
   useEffect(() => {
     setSections([
-      { id: 'traffic',  label: 'Request Flow' },
-      { id: 'services', label: 'Services' },
-      { id: 'cicd',     label: 'CI / CD' },
-      { id: 'nginx',    label: 'nginx Routing' },
+      { id: 'traffic',    label: 'Request Flow' },
+      { id: 'services',   label: 'Services' },
+      { id: 'networking', label: 'Docker Networking' },
+      { id: 'cicd',       label: 'CI / CD' },
+      { id: 'nginx',      label: 'nginx Routing' },
     ]);
   }, []);
 
@@ -221,6 +252,54 @@ export default function Stack() {
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Docker Services</h2>
         <div className="space-y-3">
           {SERVICES.map(svc => <ServiceCard key={svc.id} svc={svc} />)}
+        </div>
+      </section>
+
+      {/* Docker Networking */}
+      <section id="networking" className="mb-10">
+        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Docker Networking</h2>
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-3">
+          <p className="text-xs text-slate-500 leading-relaxed mb-4">
+            Each Docker Compose project creates its own private bridge network. Containers on different networks cannot see each other — even on the same machine. This caused a <span className="font-semibold text-slate-700">502 Bad Gateway</span> when nginx tried to proxy to <code className="bg-white px-1 rounded">127.0.0.1:3101</code>: that address is the nginx <em>container's own loopback</em>, not the host's.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+              <p className="text-xs font-semibold text-red-700 mb-2">Before — broken</p>
+              <pre className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">{`nginx-proxy_default network:
+  nginx-proxy  ✓
+
+ai-smb-net network:
+  ai-smb-backend  ✓
+  ai-smb-mysql    ✓
+
+nginx config:
+  proxy_pass http://127.0.0.1:3101
+  → hits nginx container's loopback
+  → 502 Bad Gateway`}</pre>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+              <p className="text-xs font-semibold text-emerald-700 mb-2">After — fixed</p>
+              <pre className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">{`nginx-proxy_default network:
+  nginx-proxy      ✓
+  ai-smb-backend   ✓  ← joined both
+
+ai-smb-net network:
+  ai-smb-backend   ✓  ← still here
+  ai-smb-mysql     ✓
+
+nginx config:
+  proxy_pass http://ai-smb-backend:3002
+  → Docker DNS resolves container name
+  → works`}</pre>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            The fix: declare <code className="bg-white px-1 rounded">nginx-proxy_default</code> as an external network in <code className="bg-white px-1 rounded">docker-compose.yml</code> and attach the backend to it. Docker's internal DNS then resolves <code className="bg-white px-1 rounded">ai-smb-backend</code> to the correct container IP. The host port <code className="bg-white px-1 rounded">127.0.0.1:3101</code> is kept only for health checks run directly on the server.
+          </p>
+        </div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-slate-600 leading-relaxed">
+          <span className="font-semibold text-amber-700">Rule of thumb — </span>
+          if two Docker Compose projects need to talk, put a shared network in between and use container names, not <code className="bg-white px-1 rounded">localhost</code>. <code className="bg-white px-1 rounded">localhost</code> inside a container is always that container's own loopback.
         </div>
       </section>
 
