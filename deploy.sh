@@ -15,14 +15,12 @@ if [[ ! -f "$REPO_DIR/.env" ]]; then
 fi
 set -a; source "$REPO_DIR/.env"; set +a
 
-: "${SITE_DOMAIN:?SITE_DOMAIN must be set in .env}"
 : "${SITE_ROOT:?SITE_ROOT must be set in .env}"
 : "${BACKEND_PORT:?BACKEND_PORT must be set in .env}"
 : "${NGINX_VHOST_DIR:=/etc/nginx/conf.d}"
 : "${NGINX_RELOAD_CMD:=sudo nginx -s reload}"
 
 log "=== Deployment started ==="
-log "Site:    $SITE_DOMAIN"
 log "Root:    $SITE_ROOT"
 log "Backend: 127.0.0.1:$BACKEND_PORT"
 
@@ -60,7 +58,7 @@ docker compose up -d mysql
 # ── Install nginx vhost ───────────────────────────────────────────────────────
 log "Installing nginx vhost → $NGINX_VHOST_DIR/ai-smb.conf ..."
 # envsubst substitutes only the listed variables; nginx's own $host etc. are left intact
-envsubst '${SITE_DOMAIN} ${SITE_ROOT} ${BACKEND_PORT}' \
+envsubst '${SITE_ROOT} ${BACKEND_PORT}' \
   < "$REPO_DIR/deploy/nginx/site.conf.template" \
   > /tmp/ai-smb.conf
 cp /tmp/ai-smb.conf "$NGINX_VHOST_DIR/ai-smb.conf"
@@ -91,5 +89,4 @@ else
 fi
 
 log "=== Deployment complete ==="
-log "Site:    http://$SITE_DOMAIN"
-log "Health:  http://$SITE_DOMAIN/api/health"
+log "Health:  http://127.0.0.1:${BACKEND_PORT}/api/health"

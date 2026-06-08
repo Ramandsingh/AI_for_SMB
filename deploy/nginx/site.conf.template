@@ -4,7 +4,7 @@
 
 server {
     listen 80;
-    server_name ${SITE_DOMAIN};
+    server_name _;
 
     root ${SITE_ROOT};
     index index.html;

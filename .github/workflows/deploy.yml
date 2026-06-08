@@ -18,7 +18,6 @@ jobs:
       - name: Write .env
         run: |
           {
-            echo "SITE_DOMAIN=${{ secrets.SITE_DOMAIN }}"
             echo "SITE_ROOT=${{ secrets.SITE_ROOT }}"
             echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}"
             echo "NGINX_VHOST_DIR=${{ secrets.NGINX_VHOST_DIR }}"
@@ -57,7 +56,7 @@ jobs:
         run: |
           source .env
           # Substitute only site variables; nginx's own $host, $uri etc. are left intact
-          envsubst '${SITE_DOMAIN} ${SITE_ROOT} ${BACKEND_PORT}' \
+          envsubst '${SITE_ROOT} ${BACKEND_PORT}' \
             < deploy/nginx/site.conf.template \
             > /tmp/ai-smb.conf
           cp /tmp/ai-smb.conf "${NGINX_VHOST_DIR:-/etc/nginx/conf.d}/ai-smb.conf"
