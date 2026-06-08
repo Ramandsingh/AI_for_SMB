@@ -8,8 +8,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      # Bind to loopback only — host nginx proxies in from the outside.
-      # Set BACKEND_PORT in .env to the port reserved for this site (e.g. 3101).
+      # Loopback-only binding — used for host-level health checks in deploy.sh/CI.
+      # nginx-proxy reaches the backend via Docker network (see nginx-proxy-net below),
+      # not via this host port.
       - "127.0.0.1:${BACKEND_PORT:-3101}:3002"
     environment:
       - DB_HOST=mysql
@@ -24,6 +25,7 @@ services:
         condition: service_healthy
     networks:
       - ai-smb-net
+      - nginx-proxy-net
     restart: unless-stopped
 
   mysql:
@@ -52,6 +54,9 @@ services:
 networks:
   ai-smb-net:
     driver: bridge
+  nginx-proxy-net:
+    external: true
+    name: nginx-proxy_default
 
 volumes:
   # Renamed from mysql_data → ai-smb-mysql-data to avoid conflicts when multiple

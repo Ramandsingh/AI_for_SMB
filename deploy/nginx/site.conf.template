@@ -9,9 +9,9 @@ server {
     # Allow uploads up to 55 MB (PDF lab 50 MB + overhead)
     client_max_body_size 55m;
 
-    # Proxy API requests to the site's backend container (loopback port)
+    # Proxy API requests — backend reachable by container name via shared Docker network
     location /api/ {
-        proxy_pass         http://127.0.0.1:${BACKEND_PORT};
+        proxy_pass         http://ai-smb-backend:3002;
         proxy_http_version 1.1;
         proxy_set_header   Host              $host;
         proxy_set_header   X-Real-IP         $remote_addr;
