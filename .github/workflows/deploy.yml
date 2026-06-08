@@ -20,8 +20,8 @@ jobs:
           {
             echo "SITE_ROOT=${{ secrets.SITE_ROOT }}"
             echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}"
-            echo "NGINX_VHOST_DIR=${{ secrets.NGINX_VHOST_DIR }}"
-            echo "NGINX_RELOAD_CMD=${{ secrets.NGINX_RELOAD_CMD }}"
+            echo "NGINX_VHOST_DIR='${{ secrets.NGINX_VHOST_DIR }}'"
+            echo "NGINX_RELOAD_CMD='${{ secrets.NGINX_RELOAD_CMD }}'"
             echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}"
             echo "DB_USER=${{ secrets.DB_USER }}"
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
