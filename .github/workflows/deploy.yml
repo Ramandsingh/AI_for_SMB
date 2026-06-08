@@ -39,7 +39,7 @@ jobs:
       - name: Sync static files to site root
         run: |
           # SITE_ROOT comes from the .env written above
-          source .env
+          set -a; source .env; set +a
           echo "Syncing to $SITE_ROOT"
           mkdir -p "$SITE_ROOT"
           rsync -a --delete frontend/dist/ "$SITE_ROOT/"
@@ -54,7 +54,7 @@ jobs:
 
       - name: Install nginx vhost and reload
         run: |
-          source .env
+          set -a; source .env; set +a
           # Substitute only site variables; nginx's own $host, $uri etc. are left intact
           envsubst '${SITE_ROOT} ${BACKEND_PORT}' \
             < deploy/nginx/site.conf.template \
@@ -65,7 +65,7 @@ jobs:
 
       - name: Health check
         run: |
-          source .env
+          set -a; source .env; set +a
           echo "--- Container status ---"
           docker compose ps
           echo "--- Backend startup logs ---"
