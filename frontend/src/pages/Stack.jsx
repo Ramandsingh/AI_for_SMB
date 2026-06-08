@@ -164,6 +164,7 @@ export default function Stack() {
       { id: 'traffic',  label: 'Request Flow' },
       { id: 'services', label: 'Services' },
       { id: 'cicd',     label: 'CI / CD' },
+      { id: 'nginx',    label: 'nginx Routing' },
     ]);
   }, []);
 
@@ -252,6 +253,75 @@ export default function Stack() {
             <p className="text-xs font-semibold text-violet-700 mb-1">Slow path (new dependency)</p>
             <p className="text-xs text-slate-600">package.json changed → full npm install → ~8 min for frontend (Mermaid, PDF.js, etc.), ~2 min for backend.</p>
           </div>
+        </div>
+      </section>
+
+      {/* nginx Routing */}
+      <section id="nginx" className="mt-10">
+        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">nginx Routing</h2>
+
+        {/* Journey */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-4">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">How a request gets here</p>
+          <div className="space-y-2">
+            {[
+              { step: '1', label: 'DNS', detail: 'A domain name (e.g. shop.mycompany.com) is resolved to a server IP by DNS. Without a domain, you go straight to the IP.' },
+              { step: '2', label: 'IP → server', detail: 'The request arrives at the host machine on a port (e.g. :80). The OS hands it to whatever process is listening — in this case, the nginx container.' },
+              { step: '3', label: 'server_name — which site?', detail: 'nginx reads the Host header the browser sent. It compares it against server_name in each config file. The matching block handles the request. server_name _ is a catch-all — it matches anything, including raw IP addresses.' },
+              { step: '4', label: 'location — which folder?', detail: 'Inside the matching server block, nginx checks the URL path against location rules. Each location maps a path to a folder on disk (root / alias) or to an upstream service (proxy_pass).' },
+            ].map((item, i, arr) => (
+              <div key={item.step} className="flex gap-3 items-start">
+                <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-bold">{item.step}</div>
+                  {i < arr.length - 1 && <div className="w-px h-4 bg-slate-200 mt-1" />}
+                </div>
+                <div className="pb-2">
+                  <p className="text-sm font-semibold text-slate-800">{item.label}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Domain vs Path */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p className="text-xs font-semibold text-blue-700 mb-2">Domain-based routing</p>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">Different hostnames hit the same IP. nginx uses <code className="bg-white px-1 rounded">server_name</code> to send each to a different config. DNS is what points the names to the IP.</p>
+            <pre className="text-xs bg-white rounded-lg p-3 text-slate-700 leading-relaxed overflow-auto">{`shop.mycompany.com  → /srv/sites/shop/
+dash.mycompany.com  → /srv/sites/dash/
+
+# shop.conf
+server_name shop.mycompany.com;
+root /srv/sites/shop/current;
+
+# dash.conf
+server_name dash.mycompany.com;
+root /srv/sites/dash/current;`}</pre>
+          </div>
+
+          <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+            <p className="text-xs font-semibold text-violet-700 mb-2">Path-based routing</p>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">One hostname, multiple apps distinguished by URL path. No DNS or domain needed — works on a raw IP. Each <code className="bg-white px-1 rounded">location</code> maps a path to a folder or upstream.</p>
+            <pre className="text-xs bg-white rounded-lg p-3 text-slate-700 leading-relaxed overflow-auto">{`192.168.68.6/ai     → /srv/sites/ai/
+192.168.68.6/notes  → /srv/sites/notes/
+
+server_name _;   # catch-all
+
+location /ai/ {
+  alias /srv/sites/ai/current/;
+}
+location /notes/ {
+  alias /srv/sites/notes/current/;
+}`}</pre>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-500 leading-relaxed">
+          <span className="font-semibold text-slate-700">Rule of thumb — </span>
+          <span className="font-semibold text-slate-700">server_name</span> is the door (which site does this request belong to).{' '}
+          <span className="font-semibold text-slate-700">location</span> is the room (once inside, where does it go). Domain-based needs DNS. Path-based works on a raw IP but requires SPAs to set <code className="bg-slate-100 px-1 rounded">base</code> in vite.config.js and <code className="bg-slate-100 px-1 rounded">basename</code> in React Router.
         </div>
       </section>
     </div>
