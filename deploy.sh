@@ -55,13 +55,21 @@ log "Starting backend and database..."
 docker compose up -d --force-recreate backend
 docker compose up -d mysql
 
-# ── Install nginx vhost ───────────────────────────────────────────────────────
-log "Installing nginx vhost → $NGINX_VHOST_DIR/ai-smb.conf ..."
-# envsubst substitutes only the listed variables; nginx's own $host etc. are left intact
-envsubst '${NGINX_SITE_ROOT} ${BACKEND_PORT}' \
+# ── Install nginx location snippet ───────────────────────────────────────────
+NGINX_SITES_DIR="${NGINX_VHOST_DIR}/sites"
+
+# One-time base server block setup (safe to run repeatedly)
+if [[ ! -f "${NGINX_VHOST_DIR}/00-base.conf" ]]; then
+  log "Installing base server config → ${NGINX_VHOST_DIR}/00-base.conf"
+  cp "$REPO_DIR/deploy/nginx/base-server.conf" "${NGINX_VHOST_DIR}/00-base.conf"
+fi
+mkdir -p "$NGINX_SITES_DIR"
+
+log "Installing location snippet → $NGINX_SITES_DIR/ai-smb.conf ..."
+envsubst '${NGINX_SITE_ROOT}' \
   < "$REPO_DIR/deploy/nginx/site.conf.template" \
-  > /tmp/ai-smb.conf
-cp /tmp/ai-smb.conf "$NGINX_VHOST_DIR/ai-smb.conf"
+  > /tmp/ai-smb-locations.conf
+cp /tmp/ai-smb-locations.conf "$NGINX_SITES_DIR/ai-smb.conf"
 
 log "Reloading nginx..."
 nginx -t 2>&1 | tee -a "$LOG_FILE"

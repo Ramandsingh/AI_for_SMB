@@ -55,15 +55,22 @@ jobs:
           docker compose up -d --force-recreate backend
           docker compose up -d mysql
 
-      - name: Install nginx vhost and reload
+      - name: Install nginx location snippet and reload
         run: |
           set -a; source .env; set +a
+          NGINX_SITES_DIR="${NGINX_VHOST_DIR:-/etc/nginx/conf.d}/sites"
+
+          # One-time base server block (safe to run repeatedly)
+          if [[ ! -f "${NGINX_VHOST_DIR:-/etc/nginx/conf.d}/00-base.conf" ]]; then
+            cp deploy/nginx/base-server.conf "${NGINX_VHOST_DIR:-/etc/nginx/conf.d}/00-base.conf"
+          fi
+          mkdir -p "$NGINX_SITES_DIR"
+
           # Substitute only site variables; nginx's own $host, $uri etc. are left intact
-          envsubst '${NGINX_SITE_ROOT} ${BACKEND_PORT}' \
+          envsubst '${NGINX_SITE_ROOT}' \
             < deploy/nginx/site.conf.template \
-            > /tmp/ai-smb.conf
-          cp /tmp/ai-smb.conf "${NGINX_VHOST_DIR:-/etc/nginx/conf.d}/ai-smb.conf"
-          nginx -t
+            > /tmp/ai-smb-locations.conf
+          cp /tmp/ai-smb-locations.conf "$NGINX_SITES_DIR/ai-smb.conf"
           eval "${NGINX_RELOAD_CMD:-sudo nginx -s reload}"
 
       - name: Health check
