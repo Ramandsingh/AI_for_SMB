@@ -6,7 +6,7 @@ server {
     listen 80;
     server_name _;
 
-    root ${SITE_ROOT};
+    root ${NGINX_SITE_ROOT};
     index index.html;
 
     # Allow uploads up to 55 MB (PDF lab 50 MB + overhead)

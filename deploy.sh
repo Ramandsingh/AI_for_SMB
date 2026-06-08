@@ -58,7 +58,7 @@ docker compose up -d mysql
 # ── Install nginx vhost ───────────────────────────────────────────────────────
 log "Installing nginx vhost → $NGINX_VHOST_DIR/ai-smb.conf ..."
 # envsubst substitutes only the listed variables; nginx's own $host etc. are left intact
-envsubst '${SITE_ROOT} ${BACKEND_PORT}' \
+envsubst '${NGINX_SITE_ROOT} ${BACKEND_PORT}' \
   < "$REPO_DIR/deploy/nginx/site.conf.template" \
   > /tmp/ai-smb.conf
 cp /tmp/ai-smb.conf "$NGINX_VHOST_DIR/ai-smb.conf"
