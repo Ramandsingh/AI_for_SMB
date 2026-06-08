@@ -27,8 +27,8 @@ server {
         try_files $uri $uri/ /ai/index.html;
     }
 
-    # Root returns 404 — nothing lives at /
-    location / {
-        return 404;
+    # Root redirects to the app
+    location = / {
+        return 301 /ai/;
     }
 }
